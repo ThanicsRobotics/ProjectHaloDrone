@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eagle SYSTEM "eagle.dtd">
+<eagle version="7.5.0">
+<drawing>
+<settings>
+<setting alwaysvectorfont="no"/>
+<setting verticaltext="up"/>
+</settings>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<layers>
+<layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
+<layer number="2" name="Route2" color="1" fill="3" visible="no" active="yes"/>
+<layer number="3" name="Route3" color="4" fill="3" visible="no" active="yes"/>
+<layer number="4" name="Route4" color="1" fill="4" visible="no" active="yes"/>
+<layer number="5" name="Route5" color="4" fill="4" visible="no" active="yes"/>
+<layer number="6" name="Route6" color="1" fill="8" visible="no" active="yes"/>
+<layer number="7" name="Route7" color="4" fill="8" visible="no" active="yes"/>
+<layer number="8" name="Route8" color="1" fill="2" visible="no" active="yes"/>
+<layer number="9" name="Route9" color="4" fill="2" visible="no" active="yes"/>
+<layer number="10" name="Route10" color="1" fill="7" visible="no" active="yes"/>
+<layer number="11" name="Route11" color="4" fill="7" visible="no" active="yes"/>
+<layer number="12" name="Route12" color="1" fill="5" visible="no" active="yes"/>
+<layer number="13" name="Route13" color="4" fill="5" visible="no" active="yes"/>
+<layer number="14" name="Route14" color="1" fill="6" visible="no" active="yes"/>
+<layer number="15" name="Route15" color="4" fill="6" visible="no" active="yes"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
+<layer number="17" name="Pads" color="2" fill="1" visible="yes" active="yes"/>
+<layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
+<layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="yes"/>
+<layer number="20" name="Dimension" color="15" fill="1" visible="yes" active="yes"/>
+<layer number="21" name="tPlace" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="yes"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="yes"/>
+<layer number="25" name="tNames" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="27" name="tValues" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="28" name="bValues" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="29" name="tStop" color="7" fill="3" visible="yes" active="yes"/>
+<layer number="30" name="bStop" color="7" fill="6" visible="no" active="yes"/>
+<layer number="31" name="tCream" color="7" fill="4" visible="no" active="yes"/>
+<layer number="32" name="bCream" color="7" fill="5" visible="no" active="yes"/>
+<layer number="33" name="tFinish" color="6" fill="3" visible="no" active="yes"/>
+<layer number="34" name="bFinish" color="6" fill="6" visible="no" active="yes"/>
+<layer number="35" name="tGlue" color="7" fill="4" visible="no" active="yes"/>
+<layer number="36" name="bGlue" color="7" fill="5" visible="no" active="yes"/>
+<layer number="37" name="tTest" color="7" fill="1" visible="no" active="yes"/>
+<layer number="38" name="bTest" color="7" fill="1" visible="no" active="yes"/>
+<layer number="39" name="tKeepout" color="4" fill="11" visible="yes" active="yes"/>
+<layer number="40" name="bKeepout" color="1" fill="11" visible="yes" active="yes"/>
+<layer number="41" name="tRestrict" color="4" fill="10" visible="yes" active="yes"/>
+<layer number="42" name="bRestrict" color="1" fill="10" visible="yes" active="yes"/>
+<layer number="43" name="vRestrict" color="2" fill="10" visible="yes" active="yes"/>
+<layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
+<layer number="45" name="Holes" color="7" fill="1" visible="no" active="yes"/>
+<layer number="46" name="Milling" color="3" fill="1" visible="no" active="yes"/>
+<layer number="47" name="Measures" color="7" fill="1" visible="no" active="yes"/>
+<layer number="48" name="Document" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="49" name="Reference" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="51" name="tDocu" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="52" name="bDocu" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="90" name="Modules" color="5" fill="1" visible="yes" active="yes"/>
+<layer number="91" name="Nets" color="2" fill="1" visible="yes" active="yes"/>
+<layer number="92" name="Busses" color="1" fill="1" visible="yes" active="yes"/>
+<layer number="93" name="Pins" color="2" fill="1" visible="yes" active="yes"/>
+<layer number="94" name="Symbols" color="4" fill="1" visible="yes" active="yes"/>
+<layer number="95" name="Names" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="96" name="Values" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="97" name="Info" color="7" fill="1" visible="yes" active="yes"/>
+<layer number="98" name="Guide" color="6" fill="1" visible="yes" active="yes"/>
+</layers>
+<library>
+<packages>
+<package name="INTEL_EDISON">
+<description>Intel Edison Compute Module. Ideal for creating your own PCB to host an Edison. Created for www.element14.com by Dave of Young Circuit Designs.
+Note: 
+70-pin connector on the Edison is a 1.5mm-tall Hirose plug DF40C-70DP-0.4V(51)
+Mating Hirose receptacle connectors of varying heights include the following Hirose part numbers:
+   1.5mm-tall: DF40C-70DS-0.4V(51)
+   2.0mm-tall: DF40C(2.0)-70DS-0.4V(51)
+   3.0mm-tall: DF40CG(3.0)-70DS-0.4V(51)
+The host board will sit flush with the Edison's shield if the 1.5mm-tall receptacle is used.
+
+More information can be found on the Intel Edison Compute Module Hardware Guide.</description>
+<smd name="1" x="21.62" y="11.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="2" x="18.84" y="11.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="3" x="21.62" y="11.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="4" x="18.84" y="11.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="5" x="21.62" y="12.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="6" x="18.84" y="12.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="7" x="21.62" y="12.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="8" x="18.84" y="12.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="9" x="21.62" y="13.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="10" x="18.84" y="13.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="11" x="21.62" y="13.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="12" x="18.84" y="13.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="13" x="21.62" y="13.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="14" x="18.84" y="13.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="15" x="21.62" y="14.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="16" x="18.84" y="14.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="17" x="21.62" y="14.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="18" x="18.84" y="14.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="19" x="21.62" y="15.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="20" x="18.84" y="15.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="21" x="21.62" y="15.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="22" x="18.84" y="15.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="23" x="21.62" y="15.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="24" x="18.84" y="15.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="25" x="21.62" y="16.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="26" x="18.84" y="16.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="27" x="21.62" y="16.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="28" x="18.84" y="16.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="29" x="21.62" y="17.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="30" x="18.84" y="17.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="31" x="21.62" y="17.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="32" x="18.84" y="17.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="33" x="21.62" y="17.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="34" x="18.84" y="17.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="35" x="21.62" y="18.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="36" x="18.84" y="18.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="37" x="21.62" y="18.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="38" x="18.84" y="18.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="39" x="21.62" y="19.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="40" x="18.84" y="19.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="41" x="21.62" y="19.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="42" x="18.84" y="19.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="43" x="21.62" y="19.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="44" x="18.84" y="19.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="45" x="21.62" y="20.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="46" x="18.84" y="20.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="47" x="21.62" y="20.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="48" x="18.84" y="20.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="49" x="21.62" y="21.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="50" x="18.84" y="21.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="51" x="21.62" y="21.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="52" x="18.84" y="21.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="53" x="21.62" y="21.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="54" x="18.84" y="21.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="55" x="21.62" y="22.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="56" x="18.84" y="22.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="57" x="21.62" y="22.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="58" x="18.84" y="22.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="59" x="21.62" y="23.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="60" x="18.84" y="23.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="61" x="21.62" y="23.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="62" x="18.84" y="23.5" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="63" x="21.62" y="23.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="64" x="18.84" y="23.9" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="65" x="21.62" y="24.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="66" x="18.84" y="24.3" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="67" x="21.62" y="24.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="68" x="18.84" y="24.7" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="69" x="21.62" y="25.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<smd name="70" x="18.84" y="25.1" dx="0.2" dy="1" layer="1" rot="R90" stop="no"/>
+<rectangle x1="18.69" y1="10.9" x2="18.99" y2="12.1" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="11.3" x2="18.99" y2="12.5" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="11.7" x2="18.99" y2="12.9" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="12.1" x2="18.99" y2="13.3" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="12.5" x2="18.99" y2="13.7" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="12.9" x2="18.99" y2="14.1" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="13.3" x2="18.99" y2="14.5" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="13.7" x2="18.99" y2="14.9" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="14.1" x2="18.99" y2="15.3" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="14.5" x2="18.99" y2="15.7" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="14.9" x2="18.99" y2="16.1" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="15.3" x2="18.99" y2="16.5" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="15.7" x2="18.99" y2="16.9" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="16.1" x2="18.99" y2="17.3" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="16.5" x2="18.99" y2="17.7" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="16.9" x2="18.99" y2="18.1" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="17.3" x2="18.99" y2="18.5" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="17.7" x2="18.99" y2="18.9" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="18.1" x2="18.99" y2="19.3" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="18.5" x2="18.99" y2="19.7" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="18.9" x2="18.99" y2="20.1" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="19.3" x2="18.99" y2="20.5" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="19.7" x2="18.99" y2="20.9" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="20.1" x2="18.99" y2="21.3" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="20.5" x2="18.99" y2="21.7" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="20.9" x2="18.99" y2="22.1" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="21.3" x2="18.99" y2="22.5" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="21.7" x2="18.99" y2="22.9" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="22.1" x2="18.99" y2="23.3" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="22.5" x2="18.99" y2="23.7" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="22.9" x2="18.99" y2="24.1" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="23.3" x2="18.99" y2="24.5" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="23.7" x2="18.99" y2="24.9" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="24.1" x2="18.99" y2="25.3" layer="29" rot="R90"/>
+<rectangle x1="18.69" y1="24.5" x2="18.99" y2="25.7" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="10.9" x2="21.79" y2="12.1" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="11.3" x2="21.79" y2="12.5" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="11.7" x2="21.79" y2="12.9" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="12.1" x2="21.79" y2="13.3" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="12.5" x2="21.79" y2="13.7" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="12.9" x2="21.79" y2="14.1" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="13.3" x2="21.79" y2="14.5" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="13.7" x2="21.79" y2="14.9" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="14.1" x2="21.79" y2="15.3" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="14.5" x2="21.79" y2="15.7" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="14.9" x2="21.79" y2="16.1" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="15.3" x2="21.79" y2="16.5" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="15.7" x2="21.79" y2="16.9" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="16.1" x2="21.79" y2="17.3" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="16.5" x2="21.79" y2="17.7" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="16.9" x2="21.79" y2="18.1" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="17.3" x2="21.79" y2="18.5" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="17.7" x2="21.79" y2="18.9" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="18.1" x2="21.79" y2="19.3" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="18.5" x2="21.79" y2="19.7" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="18.9" x2="21.79" y2="20.1" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="19.3" x2="21.79" y2="20.5" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="19.7" x2="21.79" y2="20.9" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="20.1" x2="21.79" y2="21.3" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="20.5" x2="21.79" y2="21.7" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="20.9" x2="21.79" y2="22.1" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="21.3" x2="21.79" y2="22.5" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="21.7" x2="21.79" y2="22.9" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="22.1" x2="21.79" y2="23.3" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="22.5" x2="21.79" y2="23.7" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="22.9" x2="21.79" y2="24.1" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="23.3" x2="21.79" y2="24.5" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="23.7" x2="21.79" y2="24.9" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="24.1" x2="21.79" y2="25.3" layer="29" rot="R90"/>
+<rectangle x1="21.49" y1="24.5" x2="21.79" y2="25.7" layer="29" rot="R90"/>
+<wire x1="18.73" y1="10" x2="18.73" y2="26.6" width="0.127" layer="51"/>
+<wire x1="18.73" y1="26.6" x2="21.73" y2="26.6" width="0.127" layer="51"/>
+<wire x1="21.73" y1="26.6" x2="21.73" y2="10" width="0.127" layer="51"/>
+<wire x1="21.73" y1="10" x2="18.73" y2="10" width="0.127" layer="51"/>
+<wire x1="18.73" y1="11.1" x2="18.73" y2="10" width="0.127" layer="21"/>
+<wire x1="18.73" y1="10" x2="21.73" y2="10" width="0.127" layer="21"/>
+<wire x1="21.73" y1="10" x2="21.73" y2="11.1" width="0.127" layer="21"/>
+<wire x1="21.73" y1="25.5" x2="21.73" y2="26.6" width="0.127" layer="21"/>
+<wire x1="21.73" y1="26.6" x2="18.73" y2="26.6" width="0.127" layer="21"/>
+<wire x1="18.73" y1="26.6" x2="18.73" y2="25.5" width="0.127" layer="21"/>
+<circle x="22.23" y="10.5" radius="0.14141875" width="0.3048" layer="21"/>
+<pad name="MNT1" x="0" y="0" drill="2"/>
+<pad name="MNT2" x="20.6" y="28.69" drill="2"/>
+<wire x1="-1.47" y1="-4.83" x2="-1.47" y2="30.67" width="0.127" layer="51"/>
+<wire x1="-1.47" y1="30.67" x2="23.53" y2="30.67" width="0.127" layer="51"/>
+<wire x1="23.53" y1="30.67" x2="23.53" y2="-4.83" width="0.127" layer="51"/>
+<wire x1="23.53" y1="-4.83" x2="-1.47" y2="-4.83" width="0.127" layer="51"/>
+<polygon width="0.127" layer="21" pour="hatch">
+<vertex x="17.75" y="-4.83"/>
+<vertex x="17.75" y="8.28"/>
+<vertex x="23.53" y="8.28"/>
+<vertex x="23.53" y="-4.83"/>
+</polygon>
+<text x="17.3" y="-4.7" size="1.016" layer="21" rot="R90">Antenna Keepout</text>
+</package>
+</packages>
+<symbols>
+<symbol name="INTEL_EDISON_PCB">
+<description>Intel Edison Compute Module. Ideal for creating your own PCB to host an Edison, including mounting holes. Created for www.element14.com by Dave of Young Circuit Designs.
+Note: 
+70-pin connector on the Edison is a 1.5mm-tall Hirose plug DF40C-70DP-0.4V(51)
+Mating Hirose receptacle connectors of varying heights include the following Hirose part numbers:
+   1.5mm-tall: DF40C-70DS-0.4V(51)
+   2.0mm-tall: DF40C(2.0)-70DS-0.4V(51)
+   3.0mm-tall: DF40CG(3.0)-70DS-0.4V(51)
+The host board will sit flush with the Edison's shield if the 1.5mm-tall receptacle is used.
+
+More information can be found on the Intel Edison Compute Module Hardware Guide.</description>
+<pin name="GND@1" x="-25.4" y="45.72" length="middle"/>
+<pin name="USB_ID" x="-25.4" y="43.18" length="middle"/>
+<pin name="GND@5" x="-25.4" y="40.64" length="middle"/>
+<pin name="VSYS@6" x="25.4" y="40.64" length="middle" rot="R180"/>
+<pin name="MSIC_SLP_CLK3" x="-25.4" y="38.1" length="middle"/>
+<pin name="3.3V@8" x="25.4" y="38.1" length="middle" rot="R180"/>
+<pin name="GND@9" x="-25.4" y="35.56" length="middle"/>
+<pin name="GND@11" x="-25.4" y="33.02" length="middle"/>
+<pin name="GND@13" x="-25.4" y="30.48" length="middle"/>
+<pin name="GND@15" x="-25.4" y="27.94" length="middle"/>
+<pin name="PWRBTN#" x="-25.4" y="25.4" length="middle"/>
+<pin name="PSW" x="-25.4" y="20.32" length="middle"/>
+<pin name="FAULT" x="-25.4" y="22.86" length="middle"/>
+<pin name="V_VBAT_BKUP" x="-25.4" y="17.78" length="middle"/>
+<pin name="GP165" x="-25.4" y="15.24" length="middle"/>
+<pin name="GP135" x="-25.4" y="12.7" length="middle"/>
+<pin name="UNUSED@29" x="-25.4" y="10.16" length="middle"/>
+<pin name="RCVR_MODE" x="-25.4" y="7.62" length="middle"/>
+<pin name="GP12_PWM0" x="-25.4" y="2.54" length="middle"/>
+<pin name="GP13_PWM1" x="-25.4" y="5.08" length="middle"/>
+<pin name="GP182_PWM2" x="-25.4" y="0" length="middle"/>
+<pin name="GP183_PWM3" x="-25.4" y="-2.54" length="middle"/>
+<pin name="GP19" x="-25.4" y="-5.08" length="middle"/>
+<pin name="GP27" x="-25.4" y="-10.16" length="middle"/>
+<pin name="GP20" x="-25.4" y="-7.62" length="middle"/>
+<pin name="GP28" x="-25.4" y="-12.7" length="middle"/>
+<pin name="UNUSED@49" x="-25.4" y="-15.24" length="middle"/>
+<pin name="GP111" x="-25.4" y="-17.78" length="middle"/>
+<pin name="GP110" x="-25.4" y="-20.32" length="middle"/>
+<pin name="GP109" x="-25.4" y="-22.86" length="middle"/>
+<pin name="GP115" x="-25.4" y="-25.4" length="middle"/>
+<pin name="GP130" x="-25.4" y="-30.48" length="middle"/>
+<pin name="GP114" x="-25.4" y="-27.94" length="middle"/>
+<pin name="GP129" x="-25.4" y="-33.02" length="middle"/>
+<pin name="GP128" x="-25.4" y="-35.56" length="middle"/>
+<pin name="OSC_CLK_OUT_0" x="-25.4" y="-38.1" length="middle"/>
+<pin name="FW_RCVR" x="-25.4" y="-40.64" length="middle"/>
+<pin name="VSYS@2" x="25.4" y="45.72" length="middle" rot="R180"/>
+<pin name="VSYS@4" x="25.4" y="43.18" length="middle" rot="R180"/>
+<pin name="3.3V@10" x="25.4" y="35.56" length="middle" rot="R180"/>
+<pin name="1.8V" x="25.4" y="33.02" length="middle" rot="R180"/>
+<pin name="DCIN" x="25.4" y="30.48" length="middle" rot="R180"/>
+<pin name="USB_DP" x="25.4" y="27.94" length="middle" rot="R180"/>
+<pin name="USB_DN" x="25.4" y="25.4" length="middle" rot="R180"/>
+<pin name="USB_VBUS" x="25.4" y="22.86" length="middle" rot="R180"/>
+<pin name="GP134" x="25.4" y="20.32" length="middle" rot="R180"/>
+<pin name="GP45" x="25.4" y="15.24" length="middle" rot="R180"/>
+<pin name="GP44" x="25.4" y="17.78" length="middle" rot="R180"/>
+<pin name="GP46" x="25.4" y="12.7" length="middle" rot="R180"/>
+<pin name="GP47" x="25.4" y="10.16" length="middle" rot="R180"/>
+<pin name="GP48" x="25.4" y="7.62" length="middle" rot="R180"/>
+<pin name="GP49" x="25.4" y="5.08" length="middle" rot="R180"/>
+<pin name="UNUSED@38" x="25.4" y="0" length="middle" rot="R180"/>
+<pin name="RESET_OUT#" x="25.4" y="2.54" length="middle" rot="R180"/>
+<pin name="UNUSED@40" x="25.4" y="-2.54" length="middle" rot="R180"/>
+<pin name="GP15" x="25.4" y="-5.08" length="middle" rot="R180"/>
+<pin name="GP84" x="25.4" y="-7.62" length="middle" rot="R180"/>
+<pin name="GP131" x="25.4" y="-10.16" length="middle" rot="R180"/>
+<pin name="GP14" x="25.4" y="-12.7" length="middle" rot="R180"/>
+<pin name="GP42" x="25.4" y="-15.24" length="middle" rot="R180"/>
+<pin name="GP40" x="25.4" y="-17.78" length="middle" rot="R180"/>
+<pin name="GP41" x="25.4" y="-20.32" length="middle" rot="R180"/>
+<pin name="GP43" x="25.4" y="-22.86" length="middle" rot="R180"/>
+<pin name="GP78" x="25.4" y="-25.4" length="middle" rot="R180"/>
+<pin name="GP77" x="25.4" y="-27.94" length="middle" rot="R180"/>
+<pin name="GP79" x="25.4" y="-30.48" length="middle" rot="R180"/>
+<pin name="GP82" x="25.4" y="-33.02" length="middle" rot="R180"/>
+<pin name="GP80" x="25.4" y="-35.56" length="middle" rot="R180"/>
+<pin name="GP83" x="25.4" y="-38.1" length="middle" rot="R180"/>
+<pin name="GP81" x="25.4" y="-40.64" length="middle" rot="R180"/>
+<wire x1="-20.32" y1="50.8" x2="20.32" y2="50.8" width="0.254" layer="94"/>
+<wire x1="20.32" y1="50.8" x2="20.32" y2="-45.72" width="0.254" layer="94"/>
+<wire x1="20.32" y1="-45.72" x2="-20.32" y2="-45.72" width="0.254" layer="94"/>
+<wire x1="-20.32" y1="-45.72" x2="-20.32" y2="50.8" width="0.254" layer="94"/>
+<text x="-20.32" y="53.594" size="1.778" layer="95">&gt;NAME</text>
+<text x="-20.32" y="51.054" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="MNT1" x="-25.4" y="-50.8" length="middle"/>
+<pin name="MNT2" x="25.4" y="-50.8" length="middle" rot="R180"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="INTEL_EDISON_PCB">
+<description>Intel Edison Compute Module. Ideal for creating your own PCB to host an Edison. Created for www.element14.com by Dave of Young Circuit Designs.
+Note: 
+70-pin connector on the Edison is a 1.5mm-tall Hirose plug DF40C-70DP-0.4V(51)
+Mating Hirose receptacle connectors of varying heights include the following Hirose part numbers:
+   1.5mm-tall: DF40C-70DS-0.4V(51)
+   2.0mm-tall: DF40C(2.0)-70DS-0.4V(51)
+   3.0mm-tall: DF40CG(3.0)-70DS-0.4V(51)
+The host board will sit flush with the Edison's shield if the 1.5mm-tall receptacle is used.
+
+More information can be found on the Intel Edison Compute Module Hardware Guide.</description>
+<gates>
+<gate name="G$1" symbol="INTEL_EDISON_PCB" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="INTEL_EDISON">
+<connects>
+<connect gate="G$1" pin="1.8V" pad="12"/>
+<connect gate="G$1" pin="3.3V@10" pad="10"/>
+<connect gate="G$1" pin="3.3V@8" pad="8"/>
+<connect gate="G$1" pin="DCIN" pad="14"/>
+<connect gate="G$1" pin="FAULT" pad="19"/>
+<connect gate="G$1" pin="FW_RCVR" pad="69"/>
+<connect gate="G$1" pin="GND@1" pad="1"/>
+<connect gate="G$1" pin="GND@11" pad="11"/>
+<connect gate="G$1" pin="GND@13" pad="13"/>
+<connect gate="G$1" pin="GND@15" pad="15"/>
+<connect gate="G$1" pin="GND@5" pad="5"/>
+<connect gate="G$1" pin="GND@9" pad="9"/>
+<connect gate="G$1" pin="GP109" pad="55"/>
+<connect gate="G$1" pin="GP110" pad="53"/>
+<connect gate="G$1" pin="GP111" pad="51"/>
+<connect gate="G$1" pin="GP114" pad="59"/>
+<connect gate="G$1" pin="GP115" pad="57"/>
+<connect gate="G$1" pin="GP128" pad="65"/>
+<connect gate="G$1" pin="GP129" pad="63"/>
+<connect gate="G$1" pin="GP12_PWM0" pad="35"/>
+<connect gate="G$1" pin="GP130" pad="61"/>
+<connect gate="G$1" pin="GP131" pad="46"/>
+<connect gate="G$1" pin="GP134" pad="22"/>
+<connect gate="G$1" pin="GP135" pad="27"/>
+<connect gate="G$1" pin="GP13_PWM1" pad="33"/>
+<connect gate="G$1" pin="GP14" pad="48"/>
+<connect gate="G$1" pin="GP15" pad="42"/>
+<connect gate="G$1" pin="GP165" pad="25"/>
+<connect gate="G$1" pin="GP182_PWM2" pad="37"/>
+<connect gate="G$1" pin="GP183_PWM3" pad="39"/>
+<connect gate="G$1" pin="GP19" pad="41"/>
+<connect gate="G$1" pin="GP20" pad="43"/>
+<connect gate="G$1" pin="GP27" pad="45"/>
+<connect gate="G$1" pin="GP28" pad="47"/>
+<connect gate="G$1" pin="GP40" pad="52"/>
+<connect gate="G$1" pin="GP41" pad="54"/>
+<connect gate="G$1" pin="GP42" pad="50"/>
+<connect gate="G$1" pin="GP43" pad="56"/>
+<connect gate="G$1" pin="GP44" pad="24"/>
+<connect gate="G$1" pin="GP45" pad="26"/>
+<connect gate="G$1" pin="GP46" pad="28"/>
+<connect gate="G$1" pin="GP47" pad="30"/>
+<connect gate="G$1" pin="GP48" pad="32"/>
+<connect gate="G$1" pin="GP49" pad="34"/>
+<connect gate="G$1" pin="GP77" pad="60"/>
+<connect gate="G$1" pin="GP78" pad="58"/>
+<connect gate="G$1" pin="GP79" pad="62"/>
+<connect gate="G$1" pin="GP80" pad="66"/>
+<connect gate="G$1" pin="GP81" pad="70"/>
+<connect gate="G$1" pin="GP82" pad="64"/>
+<connect gate="G$1" pin="GP83" pad="68"/>
+<connect gate="G$1" pin="GP84" pad="44"/>
+<connect gate="G$1" pin="MNT1" pad="MNT1"/>
+<connect gate="G$1" pin="MNT2" pad="MNT2"/>
+<connect gate="G$1" pin="MSIC_SLP_CLK3" pad="7"/>
+<connect gate="G$1" pin="OSC_CLK_OUT_0" pad="67"/>
+<connect gate="G$1" pin="PSW" pad="21"/>
+<connect gate="G$1" pin="PWRBTN#" pad="17"/>
+<connect gate="G$1" pin="RCVR_MODE" pad="31"/>
+<connect gate="G$1" pin="RESET_OUT#" pad="36"/>
+<connect gate="G$1" pin="UNUSED@29" pad="29"/>
+<connect gate="G$1" pin="UNUSED@38" pad="38"/>
+<connect gate="G$1" pin="UNUSED@40" pad="40"/>
+<connect gate="G$1" pin="UNUSED@49" pad="49"/>
+<connect gate="G$1" pin="USB_DN" pad="18"/>
+<connect gate="G$1" pin="USB_DP" pad="16"/>
+<connect gate="G$1" pin="USB_ID" pad="3"/>
+<connect gate="G$1" pin="USB_VBUS" pad="20"/>
+<connect gate="G$1" pin="VSYS@2" pad="2"/>
+<connect gate="G$1" pin="VSYS@4" pad="4"/>
+<connect gate="G$1" pin="VSYS@6" pad="6"/>
+<connect gate="G$1" pin="V_VBAT_BKUP" pad="23"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="INTEL_EDISON_EXT">
+<description>Intel Edison Compute Module without an associated package. Ideal for documenting how an Edison connects to a design without having to place it on a PCB. Created for www.element14.com by Dave of Young Circuit Designs.
+Note: 
+70-pin connector on the Edison is a 1.5mm-tall Hirose plug DF40C-70DP-0.4V(51)
+Mating Hirose receptacle connectors of varying heights include the following Hirose part numbers:
+   1.5mm-tall: DF40C-70DS-0.4V(51)
+   2.0mm-tall: DF40C(2.0)-70DS-0.4V(51)
+   3.0mm-tall: DF40CG(3.0)-70DS-0.4V(51)
+The host board will sit flush with the Edison's shield if the 1.5mm-tall receptacle is used.
+
+More information can be found on the Intel Edison Compute Module Hardware Guide.</description>
+<gates>
+<gate name="G$1" symbol="INTEL_EDISON_PCB" x="0" y="0"/>
+</gates>
+<devices>
+<device name="">
+<technologies>
+<technology name="">
+<attribute name="_EXTERNAL_" value="" constant="no"/>
+</technology>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
+</drawing>
+</eagle>
