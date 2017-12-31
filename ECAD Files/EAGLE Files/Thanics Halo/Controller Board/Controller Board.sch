@@ -495,7 +495,7 @@ by exp-lbrs-replace2.ulp</description>
 <smd name="2" x="0.8763" y="0" dx="0.9652" dy="0.9144" layer="1"/>
 <text x="-0.889" y="0.762" size="0.762" layer="21">&gt;NAME</text>
 </package>
-<package name="RC0603N" urn="urn:adsk.eagle:footprint:178041/1" library_version="1">
+<package name="RC0603N" urn="urn:adsk.eagle:footprint:178041/1" locally_modified="yes" library_version="7" library_locally_modified="yes">
 <wire x1="-0.0762" y1="-0.5334" x2="0.0762" y2="-0.5334" width="0.1524" layer="21"/>
 <wire x1="0.0762" y1="0.5334" x2="-0.0762" y2="0.5334" width="0.1524" layer="21"/>
 <wire x1="-0.4064" y1="-0.4064" x2="-0.4064" y2="0.4064" width="0.1524" layer="51"/>
@@ -511,7 +511,7 @@ by exp-lbrs-replace2.ulp</description>
 <wire x1="-0.8128" y1="0.4064" x2="-0.8128" y2="-0.4064" width="0.1524" layer="51"/>
 <smd name="1" x="-0.7747" y="0" dx="0.762" dy="0.8128" layer="1"/>
 <smd name="2" x="0.7747" y="0" dx="0.762" dy="0.8128" layer="1"/>
-<text x="-3.2766" y="-0.635" size="1.27" layer="21" ratio="6" rot="SR0">&lt;Name</text>
+<text x="-1.27" y="0.762" size="0.762" layer="21">&gt;NAME</text>
 </package>
 <package name="RC0402N-M" urn="urn:adsk.eagle:footprint:178067/1" library_version="1">
 <wire x1="-0.2286" y1="-0.254" x2="-0.2286" y2="0.254" width="0.1524" layer="51"/>
@@ -3291,7 +3291,7 @@ LED</description>
 </device>
 </devices>
 </deviceset>
-<deviceset name="RC0603JR-07100KL" urn="urn:adsk.eagle:component:178236/1" prefix="R" uservalue="yes" library_version="1">
+<deviceset name="RC0603JR-07100KL" urn="urn:adsk.eagle:component:178236/1" locally_modified="yes" prefix="R" uservalue="yes" library_version="7" library_locally_modified="yes">
 <gates>
 <gate name="A" symbol="RES" x="0" y="0"/>
 </gates>
@@ -3343,7 +3343,7 @@ LED</description>
 </device>
 </devices>
 </deviceset>
-<deviceset name="RC0603JR-071KL" urn="urn:adsk.eagle:component:178234/1" prefix="R" uservalue="yes" library_version="1">
+<deviceset name="RC0603JR-071KL" urn="urn:adsk.eagle:component:178234/1" locally_modified="yes" prefix="R" uservalue="yes" library_version="7" library_locally_modified="yes">
 <gates>
 <gate name="A" symbol="RES" x="0" y="0"/>
 </gates>
@@ -3461,7 +3461,7 @@ LED</description>
 </device>
 </devices>
 </deviceset>
-<deviceset name="RC0603JR-0720RL" urn="urn:adsk.eagle:component:178235/1" prefix="R" uservalue="yes" library_version="1">
+<deviceset name="RC0603JR-0720RL" urn="urn:adsk.eagle:component:178235/1" locally_modified="yes" prefix="R" uservalue="yes" library_version="7" library_locally_modified="yes">
 <gates>
 <gate name="A" symbol="RES" x="0" y="0"/>
 </gates>
@@ -3513,7 +3513,7 @@ LED</description>
 </device>
 </devices>
 </deviceset>
-<deviceset name="RC0603FR-07340RL" urn="urn:adsk.eagle:component:178232/1" prefix="R" uservalue="yes" library_version="1">
+<deviceset name="RC0603FR-07340RL" urn="urn:adsk.eagle:component:178232/1" locally_modified="yes" prefix="R" uservalue="yes" library_version="7" library_locally_modified="yes">
 <gates>
 <gate name="A" symbol="RES" x="0" y="0"/>
 </gates>
@@ -4611,6 +4611,7 @@ LED</description>
 <wire x1="2" y1="1.6" x2="-2" y2="1.6" width="0.127" layer="21"/>
 <wire x1="1.4" y1="2.4" x2="2.8" y2="1.2" width="0.127" layer="21"/>
 <circle x="-2.8" y="1.8" radius="0.4472125" width="0.127" layer="21"/>
+<text x="-2.032" y="1.905" size="0.762" layer="21">&gt;NAME</text>
 </package>
 </packages>
 <symbols>
@@ -7801,7 +7802,11 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <wire x1="-0.508" y1="0.254" x2="-0.508" y2="-0.254" width="0.1524" layer="51"/>
 <wire x1="-0.3048" y1="0" x2="-0.4572" y2="0" width="0" layer="51" curve="-180"/>
 <wire x1="-0.4572" y1="0" x2="-0.3048" y2="0" width="0" layer="51" curve="-180"/>
-<text x="-3.2766" y="-0.635" size="1.27" layer="25" ratio="6" rot="SR0">&gt;Name</text>
+<wire x1="-1.016" y1="0.508" x2="-1.016" y2="-0.508" width="0.127" layer="21"/>
+<wire x1="-1.016" y1="-0.508" x2="1.016" y2="-0.508" width="0.127" layer="21"/>
+<wire x1="1.016" y1="-0.508" x2="1.016" y2="0.508" width="0.127" layer="21"/>
+<wire x1="1.016" y1="0.508" x2="-1.016" y2="0.508" width="0.127" layer="21"/>
+<text x="-1.143" y="0.635" size="0.762" layer="21">&gt;NAME</text>
 </package>
 <package name="G-155-L">
 <smd name="1" x="-0.4191" y="0" dx="0.3556" dy="0.508" layer="1"/>
@@ -7926,7 +7931,11 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <wire x1="-0.8636" y1="0.4572" x2="-0.8636" y2="-0.4572" width="0.1524" layer="51"/>
 <wire x1="-0.508" y1="0" x2="-0.6604" y2="0" width="0" layer="51" curve="-180"/>
 <wire x1="-0.6604" y1="0" x2="-0.508" y2="0" width="0" layer="51" curve="-180"/>
-<text x="-3.2766" y="-0.635" size="1.27" layer="25" ratio="6" rot="SR0">&gt;Name</text>
+<wire x1="-1.397" y1="0.762" x2="-1.397" y2="-0.762" width="0.127" layer="21"/>
+<wire x1="-1.397" y1="-0.762" x2="1.397" y2="-0.762" width="0.127" layer="21"/>
+<wire x1="1.397" y1="-0.762" x2="1.397" y2="0.762" width="0.127" layer="21"/>
+<wire x1="1.397" y1="0.762" x2="-1.397" y2="0.762" width="0.127" layer="21"/>
+<text x="-1.397" y="0.889" size="0.762" layer="21">&gt;NAME</text>
 </package>
 <package name="IND_BLM18_0603-L">
 <smd name="1" x="-0.6223" y="0" dx="0.7112" dy="0.9398" layer="1"/>
@@ -8114,7 +8123,11 @@ new: Attribute TP_SIGNAL_NAME&lt;br&gt;
 <wire x1="0.508" y1="-0.2794" x2="0.508" y2="0.2794" width="0.1524" layer="51"/>
 <wire x1="0.2032" y1="0.2794" x2="-0.2032" y2="0.2794" width="0.1524" layer="51"/>
 <wire x1="-0.508" y1="0.2794" x2="-0.508" y2="-0.2794" width="0.1524" layer="51"/>
-<text x="-3.2766" y="-0.635" size="1.27" layer="25" ratio="6" rot="SR0">&gt;Name</text>
+<wire x1="-1.016" y1="-0.508" x2="-1.016" y2="0.508" width="0.127" layer="21"/>
+<wire x1="-1.016" y1="0.508" x2="1.016" y2="0.508" width="0.127" layer="21"/>
+<wire x1="1.016" y1="0.508" x2="1.016" y2="-0.508" width="0.127" layer="21"/>
+<wire x1="1.016" y1="-0.508" x2="-1.016" y2="-0.508" width="0.127" layer="21"/>
+<text x="-1.016" y="0.635" size="0.762" layer="21">&gt;NAME</text>
 </package>
 <package name="YAG_CC0402-L">
 <smd name="1" x="-0.4191" y="0" dx="0.4064" dy="0.5588" layer="1"/>
