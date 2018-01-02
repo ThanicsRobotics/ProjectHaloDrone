@@ -6,7 +6,7 @@
             "request": "launch",
             "cwd": "${workspaceRoot}",
             "name": "PlatformIO Debugger",
-            "target": "c:/Users/Bill 2012/Documents/Thanics Robotics/Thanics FlightController/HALO/FlightController/Thanics_Flight_Control/.pioenvs/nucleo_f446re/firmware.elf",
+            "target": "c:/Users/Bill 2012/Documents/Thanics Robotics/ProjectHalo/ProjectHalo/Software/Drone/STM32_FlightController/.pioenvs/nucleo_f446re/firmware.elf",
             "gdbpath": "C:/Users/Bill 2012/.platformio/penv/Scripts/piodebuggdb",
             "autorun": [ "source .pioinit" ]
         }
