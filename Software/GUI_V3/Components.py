@@ -53,10 +53,11 @@ class Header(GridLayout):
 
 
 class HomeButton(ActionPrevious):
-    title = 'Halo Controller'
-    app_icon = os.path.abspath("icons/DroneIcon.png")
+    title = ''
+    app_icon = os.path.abspath("icons/ArrowPrev.png")
     with_previous = False
     previous_image = os.path.abspath("icons/ArrowPrev.png")
+    pack_width = 0
 
 
 class Footer(ActionBar):

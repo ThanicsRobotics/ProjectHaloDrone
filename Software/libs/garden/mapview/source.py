@@ -4,10 +4,10 @@ __all__ = ["MapSource"]
 
 from kivy.metrics import dp
 from math import cos, ceil, log, tan, pi, atan, exp
-from libs.garden.mapview import MIN_LONGITUDE, MAX_LONGITUDE, MIN_LATITUDE, MAX_LATITUDE, \
+from Software.libs.garden.mapview import MIN_LONGITUDE, MAX_LONGITUDE, MIN_LATITUDE, MAX_LATITUDE, \
     CACHE_DIR
-from libs.garden.mapview.downloader import Downloader
-from libs.garden.mapview.utils import clamp
+from Software.libs.garden.mapview.downloader import Downloader
+from Software.libs.garden.mapview.utils import clamp
 import hashlib
 
 

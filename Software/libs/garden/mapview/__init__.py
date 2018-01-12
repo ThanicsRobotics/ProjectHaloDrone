@@ -26,7 +26,7 @@ try:
 except KeyError:
     pass
 
-from libs.garden.mapview.types import Coordinate, Bbox
-from libs.garden.mapview.source import MapSource
-from libs.garden.mapview.view import MapView, MapMarker, MapLayer, MarkerMapLayer, \
+from Software.libs.garden.mapview.types import Coordinate, Bbox
+from Software.libs.garden.mapview.source import MapSource
+from Software.libs.garden.mapview.view import MapView, MapMarker, MapLayer, MarkerMapLayer, \
     MapMarkerPopup
