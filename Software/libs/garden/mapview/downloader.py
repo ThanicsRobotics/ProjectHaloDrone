@@ -10,7 +10,7 @@ from random import choice
 import requests
 import traceback
 from time import time
-from libs.garden.mapview import CACHE_DIR
+from Software.libs.garden.mapview import CACHE_DIR
 
 
 DEBUG = "MAPVIEW_DEBUG_DOWNLOADER" in environ

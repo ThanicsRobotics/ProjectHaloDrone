@@ -12,9 +12,9 @@ from kivy.uix.slider import Slider
 from kivy.uix.widget import Widget
 from requests import ConnectionError
 
-from GUI_V3.Components import *
-from libs.garden import MapView, MapMarker, MapMarkerPopup, MarkerMapLayer
-from util import settings, get_controller_geo_ip
+from Software.GUI_V3.Components import *
+from Software.libs.garden import MapView, MapMarker, MapMarkerPopup, MarkerMapLayer
+from Software.util import settings, get_controller_geo_ip
 
 coord_enabled = False
 maneuver_icon = os.path.abspath("icons/MissingTexture.png")
@@ -30,6 +30,8 @@ except ConnectionError:
     """Put any connection failed code here
     """
     print bcolors.FAIL + "Failed to connect!" + bcolors.ENDC
+    start_lat = NumericProperty(0)
+    start_lon = NumericProperty(1)
 
 slider_d = Slider()
 slider_hl = Slider(orientation="vertical")
