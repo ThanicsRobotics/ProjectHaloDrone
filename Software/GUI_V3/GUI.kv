@@ -1,0 +1,78 @@
+<Header>:
+    cols: 2
+    opacity: 1
+    size_hint_y: None
+    height: 50
+    pos_hint: {'top':1}
+    GridLayout:
+        id: left
+        padding: [0, 5, 75, 10]
+        cols: 3
+        canvas.before:
+            Rectangle:
+                size: self.size
+                pos: self.pos
+                source: root.top_left
+        Image:
+            id: drone_battery
+            source: root.drone_battery
+        Image:
+            id: drone_connection
+            source: root.drone_connection
+        Image:
+            id: drone_gps
+            source: root.drone_gps
+    GridLayout:
+        id: right
+        padding: [75, 5, 0, 10]
+        cols: 3
+        canvas:
+            Rectangle:
+                size: self.size
+                pos: self.pos
+                source: root.top_right
+        Image:
+            id: controller_gps
+            source: root.controller_gps
+        Image:
+            id: wifi_connection
+            source: root.wifi_connection
+        Image:
+            id: controller_battery
+            source: root.controller_battery
+
+<Footer>:
+    pos_hint: {'bottom':1}
+    ActionView:
+        use_separator: False
+        HomeButton:
+            previous_image_width: 5
+        ActionButton:
+            text: "Next"
+            icon: root.next_icon
+        ActionButton:
+            text: "Testing"
+        ActionButton:
+            text: "Testing"
+        ActionGroup:
+            text: 'Maneuvers'
+            ManeuverButton:
+                text: 'Orbit'
+                on_press:
+                    self.update_marker_data(self.text)
+            ManeuverButton:
+                text: 'Spiral'
+                on_press:
+                    self.update_marker_data(self.text)
+            ActionButton:
+                text: 'Follow Me'
+            ActionButton:
+                text: 'Follow This'
+        ActionButton:
+            text: "Next"
+            icon: root.next_icon
+
+<FlightStatsScreen>:
+<MapScreen>:
+<Map>:
+    zoom: 17
