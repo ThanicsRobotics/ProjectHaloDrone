@@ -1,0 +1,105 @@
+{
+  "general": {
+    "altitude": 400,
+    "logging": {
+      "loc": "logs.txt",
+      "encryption_key": "something"
+    },
+    "units": {
+      "measurements": "metric",
+      "speed": "per second"
+    },
+    "language": "english",
+    "colors": {
+      "text_color": [
+        0, 0, 0, 1
+      ],
+      "background_color": [
+        255.0, 255.0, 255.0, 1
+      ],
+      "misc_color": [
+        7.0, 23.0, 226.0, 1
+      ],
+      "green": [
+        28.0, 143.0, 22.0, 1.0
+      ],
+      "red": [
+        151.0, 7.0, 7.0, 1.0
+      ]
+    },
+    "touch_min_score": 0.7
+  },
+
+  "pages": {
+    "flight_stats": {
+      "header": false,
+      "footer": true,
+      "active": true,
+      "yaw": "relative",
+      "tiles": {
+        "first": "yaw",
+        "second": "pitch",
+        "third": "roll"
+      },
+      "tile_size": {
+        "yaw": 0.3,
+        "pitch": 0.3,
+        "roll": 0.3
+      }
+    },
+    "map": {
+      "header": true,
+      "footer": true,
+      "alt_bar": true,
+      "flight_stats": true,
+      "maneuvers": false,
+      "scale": true
+    },
+    "video": {
+      "header": true,
+      "footer": true,
+      "camera": {
+        "exposure_time": 1,
+        "shutter_speed": 1,
+        "iso": 1,
+        "white_balance": 1
+      }
+    },
+    "settings": {
+
+    },
+    "diagnostic": {
+      "general": {
+        "show_health": true
+      },
+      "battery": {
+        "show_charge_time": true,
+        "show_cur_percent": true,
+        "show_lifespan": true
+      },
+      "camera": {
+        "show_storage": true,
+        "show_num_pics": true,
+        "show_num_vids": true
+      },
+      "cpu": {
+        "show_performance": true,
+        "show_thermal": true
+      },
+      "transceiver": {
+        "show_freq": true,
+        "show_sig_strength": true,
+        "show_data_rate": true
+      }
+    }
+  },
+
+  "flight_modes": {
+    "general": true,
+    "photo": false,
+    "auto": false,
+    "voice": false,
+    "sport": false
+  }
+}
+
