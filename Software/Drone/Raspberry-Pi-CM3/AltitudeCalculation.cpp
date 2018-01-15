@@ -13,6 +13,9 @@ static const int CHANNEL = 0;
 char baroData[];
 char baroCoefficients[];
  
+int pressure;
+int temperature;
+
 // Function to convert binary fractional to
 // decimal
 double binaryToDecimal(string binary, int len)
@@ -88,8 +91,16 @@ void getDataAndCoefficients() {
 int main()
 {
     getDataAndCoefficients();
-    
-    
+    pressure = ((baroData[0] << 8) | baroData[2]) >> 6;
+    temperature = ((baroData[4] << 8) | baroData[6]) >> 6;
+
+    int a0 = (baroCoefficients[2] << 8) | baroCoefficients[4];
+
+    int b1 = (baroCoefficients[2] << 8) | baroCoefficients[4];
+
+    int b2 = (baroCoefficients[2] << 8) | baroCoefficients[4];
+
+    int c12 = ((baroCoefficients[2] << 8) | baroCoefficients[4]) >> 2;
 
 
     string n = "110.101";
