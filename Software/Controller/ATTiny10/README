@@ -1,0 +1,4 @@
+ATTiny10 Code
+
+Principle of Operation
+The ControllerPowerControl program for the ATTiny10 on the Thanics Controller board is meant to switch a MOSFET to switch input power to the voltage regulators on the board. The ATTiny10 immediately switches the latching MOSFET ON when the power button is pressed, and when the Raspberry Pi CM3 initiates a HALT state, it sends a logic HIGH signal to the ATTiny. The ATTiny then waits a few seconds for the Pi to completely shut down, then switches OFF the latching MOSFET. The reason for this extra processor is to have no power off consumption, to prolong battery life. 
