@@ -88,26 +88,33 @@ void getDataAndCoefficients() {
     baroData = wiringPiSPIDataRW(CHANNEL, buffer, len(dataSetup));
 }   
  
-int main()
-{
+int main() {
     getDataAndCoefficients();
     pressure = ((baroData[0] << 8) | baroData[2]) >> 6;
     temperature = ((baroData[4] << 8) | baroData[6]) >> 6;
 
-    int a0 = (baroCoefficients[2] << 8) | baroCoefficients[4];
+    //010001010001.101
 
-    int b1 = (baroCoefficients[2] << 8) | baroCoefficients[4];
+    int a0 = (baroCoefficients[2] << 8) | baroCoefficients[4];              
+    //S I11 I10 I9 I8 I7 I6 I5 I4 I3 I2 I1 I0 . F2 F1 F0
 
-    int b2 = (baroCoefficients[2] << 8) | baroCoefficients[4];
+    int b1 = (baroCoefficients[2] << 8) | baroCoefficients[4];              
+    //S I1 I0 . F12 F11 F10 F9 F8 F7 F6 F5 F4 F3 F2 F1 F0
 
-    int c12 = ((baroCoefficients[2] << 8) | baroCoefficients[4]) >> 2;
+    int b2 = (baroCoefficients[2] << 8) | baroCoefficients[4];              
+    //S I0 . F13 F12 F11 F10 F9 F8 F7 F6 F5 F4 F3 F2 F1 F0
 
+    int c12 = ((baroCoefficients[2] << 8) | baroCoefficients[4]) >> 2;      
+    //S 0 . 000 000 000 F12 F11 F10 F9 F8 F7 F6 F5 F4 F3 F2 F1 F0
 
-    string n = "110.101";
+    /*string n = "110.101";
     cout << binaryToDecimal(n, n.length()) << "\n";
  
     n = "101.1101";
-    cout << binaryToDecimal(n, n.length());
- 
+    cout << binaryToDecimal(n, n.length());*/
+    
+    float pressureComp = a0 + (b1 + c12 * temperature) * pressure + b2 * temperature;
+    float pressureFinal = pressureComp * (65/1023) + 50;                                //Final pressure in kPa
+
     return 0;
 }
