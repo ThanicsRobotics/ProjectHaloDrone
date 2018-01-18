@@ -107,6 +107,7 @@ int main() {
     int c12 = ((baroCoefficients[2] << 8) | baroCoefficients[4]) >> 2;      
     //S 0 . 000 000 000 F12 F11 F10 F9 F8 F7 F6 F5 F4 F3 F2 F1 F0
 
+    
     /*string n = "110.101";
     cout << binaryToDecimal(n, n.length()) << "\n";
  

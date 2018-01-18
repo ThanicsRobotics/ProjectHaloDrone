@@ -3,6 +3,7 @@ commit.sh
 push.sh
 haloWorkspace.code-workspace
 testFile.cpp
+a.out
 /ECAD-Files/EAGLE-Files/Thanics\ Halo/Battery\ Button\ Board/
 /ECAD-Files/EAGLE-Files/Thanics\ Halo/Bulk\ Board\ 3/
 /ECAD-Files/EAGLE-Files/Thanics\ Halo/Bulk\ Board\ 2/
