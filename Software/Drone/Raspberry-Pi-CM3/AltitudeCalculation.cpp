@@ -16,8 +16,7 @@ char baroCoefficients[];
 int pressure;
 int temperature;
 
-// Function to convert binary fractional to
-// decimal
+// Function to convert binary fractional to decimal
 double binaryToDecimal(string binary, int len)
 {
     // Fetch the radix point
