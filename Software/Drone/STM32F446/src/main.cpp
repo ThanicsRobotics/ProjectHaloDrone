@@ -8,6 +8,8 @@ DigitalOut led(LED1);
 I2C i2c(D14,D15); //sda,scl
 Serial pc(USBTX, USBRX); //tx,rx
 Serial device(D10, D2);
+SPI spi(p5, p6, p7); // mosi, miso, sclk
+DigitalOut cs(p8);
 Timer onTime;
 
 //PWM Motor Pins
@@ -286,10 +288,19 @@ int main() {
   pc.printf("Program Start\r\n");
   onTime.start();                                                             //Start loop timer
   i2c.frequency(400000);                                                      //I2C Frequency set to 400kHz
-  pc.baud(9600);                                                              //Debugging baud rate at 9600bps
-  device.baud(9600);                                                          //Radio baud rate at 9600bps
+  pc.baud(9600);                                                              //Serial Debugging baud rate at 9600bps
+  device.baud(9600);                                                          //Serial Radio baud rate at 9600bps
   device.attach(&rxInterrupt);
+  
+  cs = 1;                                                                     //Chip must be deselected
 
+  // Setup the spi for 8 bit data, high steady state clock,
+  // second edge capture, with a 1MHz clock rate
+  spi.format(8,3);
+  spi.frequency(1000000);
+  cs = 0;                                                                     //Select the device by seting chip select low
+  
+  
   start = 0;                                                                  //Set start back to zero
   gyro_address = 0x68<<1;                                                     //Store the gyro address
 
@@ -535,7 +546,16 @@ int main() {
               //do stuff thats not flight
               //pc.printf("%f  -  ", motor2.read());
               //pc.printf("%d\r\n", (int)angle_roll);
-              
+
+              // Send 0x8f, the command to read the WHOAMI register
+              spi.write(0x8F);
+
+              // Send a dummy byte to receive the contents of the WHOAMI register
+              int whoami = spi.write(0x00);
+              printf("WHOAMI register = 0x%X\n", whoami);
+
+              // Deselect the device
+              cs = 1;
            }
            //pc.printf("%d\r\n", onTime.read_us() - loop_timer);
           //  if (loopTime > 4000) {
