@@ -4,23 +4,37 @@
 #include <wiringPiSPI.h>
 #include <wiringPiI2C.h>
 #include <unistd.h>
+#include <time.h>
 
-#define ADDR 0x22
+#define ADDR 0x22                     //I2C address of IO Expander
 #define LOW 0
+#define EDGE_FALLING 0
 #define HIGH 1
+#define EDGE_RISING 1
 
 using namespace std;
 
 //CS0 is barometer, CS1 is STM32 flight controller
 int SPI_CS = 0;
+int fd;
 
+//Pressure Altitude variables
 char baroData[];
 char baroCoefficients[];
 
 int pressure;
 int temperature;
 
+//Gyro variables
+float gyroPitch;
+float gyroRoll;
 
+//Pulse timing variables
+long int start_time;
+long int pulse_time;
+struct timespec gettime_now;
+int edge = EDGE_FALLING;
+bool pulseComplete = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
@@ -67,17 +81,14 @@ double binaryToDecimal(string binary, int len) {
 }
 
 void getPressureDataAndCoefficients() {
-    int fd, result;
+    //Switch to barometer 
+    SPI_CS = 0;
+    wiringPiSPISetup(SPI_CS, 1000000);
+
+    int result;
     unsigned char buffer[100];
     const char dataSetup[9] = {0x80, 0x00, 0x82, 0x00, 0x84, 0x00, 0x86, 0x00, 0x00};
     const char coefficientsSetup[17] = {0x88, 0x00, 0x8A, 0x00, 0x8C, 0x00, 0x8E, 0x00, 0x90, 0x00, 0x92, 0x00, 0x94, 0x00, 0x96, 0x00, 0x00};
-
-    cout << "Initializing" << endl;
-
-    // 500000 indicates bus speed.
-    fd = wiringPiSPISetup(SPI_CS, 500000);
-
-    cout << "Init result: " << fd << endl;
 
     // start conversions
     buffer[0] = 0x24;
@@ -140,11 +151,11 @@ void calculatePID() {
     if(pid_output > pid_max)pid_output = pid_max;
     else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
 
-    pid_last_roll_d_error = pid_error_temp;
+    pid_last_d_error = pid_error_temp;
 }
 
 void setupIOExpander() {
-    int fd = wiringPiI2CSetup(ADDR);
+    fd = wiringPiI2CSetup(ADDR);
 
     //Configuration bytes (Inputs are 1's, Outputs 0's)
     //Port 0: 01010101
@@ -157,46 +168,107 @@ void setupIOExpander() {
     wiringPiI2CWriteReg8(fd, 0x0E, 0xC0)
 
     //Initialization of IO Expander interrupts
-    wiringPiISR(38, INT_EDGE_RISING, handleEcho);
+    wiringPiISR(38, INT_EDGE_BOTH, handleEcho);
 }
 
 void handleEcho() {
-
+    if (edge == EDGE_FALLING) {
+        clock_gettime(CLOCK_REALTIME, &gettime_now);
+	    start_time = gettime_now.tv_nsec;		                                               //Get nS value
+        edge = EDGE_RISING;
+        pulseComplete = false;
+    }
+    else {
+        clock_gettime(CLOCK_REALTIME, &gettime_now);
+		pulse_time = gettime_now.tv_nsec - start_time;
+        pulseComplete = true;
+    }
 }
 
-void getUltrasonicData() {
+int getUltrasonicData(int sensor) {
+    int pin;
+    switch (sensor) {
+        case 1:
+            pin = 17;
+            break;
+        case 2:
+            pin = 15;
+            break;
+        default:
+            break;
+    }
+    digitalWrite(pin, LOW);
+    sleep(.000002);
 
+    digitalWrite(pin, HIGH);
+    sleep(.000010);
+    digitalWrite(pin, LOW);
+    while(pulseComplete == false);
+    int distance = pulse_time * 0.034 / 2;
+    return distance;
 }
 
-void angleCorrection() {
+int angleCorrection(int rawDistance) {
 
 }
 
 void calculateAbsoluteAltitude() {
-
+    getGyroValues();
+    int rawDistance = getUltrasonicData(1);
+    angleCorrection(rawDistance);
     
 }
 
+void getGyroValues() {
+    //Switch to flight controller 
+    SPI_CS = 1;
+    wiringPiSPISetup(SPI_CS, 1000000);
+
+    //Write to Authentication register
+    buffer[0] = 0x01;
+    wiringPiSPIDataRW(SPI_CS, buffer, 1);
+
+    //Get Auth Key and send it back
+    int authKey = wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    buffer[0] = authKey;
+    wiringPiSPIDataRW(SPI_CS, buffer, 1);
+
+    //Get gyro pitch
+    buffer[0] = 0x02;
+    wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    gyroPitch = wiringPiSPIDataRW(SPI_CS, buffer, 1);
+
+    //Get gyro roll
+    buffer[0] = 0x03;
+    wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    gyroRoll = wiringPiSPIDataRW(SPI_CS, buffer, 1);
+}
+
 void digitalWrite(int pin, int state) {
+    //Figure out port number based on pin number
     int port;
     if (pin < 8) port = 0;
     else if (pin < 18 && pin > 9) port = 1;
     else port = 2;
 
-    switch port {
+    //Change output depending on port and pin number
+    switch (port) {
         case 0:
             wiringPiI2CWriteReg8(fd, 0x04, state << pin);
             break;
         case 1:
-            wiringPiI2CWriteReg8(fd, 0x04, state << (pin - 10));
+            wiringPiI2CWriteReg8(fd, 0x05, state << (pin - 10));
             break;
         case 2:
-            wiringPiI2CWriteReg8(fd, 0x04, state << (pin - 20));
+            wiringPiI2CWriteReg8(fd, 0x06, state << (pin - 20));
+            break;
+        default:
             break;
     }
 }
 
 int main() {
+    
     while(1) {
         //calculatePressureAltitude();
         calculateAbsoluteAltitude();

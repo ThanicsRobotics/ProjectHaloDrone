@@ -321,13 +321,16 @@ int main() {
   spi.frequency(1000000);
   
   //Load authentication key into SPI buffer
-  spi.reply(AUTH_KEY);
+  spi.reply(0x00);
   bool authenticated = false;
 
   //Stay in this loop until the flight controller (STM32) has made contact with the Raspberry Pi
   while (authenticated == false) {
     if (spi.receive()) {
       int response = spi.read();
+      if (response == 0x01) {
+        spi.reply(AUTH_KEY);
+      }
       if (response == AUTH_KEY) {
         authenticated = true;
       }
@@ -530,13 +533,22 @@ int main() {
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
 
-      //Load SPI buffer with gyro data
-      spi.reply(gyro_pitch);
+      //Load SPI buffer with dummy byte
+      spi.reply(0x00);
 
       //If master has sent data, we'll read it
       if (spi.receive()) {
-        throttleFactor = spi.read();
-        spi.reply(gyro_pitch);
+        int data = spi.read();
+        switch (data) {
+          case 0x02:
+            spi.reply(gyro_pitch)
+            break;
+          case 0x03:
+            spi.reply(gyro_roll);
+            break;
+          default:
+            break;
+        }
       }
     }
                             
