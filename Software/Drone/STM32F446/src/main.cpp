@@ -6,10 +6,11 @@
 
 #define AUTH_KEY 0xF3
 
-I2C i2c(PB_9,PB_8); //sda,scl
-Serial pc(USBTX, USBRX); //tx,rx
+//Communication Pins
+I2C i2c(PB_9,PB_8);                         //sda,scl
+Serial pc(USBTX, USBRX);                    //tx,rx
 Serial device(PB_6, PB_7);
-SPISlave spi(PA_7, PA_6, PA_5, PA_4); // mosi, miso, sclk, ssel
+SPISlave spi(PA_7, PA_6, PA_5, PA_4);       //mosi, miso, sclk, ssel
 Timer onTime;
 
 //PWM Motor Pins
@@ -30,22 +31,22 @@ const int yawCoefficient = 6;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float pid_p_gain_roll = 3.8;               //Gain setting for the roll P-controller
-float pid_i_gain_roll = 0.01;              //Gain setting for the roll I-controller
-float pid_d_gain_roll = 20.0;              //Gain setting for the roll D-controller
-int pid_max_roll = 400;                    //Maximum output of the PID-controller (+/-)
+float pid_p_gain_roll = 3.8;                //Gain setting for the roll P-controller
+float pid_i_gain_roll = 0.01;               //Gain setting for the roll I-controller
+float pid_d_gain_roll = 20.0;               //Gain setting for the roll D-controller
+int pid_max_roll = 400;                     //Maximum output of the PID-controller (+/-)
 
-float pid_p_gain_pitch = pid_p_gain_roll;  //Gain setting for the pitch P-controller.
-float pid_i_gain_pitch = pid_i_gain_roll;  //Gain setting for the pitch I-controller.
-float pid_d_gain_pitch = pid_d_gain_roll;  //Gain setting for the pitch D-controller.
-int pid_max_pitch = pid_max_roll;          //Maximum output of the PID-controller (+/-)
+float pid_p_gain_pitch = pid_p_gain_roll;   //Gain setting for the pitch P-controller.
+float pid_i_gain_pitch = pid_i_gain_roll;   //Gain setting for the pitch I-controller.
+float pid_d_gain_pitch = pid_d_gain_roll;   //Gain setting for the pitch D-controller.
+int pid_max_pitch = pid_max_roll;           //Maximum output of the PID-controller (+/-)
 
-float pid_p_gain_yaw = 9.0;                //Gain setting for the pitch P-controller. //4.0
-float pid_i_gain_yaw = 0.1;               //Gain setting for the pitch I-controller. //0.02
-float pid_d_gain_yaw = 0.0;                //Gain setting for the pitch D-controller.
-int pid_max_yaw = 400;                     //Maximum output of the PID-controller (+/-)
+float pid_p_gain_yaw = 9.0;                 //Gain setting for the pitch P-controller. //4.0
+float pid_i_gain_yaw = 0.1;                 //Gain setting for the pitch I-controller. //0.02
+float pid_d_gain_yaw = 0.0;                 //Gain setting for the pitch D-controller.
+int pid_max_yaw = 400;                      //Maximum output of the PID-controller (+/-)
 
-bool auto_level = true;                 //Auto level on (true) or off (false)
+bool auto_level = true;                     //Auto level on (true) or off (false)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Declaring global variables
@@ -55,7 +56,8 @@ uint8_t highByte, lowByte;
 volatile int receiver_input_roll, receiver_input_pitch, receiver_input_throttle, receiver_input_yaw;
 int counter_channel_1, counter_channel_2, counter_channel_3, counter_channel_4, loop_counter;
 int esc_1, esc_2, esc_3, esc_4;
-int throttle, battery_voltage;
+int throttle; 
+//battery_voltage;
 int cal_int, start, gyro_address;
 int receiver_input[5];
 int temperature;
@@ -81,6 +83,7 @@ bool wordStart = false;
 bool wordEnd = false;
 int throttleFactor = 0;
 
+//Sends all motor PWM signals LOW
 void motors_off() {
   motor1 = 0;
   motor2 = 0;
@@ -88,6 +91,7 @@ void motors_off() {
   motor4 = 0;
 }
 
+//Sends all motor PWM signals HIGH
 void motors_on() {
   motor1 = 1;
   motor2 = 1;
@@ -388,6 +392,8 @@ int main() {
   int battery_voltage = 1260;
     
   loop_timer = onTime.read_us();                                              //First timer reading (starting main loop)
+  
+  //Infinite PID Loop
   while(1) {
     //65.5 = 1 deg/sec in gyro scale
     gyro_roll_input = (gyro_roll_input * 0.7) + ((gyro_roll / 65.5) * 0.3);   //Gyro pid input is deg/sec.
@@ -491,9 +497,9 @@ int main() {
       else if(receiver_input_yaw < 1492)pid_yaw_setpoint = (receiver_input_yaw - 1492)/3.0;
     }
     
-    calculate_pid();                                                            //PID inputs are known. So we can calculate the pid output.
+    calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
 
-    throttle = receiver_input_throttle;                                      //We need the throttle signal as a base signal.
+    throttle = receiver_input_throttle + throttleFactor;                      //We need the throttle signal as a base signal, and add PID altitude control factor
 
     if (start == 2){                                                          //The motors are started.
       //pc.printf("hi %d\r\n", throttle);
@@ -508,10 +514,10 @@ int main() {
       if (esc_3 < 1100) esc_3 = 1100;                                         //Keep the motors running.
       if (esc_4 < 1100) esc_4 = 1100;                                         //Keep the motors running.
       
-      if(esc_1 > 2000)esc_1 = 2000;                                           //Limit the esc-1 pulse to 2000us.
-      if(esc_2 > 2000)esc_2 = 2000;                                           //Limit the esc-2 pulse to 2000us.
-      if(esc_3 > 2000)esc_3 = 2000;                                           //Limit the esc-3 pulse to 2000us.
-      if(esc_4 > 2000)esc_4 = 2000;                                           //Limit the esc-4 pulse to 2000us.  
+      if (esc_1 > 2000) esc_1 = 2000;                                           //Limit the esc-1 pulse to 2000us.
+      if (esc_2 > 2000) esc_2 = 2000;                                           //Limit the esc-2 pulse to 2000us.
+      if (esc_3 > 2000) esc_3 = 2000;                                           //Limit the esc-3 pulse to 2000us.
+      if (esc_4 > 2000) esc_4 = 2000;                                           //Limit the esc-4 pulse to 2000us.  
     }
     else {
       esc_1 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-1.
@@ -529,11 +535,12 @@ int main() {
 
       //If master has sent data, we'll read it
       if (spi.receive()) {
-        
+        throttleFactor = spi.read();
+        spi.reply(gyro_pitch);
       }
     }
                             
-    loop_timer = onTime.read_us();                                                   //Set the timer for the next loop.
+    loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
     //__disable_irq();
     motors_on();
@@ -547,18 +554,13 @@ int main() {
     //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
     gyro_signalen();
       
-    while(motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {                                                       //Stay in this loop until output 4,5,6 and 7 are low.
-      esc_loop_timer = onTime.read_us();                                              //Read the current time.
-      if(timer_channel_1 <= esc_loop_timer)motor1 = 0;                //Set digital output 7 to low if the time is expired.
-      if(timer_channel_2 <= esc_loop_timer)motor2 = 0;                //Set digital output 6 to low if the time is expired.
-      if(timer_channel_3 <= esc_loop_timer)motor3 = 0;                //Set digital output 5 to low if the time is expired.
-      if(timer_channel_4 <= esc_loop_timer)motor4 = 0;                //Set digital output 4 to low if the time is expired.
+    while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {        //Stay in this loop until all motor PWM signals are low
+      esc_loop_timer = onTime.read_us();                                      //Read the current time.
+      if(timer_channel_1 <= esc_loop_timer) motor1 = 0;                        //Set digital output 7 to low if the time is expired.
+      if(timer_channel_2 <= esc_loop_timer) motor2 = 0;                        //Set digital output 6 to low if the time is expired.
+      if(timer_channel_3 <= esc_loop_timer) motor3 = 0;                        //Set digital output 5 to low if the time is expired.
+      if(timer_channel_4 <= esc_loop_timer) motor4 = 0;                        //Set digital output 4 to low if the time is expired.
     }
     //__enable_irq();
   }
 }
-
-
-  
-
-  
