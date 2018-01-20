@@ -281,6 +281,7 @@ void calculateAbsoluteAltitude() {
 // }
 
 int main() {
+    wiringPiSetup();
     setupIOExpander();
     while(1) {
         //calculatePressureAltitude();
