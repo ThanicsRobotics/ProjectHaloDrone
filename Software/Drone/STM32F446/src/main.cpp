@@ -341,6 +341,27 @@ int main() {
   gyro_address = 0x69<<1;                                                     //Store the gyro address
 
   set_gyro_registers();                                                       //Set the specific gyro registers
+  
+  while (1) {
+    //Load SPI buffer with dummy byte
+    spi.reply(0x00);
+
+    //If master has sent data, we'll read it
+    if (spi.receive()) {
+      int data = spi.read();
+      switch (data) {
+        case 0x02:
+          spi.reply(gyro_pitch);
+          break;
+        case 0x03:
+          spi.reply(gyro_roll);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
   pc.printf("Done registers\r\n");
 
   //I don't think we need this****************************************************************************************************
@@ -541,7 +562,7 @@ int main() {
         int data = spi.read();
         switch (data) {
           case 0x02:
-            spi.reply(gyro_pitch)
+            spi.reply(gyro_pitch);
             break;
           case 0x03:
             spi.reply(gyro_roll);
