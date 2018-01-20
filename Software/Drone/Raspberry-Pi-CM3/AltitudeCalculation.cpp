@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <wiringPiSPI.h>
 #include <wiringPiI2C.h>
+#include <wiringPi.h>
 #include <unistd.h>
 #include <time.h>
 
@@ -47,6 +48,20 @@ bool pulseComplete = false;
 // float pid_error_temp;
 // float pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 
+void handleEcho() {
+    if (edge == EDGE_FALLING) {
+        clock_gettime(CLOCK_REALTIME, &gettime_now);
+	    start_time = gettime_now.tv_nsec;		                                               //Get nS value
+        edge = EDGE_RISING;
+        pulseComplete = false;
+    }
+    else {
+        clock_gettime(CLOCK_REALTIME, &gettime_now);
+		pulse_time = gettime_now.tv_nsec - start_time;
+        pulseComplete = true;
+    }
+}
+
 void setupIOExpander() {
     fd = wiringPiI2CSetup(ADDR);
 
@@ -64,20 +79,6 @@ void setupIOExpander() {
     wiringPiISR(38, INT_EDGE_BOTH, handleEcho);
 }
 
-void handleEcho() {
-    if (edge == EDGE_FALLING) {
-        clock_gettime(CLOCK_REALTIME, &gettime_now);
-	    start_time = gettime_now.tv_nsec;		                                               //Get nS value
-        edge = EDGE_RISING;
-        pulseComplete = false;
-    }
-    else {
-        clock_gettime(CLOCK_REALTIME, &gettime_now);
-		pulse_time = gettime_now.tv_nsec - start_time;
-        pulseComplete = true;
-    }
-}
-
 int getUltrasonicData(int sensor) {
     int pin;
     switch (sensor) {
@@ -90,12 +91,12 @@ int getUltrasonicData(int sensor) {
         default:
             break;
     }
-    digitalWrite(pin, LOW);
+    digitalIOWrite(pin, LOW);
     sleep(.000002);
 
-    digitalWrite(pin, HIGH);
+    digitalIOWrite(pin, HIGH);
     sleep(.000010);
-    digitalWrite(pin, LOW);
+    digitalIOWrite(pin, LOW);
     while(pulseComplete == false);
     int distance = pulse_time * 0.034 / 2;
     return distance;
@@ -106,8 +107,8 @@ int getUltrasonicData(int sensor) {
 // }
 
 void getGyroValues() {
-    char buffer[100];
-    
+    unsigned char buffer[100];
+
     //Switch to flight controller 
     SPI_CS = 1;
     wiringPiSPISetup(SPI_CS, 1000000);
@@ -132,7 +133,7 @@ void getGyroValues() {
     gyroRoll = wiringPiSPIDataRW(SPI_CS, buffer, 1);
 }
 
-void digitalWrite(int pin, int state) {
+void digitalIOWrite(int pin, int state) {
     //Figure out port number based on pin number
     int port;
     if (pin < 8) port = 0;
