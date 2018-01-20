@@ -134,26 +134,33 @@ void getGyroValues() {
 
     //Switch to flight controller 
     SPI_CS = 1;
-    wiringPiSPISetup(SPI_CS, 1000000);
+    int fd2 = wiringPiSPISetup(SPI_CS, 1000000);
+    cout << "Init result: " << fd2 << endl;
 
     //Write to Authentication register
     buffer[0] = 0x01;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    sleep(.001);
 
     //Get Auth Key and send it back
-    int authKey = wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    buffer[0] = authKey;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    //int authKey = buffer[0];
+    wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    sleep(.001);
 
     //Get gyro pitch
     buffer[0] = 0x02;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    gyroPitch = wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    sleep(.001);
+    wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    gyroPitch = buffer[0];
 
     //Get gyro roll
     buffer[0] = 0x03;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    gyroRoll = wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    sleep(.001);
+    wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    gyroRoll = buffer[0];
 }
 
 void calculateAbsoluteAltitude() {
@@ -274,7 +281,7 @@ void calculateAbsoluteAltitude() {
 // }
 
 int main() {
-    
+    setupIOExpander();
     while(1) {
         //calculatePressureAltitude();
         calculateAbsoluteAltitude();

@@ -262,10 +262,10 @@ void set_gyro_registers(){
   memset(cmd,0,sizeof(cmd));
 
   //Just checking to make sure register is set correctly
-  cmd[0] = 0x06;                                                                
-  i2c.write(gyro_address, cmd, 1);
-  i2c.read(gyro_address, cmd, 1);
-  pc.printf("PWR_MGMT_1: %d\r\n", cmd[0]);
+  // cmd[0] = 0x06;                                                                
+  // i2c.write(gyro_address, cmd, 1);
+  // i2c.read(gyro_address, cmd, 1);
+  // pc.printf("PWR_MGMT_1: %d\r\n", cmd[0]);
 
   //Changing register bank
   cmd[0] = 0x7F;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
@@ -276,20 +276,22 @@ void set_gyro_registers(){
   cmd[0] = 0x01;                                                                //We want to write to the GYRO_CONFIG_1 register (01 hex)
   cmd[1] = 0x23;                                                                //Set the register bits as 00100011 (500dps full scale)
   i2c.write(gyro_address, cmd, 2);
+  memset(cmd,0,sizeof(cmd));
 
   //Just checking to make sure register is set correctly   
-  i2c.write(gyro_address, cmd, 1);
-  i2c.read(gyro_address, cmd, 1);
-  pc.printf("GYRO_CONFIG: %d\r\n", cmd[0]);
+  // i2c.write(gyro_address, cmd, 1);
+  // i2c.read(gyro_address, cmd, 1);
+  // pc.printf("GYRO_CONFIG: %d\r\n", cmd[0]);
   
   cmd[0] = 0x14;                                                                //We want to write to the ACCEL_CONFIG register (1C hex)
   cmd[1] = 0x25;                                                                //Set the register bits as 00100101 (+/- 8g full scale range)
   i2c.write(gyro_address, cmd, 2);
-  
+  memset(cmd,0,sizeof(cmd));
+
   //Just checking to make sure register is set correctly
-  i2c.write(gyro_address, cmd, 1);
-  i2c.read(gyro_address, cmd, 1);
-  pc.printf("ACCEL_CONFIG: %d\r\n", cmd[0]);
+  // i2c.write(gyro_address, cmd, 1);
+  // i2c.read(gyro_address, cmd, 1);
+  // pc.printf("ACCEL_CONFIG: %d\r\n", cmd[0]);
 
   // cmd[0] = 0x1A;                                                                //We want to write to the CONFIG register (1A hex)
   // cmd[1] = 0x03;                                                                //Set the register bits as 00000011 (Set Digital Low Pass Filter to ~43Hz)
@@ -343,6 +345,7 @@ int main() {
   set_gyro_registers();                                                       //Set the specific gyro registers
   
   while (1) {
+    gyro_signalen();
     //Load SPI buffer with dummy byte
     spi.reply(0x00);
 
