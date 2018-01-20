@@ -62,6 +62,29 @@ void handleEcho() {
     }
 }
 
+void digitalIOWrite(int pin, int state) {
+    //Figure out port number based on pin number
+    int port;
+    if (pin < 8) port = 0;
+    else if (pin < 18 && pin > 9) port = 1;
+    else port = 2;
+
+    //Change output depending on port and pin number
+    switch (port) {
+        case 0:
+            wiringPiI2CWriteReg8(fd, 0x04, state << pin);
+            break;
+        case 1:
+            wiringPiI2CWriteReg8(fd, 0x05, state << (pin - 10));
+            break;
+        case 2:
+            wiringPiI2CWriteReg8(fd, 0x06, state << (pin - 20));
+            break;
+        default:
+            break;
+    }
+}
+
 void setupIOExpander() {
     fd = wiringPiI2CSetup(ADDR);
 
@@ -131,29 +154,6 @@ void getGyroValues() {
     buffer[0] = 0x03;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     gyroRoll = wiringPiSPIDataRW(SPI_CS, buffer, 1);
-}
-
-void digitalIOWrite(int pin, int state) {
-    //Figure out port number based on pin number
-    int port;
-    if (pin < 8) port = 0;
-    else if (pin < 18 && pin > 9) port = 1;
-    else port = 2;
-
-    //Change output depending on port and pin number
-    switch (port) {
-        case 0:
-            wiringPiI2CWriteReg8(fd, 0x04, state << pin);
-            break;
-        case 1:
-            wiringPiI2CWriteReg8(fd, 0x05, state << (pin - 10));
-            break;
-        case 2:
-            wiringPiI2CWriteReg8(fd, 0x06, state << (pin - 20));
-            break;
-        default:
-            break;
-    }
 }
 
 void calculateAbsoluteAltitude() {
