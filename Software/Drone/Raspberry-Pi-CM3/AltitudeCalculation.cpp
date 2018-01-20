@@ -19,8 +19,8 @@ int SPI_CS = 0;
 int fd;
 
 //Pressure Altitude variables
-char baroData[];
-char baroCoefficients[];
+char baroData[9];
+char baroCoefficients[17];
 
 // int pressure;
 // int temperature;
@@ -52,13 +52,13 @@ void setupIOExpander() {
 
     //Configuration bytes (Inputs are 1's, Outputs 0's)
     //Port 0: 01010101
-    wiringPiI2CWriteReg8(fd, 0x0C, 0x55)
+    wiringPiI2CWriteReg8(fd, 0x0C, 0x55);
 
     //Port 1: 01010101
-    wiringPiI2CWriteReg8(fd, 0x0D, 0x55)
+    wiringPiI2CWriteReg8(fd, 0x0D, 0x55);
 
     //Port 2: 11000000
-    wiringPiI2CWriteReg8(fd, 0x0E, 0xC0)
+    wiringPiI2CWriteReg8(fd, 0x0E, 0xC0);
 
     //Initialization of IO Expander interrupts
     wiringPiISR(38, INT_EDGE_BOTH, handleEcho);
@@ -105,17 +105,9 @@ int getUltrasonicData(int sensor) {
 
 // }
 
-void calculateAbsoluteAltitude() {
-    getGyroValues();
-    cout << gyroPitch << endl;
-    cout << gyroRoll << endl;
-    int rawDistance = getUltrasonicData(1);
-    cout << rawDistance << endl;
-    //angleCorrection(rawDistance);
-    
-}
-
 void getGyroValues() {
+    char buffer[100];
+    
     //Switch to flight controller 
     SPI_CS = 1;
     wiringPiSPISetup(SPI_CS, 1000000);
@@ -161,6 +153,16 @@ void digitalWrite(int pin, int state) {
         default:
             break;
     }
+}
+
+void calculateAbsoluteAltitude() {
+    getGyroValues();
+    cout << gyroPitch << endl;
+    cout << gyroRoll << endl;
+    int rawDistance = getUltrasonicData(1);
+    cout << rawDistance << endl;
+    //angleCorrection(rawDistance);
+    
 }
 
 // Function to convert binary fractional to decimal
