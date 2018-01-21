@@ -347,7 +347,7 @@ int main() {
   while (1) {
     gyro_signalen();
     //Load SPI buffer with dummy byte
-    spi.reply(0x00);
+    spi.reply(0x01);
 
     //If master has sent data, we'll read it
     if (spi.receive()) {
