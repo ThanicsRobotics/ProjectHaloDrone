@@ -6,6 +6,7 @@
 #include <wiringPi.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
 
 #define ADDR 0x22                     //I2C address of IO Expander
 #define LOW 0
