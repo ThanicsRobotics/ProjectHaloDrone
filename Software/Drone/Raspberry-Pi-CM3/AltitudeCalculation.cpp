@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <math.h>
 
 #define ADDR 0x22                     //I2C address of IO Expander
 #define LOW 0
@@ -41,27 +42,15 @@ bool pulseComplete = false;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// float pid_p_gain = 3.8;                //Gain setting for the roll P-controller
-// float pid_i_gain = 0.01;               //Gain setting for the roll I-controller
-// float pid_d_gain = 20.0;               //Gain setting for the roll D-controller
-// int pid_max = 400;                     //Maximum output of the PID-controller (+/-)
+float pid_p_gain = 3.8;                //Gain setting for the roll P-controller
+float pid_i_gain = 0.01;               //Gain setting for the roll I-controller
+float pid_d_gain = 20.0;               //Gain setting for the roll D-controller
+int pid_max = 400;                     //Maximum output of the PID-controller (+/-)
 
-// float pid_error_temp;
-// float pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
+float pid_error_temp;
+float pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 
 void handleEcho() {
-    // if (edge == EDGE_FALLING) {
-    //     clock_gettime(CLOCK_REALTIME, &gettime_now);
-	//     start_time = gettime_now.tv_nsec;		                                               //Get nS value
-    //     edge = EDGE_RISING;
-    //     pulseComplete = false;
-    // }
-    // else {
-    //     clock_gettime(CLOCK_REALTIME, &gettime_now);
-	// 	pulse_time = gettime_now.tv_nsec - start_time;
-    //     edge = EDGE_FALLING;
-    //     pulseComplete = true;
-    // }
     clock_gettime(CLOCK_REALTIME, &gettime_now);
 	start_time = gettime_now.tv_nsec;
     while(digitalRead(38) == HIGH) {
@@ -74,43 +63,6 @@ void handleEcho() {
     clock_gettime(CLOCK_REALTIME, &gettime_now);
 	pulse_time = gettime_now.tv_nsec - start_time;
     pulseComplete = true;
-}
-
-int pulseIn(int pin, int level, int timeout) {
-   struct timeval tn, t0, t1;
-
-   long micros;
-
-   gettimeofday(&t0, NULL);
-
-   micros = 0;
-
-   while (digitalRead(pin) != level)
-   {
-      gettimeofday(&tn, NULL);
-
-      if (tn.tv_sec > t0.tv_sec) micros = 1000000L; else micros = 0;
-      micros += (tn.tv_usec - t0.tv_usec);
-
-      if (micros > timeout) return 0;
-   }
-
-   gettimeofday(&t1, NULL);
-
-   while (digitalRead(pin) == level)
-   {
-      gettimeofday(&tn, NULL);
-
-      if (tn.tv_sec > t0.tv_sec) micros = 1000000L; else micros = 0;
-      micros = micros + (tn.tv_usec - t0.tv_usec);
-
-      if (micros > timeout) return 0;
-   }
-
-   if (tn.tv_sec > t1.tv_sec) micros = 1000000L; else micros = 0;
-   micros = micros + (tn.tv_usec - t1.tv_usec);
-
-   return micros;
 }
 
 void digitalIOWrite(int pin, int state) {
@@ -165,22 +117,25 @@ int getUltrasonicData(int sensor) {
         default:
             break;
     }
-    digitalIOWrite(pin, LOW);
-    delayMicroseconds(2);
-
-    digitalIOWrite(pin, HIGH);
-    delayMicroseconds(10);
-    digitalIOWrite(pin, LOW);
-    while(pulseComplete == false);
-    //pulse_time = pulseIn(38, LOW, 100000);
-    int distance = pulse_time * 0.034 / 2;
-    pulseComplete = false;
-    return distance;
+    int totalDistance;
+    for(int i = 0; i < 3; i++) {
+        digitalIOWrite(pin, LOW);
+        delayMicroseconds(2);
+        digitalIOWrite(pin, HIGH);
+        delayMicroseconds(10);
+        digitalIOWrite(pin, LOW);
+        while(pulseComplete == false);
+        //pulse_time = pulseIn(38, LOW, 100000);
+        int distance = (pulse_time/1000) * 0.034 / 2;
+        pulseComplete = false;
+        totalDistance += distance;
+    }
+    return totalDistance/4;
 }
 
-// int angleCorrection(int rawDistance) {
-
-// }
+int angleCorrection(int rawDistance) {
+    return sqrt(pow(rawDistance, 2) / (1 + pow(tan(gyroPitch),2) + pow(tan(gyroRoll),2)))
+}
 
 void getGyroValues() {
     unsigned char buffer[100];
@@ -223,7 +178,7 @@ void calculateAbsoluteAltitude() {
     cout << gyroRoll << endl;
     int rawDistance = getUltrasonicData(1);
     cout << rawDistance << endl;
-    //angleCorrection(rawDistance);
+    int altitude = angleCorrection(rawDistance);
 }
 
 // Function to convert binary fractional to decimal
@@ -320,18 +275,18 @@ void calculateAbsoluteAltitude() {
 //     float pressureFinal = pressureComp * (65/1023) + 50;                                //Final pressure in kPa
 // }
 
-// void calculatePID() {
-//     pid_error_temp = gyro_input - pid_setpoint;
-//     pid_i_mem += pid_i_gain * pid_error_temp;
-//     if(pid_i_mem > pid_max)pid_i_mem = pid_max;
-//     else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;
+void calculatePID() {
+    pid_error_temp = gyro_input - pid_setpoint;
+    pid_i_mem += pid_i_gain * pid_error_temp;
+    if(pid_i_mem > pid_max)pid_i_mem = pid_max;
+    else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;
 
-//     pid_output = pid_p_gain * pid_error_temp + pid_i_mem + pid_d_gain * (pid_error_temp - pid_last_d_error);
-//     if(pid_output > pid_max)pid_output = pid_max;
-//     else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
+    pid_output = pid_p_gain * pid_error_temp + pid_i_mem + pid_d_gain * (pid_error_temp - pid_last_d_error);
+    if(pid_output > pid_max)pid_output = pid_max;
+    else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
 
-//     pid_last_d_error = pid_error_temp;
-// }
+    pid_last_d_error = pid_error_temp;
+}
 
 int main() {
     wiringPiSetup();

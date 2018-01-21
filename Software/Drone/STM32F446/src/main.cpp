@@ -339,45 +339,13 @@ int main() {
     }
   }
 
+  //Load SPI buffer with dummy byte
+  spi.reply(0x01);
+
   start = 0;                                                                  //Set start back to zero
   gyro_address = 0x69<<1;                                                     //Store the gyro address
 
   set_gyro_registers();                                                       //Set the specific gyro registers
-  
-  //Load SPI buffer with dummy byte
-  spi.reply(0x01);
-  while (1) {
-    gyro_signalen();
-
-    //65.5 = 1 deg/sec in gyro scale
-    gyro_roll_input = (gyro_roll_input * 0.7) + ((gyro_roll / 65.5) * 0.3);   //Gyro pid input is deg/sec.
-    gyro_pitch_input = (gyro_pitch_input * 0.7) + ((gyro_pitch / 65.5) * 0.3);//Gyro pid input is deg/sec.
-    gyro_yaw_input = (gyro_yaw_input * 0.7) + ((gyro_yaw / 65.5) * 0.3);      //Gyro pid input is deg/sec.
-    
-    //Gyro angle calculations
-    //0.0000611 = 1 / (250Hz / 65.5)
-    angle_pitch += gyro_pitch * 0.0000611;                                    //Calculate the traveled pitch angle and add this to the angle_pitch variable.
-    angle_roll += gyro_roll * 0.0000611;                                      //Calculate the traveled roll angle and add this to the angle_roll variable.
-  
-    //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
-    //angle_pitch -= angle_roll * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the roll angle to the pitch angle.
-    //angle_roll += angle_pitch * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the pitch angle to the roll angle.
-
-    //If master has sent data, we'll read it
-    if (spi.receive()) {
-      int data = spi.read();
-      switch (data) {
-        case 0x02:
-          spi.reply(static_cast<int>(angle_pitch));
-          break;
-        case 0x03:
-          spi.reply(static_cast<int>(angle_roll));
-          break;
-        default:
-          break;
-      }
-    }
-  }
 
   //pc.printf("Done registers\r\n");
 
@@ -570,19 +538,16 @@ int main() {
     //We wait until 4000us are passed.
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
-
-      //Load SPI buffer with dummy byte
-      spi.reply(0x00);
-
+        
       //If master has sent data, we'll read it
       if (spi.receive()) {
         int data = spi.read();
         switch (data) {
           case 0x02:
-            spi.reply(gyro_pitch);
+            spi.reply(static_cast<int>(angle_pitch));
             break;
           case 0x03:
-            spi.reply(gyro_roll);
+            spi.reply(static_cast<int>(angle_roll));
             break;
           default:
             break;
