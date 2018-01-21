@@ -138,7 +138,7 @@ void setupIOExpander() {
     wiringPiI2CWriteReg8(fd, 0x0E, 0xC0);
 
     //Initialization of IO Expander interrupts
-    wiringPiISR(38, INT_EDGE_BOTH, handleEcho);
+    //wiringPiISR(38, INT_EDGE_BOTH, handleEcho);
 }
 
 int getUltrasonicData(int sensor) {
@@ -208,7 +208,7 @@ void calculateAbsoluteAltitude() {
     int rawDistance = getUltrasonicData(1);
     cout << rawDistance << endl;
     //angleCorrection(rawDistance);
-    
+    sleep(.5);
 }
 
 // Function to convert binary fractional to decimal
