@@ -360,18 +360,18 @@ int main() {
     angle_roll += gyro_roll * 0.0000611;                                      //Calculate the traveled roll angle and add this to the angle_roll variable.
   
     //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
-    angle_pitch -= angle_roll * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the roll angle to the pitch angle.
-    angle_roll += angle_pitch * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the pitch angle to the roll angle.
+    //angle_pitch -= angle_roll * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the roll angle to the pitch angle.
+    //angle_roll += angle_pitch * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the pitch angle to the roll angle.
 
     //If master has sent data, we'll read it
     if (spi.receive()) {
       int data = spi.read();
       switch (data) {
         case 0x02:
-          spi.reply((int)angle_pitch);
+          spi.reply(static_cast<int>(angle_pitch));
           break;
         case 0x03:
-          spi.reply((int)angle_roll);
+          spi.reply(static_cast<int>(angle_roll));
           break;
         default:
           break;
