@@ -50,18 +50,30 @@ bool pulseComplete = false;
 // float pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 
 void handleEcho() {
-    if (edge == EDGE_FALLING) {
+    // if (edge == EDGE_FALLING) {
+    //     clock_gettime(CLOCK_REALTIME, &gettime_now);
+	//     start_time = gettime_now.tv_nsec;		                                               //Get nS value
+    //     edge = EDGE_RISING;
+    //     pulseComplete = false;
+    // }
+    // else {
+    //     clock_gettime(CLOCK_REALTIME, &gettime_now);
+	// 	pulse_time = gettime_now.tv_nsec - start_time;
+    //     edge = EDGE_FALLING;
+    //     pulseComplete = true;
+    // }
+    clock_gettime(CLOCK_REALTIME, &gettime_now);
+	start_time = gettime_now.tv_nsec;
+    while(digitalRead(38) == LOW) {
         clock_gettime(CLOCK_REALTIME, &gettime_now);
-	    start_time = gettime_now.tv_nsec;		                                               //Get nS value
-        edge = EDGE_RISING;
-        pulseComplete = false;
+	    if ((gettime_now.tv_nsec - start_time) > 10000000) {
+            pulse_time = 0;
+            break;
+        }
     }
-    else {
-        clock_gettime(CLOCK_REALTIME, &gettime_now);
-		pulse_time = gettime_now.tv_nsec - start_time;
-        edge = EDGE_FALLING;
-        pulseComplete = true;
-    }
+    clock_gettime(CLOCK_REALTIME, &gettime_now);
+	pulse_time = gettime_now.tv_nsec - start_time;
+    pulseComplete = true;
 }
 
 int pulseIn(int pin, int level, int timeout) {
@@ -138,7 +150,7 @@ void setupIOExpander() {
     wiringPiI2CWriteReg8(fd, 0x0E, 0xC0);
 
     //Initialization of IO Expander interrupts
-    //wiringPiISR(38, INT_EDGE_BOTH, handleEcho);
+    wiringPiISR(38, INT_EDGE_FALLING, handleEcho);
 }
 
 int getUltrasonicData(int sensor) {
@@ -159,9 +171,10 @@ int getUltrasonicData(int sensor) {
     digitalIOWrite(pin, HIGH);
     sleep(.000010);
     digitalIOWrite(pin, LOW);
-    //while(pulseComplete == false);
-    pulse_time = pulseIn(38, LOW, 100000);
+    while(pulseComplete == false);
+    //pulse_time = pulseIn(38, LOW, 100000);
     int distance = pulse_time * 0.034 / 2;
+    pulseComplete = false;
     return distance;
 }
 
@@ -208,7 +221,6 @@ void calculateAbsoluteAltitude() {
     int rawDistance = getUltrasonicData(1);
     cout << rawDistance << endl;
     //angleCorrection(rawDistance);
-    sleep(.5);
 }
 
 // Function to convert binary fractional to decimal
@@ -329,5 +341,6 @@ int main() {
     while(1) {
         //calculatePressureAltitude();
         calculateAbsoluteAltitude();
+        sleep(.5);
     }
 }
