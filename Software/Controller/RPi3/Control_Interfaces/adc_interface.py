@@ -1,5 +1,5 @@
 from smbus import SMBus
-from Software.Controller.RPi3.util import map
+from ..util import map
 
 # =====VARIABLE DEFINITIONS=====
 
