@@ -58,9 +58,46 @@ void handleEcho() {
     else {
         clock_gettime(CLOCK_REALTIME, &gettime_now);
 		pulse_time = gettime_now.tv_nsec - start_time;
-        pulseComplete = true;
         edge = EDGE_FALLING;
+        pulseComplete = true;
     }
+}
+
+int pulseIn(int pin, int level, int timeout) {
+   struct timeval tn, t0, t1;
+
+   long micros;
+
+   gettimeofday(&t0, NULL);
+
+   micros = 0;
+
+   while (digitalRead(pin) != level)
+   {
+      gettimeofday(&tn, NULL);
+
+      if (tn.tv_sec > t0.tv_sec) micros = 1000000L; else micros = 0;
+      micros += (tn.tv_usec - t0.tv_usec);
+
+      if (micros > timeout) return 0;
+   }
+
+   gettimeofday(&t1, NULL);
+
+   while (digitalRead(pin) == level)
+   {
+      gettimeofday(&tn, NULL);
+
+      if (tn.tv_sec > t0.tv_sec) micros = 1000000L; else micros = 0;
+      micros = micros + (tn.tv_usec - t0.tv_usec);
+
+      if (micros > timeout) return 0;
+   }
+
+   if (tn.tv_sec > t1.tv_sec) micros = 1000000L; else micros = 0;
+   micros = micros + (tn.tv_usec - t1.tv_usec);
+
+   return micros;
 }
 
 void digitalIOWrite(int pin, int state) {
@@ -121,7 +158,8 @@ int getUltrasonicData(int sensor) {
     digitalIOWrite(pin, HIGH);
     sleep(.000010);
     digitalIOWrite(pin, LOW);
-    while(pulseComplete == false);
+    //while(pulseComplete == false);
+    pulse_time = pulseIn(38, LOW, 100000);
     int distance = pulse_time * 0.034 / 2;
     return distance;
 }
@@ -150,6 +188,7 @@ void getGyroValues() {
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     sleep(.001);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    cout << buffer << endl;
     gyroPitch = buffer[0];
 
     //Get gyro roll
@@ -157,6 +196,7 @@ void getGyroValues() {
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     sleep(.001);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    cout << buffer << endl;
     gyroRoll = buffer[0];
 }
 
