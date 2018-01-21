@@ -3,7 +3,7 @@ import os
 
 import requests
 
-os.chdir("RPi3")
+os.chdir("RPiCM3")
 loc = os.path.abspath("Settings.json")
 with open(loc) as settings_file:
     settings = json.load(settings_file)
