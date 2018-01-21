@@ -189,18 +189,19 @@ void getGyroValues() {
     //Write to Authentication register
     buffer[0] = 0x01;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    delay(1);
+    delay(10);
 
     //Get Auth Key and send it back
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     //int authKey = buffer[0];
+    delay(10);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    delay(1);
+    delay(10);
 
     //Get gyro pitch
     buffer[0] = 0x02;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    delay(1);
+    delay(10);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     cout << buffer << endl;
     gyroPitch = buffer[0];
@@ -208,7 +209,7 @@ void getGyroValues() {
     //Get gyro roll
     buffer[0] = 0x03;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    delay(1);
+    delay(10);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     cout << buffer << endl;
     gyroRoll = buffer[0];

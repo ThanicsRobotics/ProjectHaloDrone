@@ -8,7 +8,7 @@
 
 //Communication Pins
 I2C i2c(PB_9,PB_8);                         //sda,scl
-Serial pc(USBTX, USBRX);                    //tx,rx
+//Serial pc(USBTX, USBRX);                    //tx,rx
 Serial device(PB_6, PB_7);
 SPISlave spi(PA_7, PA_6, PA_5, PA_4);       //mosi, miso, sclk, ssel
 Timer onTime;
@@ -247,7 +247,7 @@ void calculate_pid() {
 }
 
 void set_gyro_registers(){
-  pc.printf("Setting Gyro Registers\r\n");
+  //pc.printf("Setting Gyro Registers\r\n");
   char cmd[2];
   
   //Changing register bank
@@ -311,10 +311,10 @@ void set_gyro_registers(){
 
 int main() {
   //Configure communications
-  pc.printf("Program Start\r\n");
+  //pc.printf("Program Start\r\n");
   onTime.start();                                                             //Start loop timer
   i2c.frequency(400000);                                                      //I2C Frequency set to 400kHz
-  pc.baud(9600);                                                              //Serial Debugging baud rate at 9600bps
+  //pc.baud(9600);                                                              //Serial Debugging baud rate at 9600bps
   device.baud(9600);                                                          //Serial Radio baud rate at 9600bps
   device.attach(&rxInterrupt);
   
@@ -365,7 +365,7 @@ int main() {
     }
   }
 
-  pc.printf("Done registers\r\n");
+  //pc.printf("Done registers\r\n");
 
   //I don't think we need this****************************************************************************************************
   // for (cal_int = 0; cal_int < 1250 ; cal_int ++){                             //Wait 5 seconds before continuing
@@ -396,7 +396,7 @@ int main() {
   gyro_axis_cal[3] /= 2000;                                                   //Divide the yaw total by 2000.
   
   //Wait until the receiver is active and the throttle is set to the lower position.
-  pc.printf("Waiting for arming...\r\n");
+  //pc.printf("Waiting for arming...\r\n");
   while(receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) {
     //start ++;                                                                 //While waiting increment start whith every loop.
     
@@ -407,7 +407,7 @@ int main() {
     wait(.003);                                                               //Wait 3 milliseconds before the next loop
   }
   start = 0;                                                                  //Set start back to 0.
-  pc.printf("Ready\r\n");
+  //pc.printf("Ready\r\n");
 
   //Load the battery voltage to the battery_voltage variable.
   //65 is the voltage compensation for the diode.
@@ -465,7 +465,7 @@ int main() {
     //For starting the motors: throttle low and yaw left (step 1)
     if(receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) {
       start = 1;
-      pc.printf("Armed\r\n");
+      //pc.printf("Armed\r\n");
     }
     
     //When yaw stick is back in the center position start the motors (step 2)
