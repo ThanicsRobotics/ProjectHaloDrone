@@ -166,10 +166,10 @@ int getUltrasonicData(int sensor) {
             break;
     }
     digitalIOWrite(pin, LOW);
-    sleep(.000002);
+    delayMicroseconds(2);
 
     digitalIOWrite(pin, HIGH);
-    sleep(.000010);
+    delayMicroseconds(10);
     digitalIOWrite(pin, LOW);
     while(pulseComplete == false);
     //pulse_time = pulseIn(38, LOW, 100000);
@@ -189,18 +189,18 @@ void getGyroValues() {
     //Write to Authentication register
     buffer[0] = 0x01;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    sleep(.001);
+    delay(1);
 
     //Get Auth Key and send it back
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     //int authKey = buffer[0];
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    sleep(.001);
+    delay(1);
 
     //Get gyro pitch
     buffer[0] = 0x02;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    sleep(.001);
+    delay(1);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     cout << buffer << endl;
     gyroPitch = buffer[0];
@@ -208,7 +208,7 @@ void getGyroValues() {
     //Get gyro roll
     buffer[0] = 0x03;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    sleep(.001);
+    delay(1);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     cout << buffer << endl;
     gyroRoll = buffer[0];
@@ -339,35 +339,9 @@ int main() {
 
     setupIOExpander();
 
-    digitalIOWrite(20, HIGH);
-    delay(100);
-    digitalIOWrite(21, HIGH);
-    delay(100);
-    digitalIOWrite(22, HIGH);
-    delay(100);
-    digitalIOWrite(23, HIGH);
-    delay(100);
-    digitalIOWrite(24, HIGH);
-    delay(100);
-    digitalIOWrite(25, HIGH);
-    delay(100);
-
-    digitalIOWrite(20, LOW);
-    delay(100);
-    digitalIOWrite(21, LOW);
-    delay(100);
-    digitalIOWrite(22, LOW);
-    delay(100);
-    digitalIOWrite(23, LOW);
-    delay(100);
-    digitalIOWrite(24, LOW);
-    delay(100);
-    digitalIOWrite(25, LOW);
-    delay(100);
-
     while(1) {
         //calculatePressureAltitude();
         calculateAbsoluteAltitude();
-        sleep(1);
+        delay(500);
     }
 }
