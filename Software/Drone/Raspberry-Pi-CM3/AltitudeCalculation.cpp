@@ -341,6 +341,6 @@ int main() {
     while(1) {
         //calculatePressureAltitude();
         calculateAbsoluteAltitude();
-        sleep(100);
+        sleep(5);
     }
 }
