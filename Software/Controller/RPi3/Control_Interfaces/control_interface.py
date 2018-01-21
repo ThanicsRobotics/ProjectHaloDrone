@@ -1,4 +1,5 @@
-import Control_Interfaces
+from Software.Controller.RPi3.Control_Interfaces.adc_interface import update
+from Software.Controller.RPi3.Control_Interfaces.radio_interface import send, receive
 
 adc_data = []
 input_buffer = []
@@ -10,7 +11,7 @@ def get_data():
     Function for gathering data from all control interfaces
     :return:
     """
-    pass
+    adc_data = update()
 
 
 def communicate():

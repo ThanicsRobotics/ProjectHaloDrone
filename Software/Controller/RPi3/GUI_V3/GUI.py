@@ -9,7 +9,7 @@ from Screens.Map import *
 from Screens.Settings import *
 from Screens.Video import *
 from Components import *
-from Software.util import Colors
+from Software.Controller.RPi3.util import Colors
 
 colors = Colors()
 
