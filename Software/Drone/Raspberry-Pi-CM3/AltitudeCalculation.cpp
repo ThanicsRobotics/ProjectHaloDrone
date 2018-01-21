@@ -339,19 +339,32 @@ int main() {
 
     setupIOExpander();
 
+    digitalIOWrite(20, HIGH);
+    delay(100);
+    digitalIOWrite(21, HIGH);
+    delay(100);
+    digitalIOWrite(22, HIGH);
+    delay(100);
+    digitalIOWrite(23, HIGH);
+    delay(100);
+    digitalIOWrite(24, HIGH);
+    delay(100);
+    digitalIOWrite(25, HIGH);
+    delay(100);
+
     digitalIOWrite(20, LOW);
-    sleep(.5);
+    delay(100);
     digitalIOWrite(21, LOW);
-    sleep(.5);
+    delay(100);
     digitalIOWrite(22, LOW);
-    sleep(.5);
+    delay(100);
     digitalIOWrite(23, LOW);
-    sleep(.5);
+    delay(100);
     digitalIOWrite(24, LOW);
-    sleep(.5);
+    delay(100);
     digitalIOWrite(25, LOW);
-    sleep(.5);
-    
+    delay(100);
+
     while(1) {
         //calculatePressureAltitude();
         calculateAbsoluteAltitude();
