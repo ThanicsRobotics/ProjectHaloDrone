@@ -64,7 +64,7 @@ void handleEcho() {
     // }
     clock_gettime(CLOCK_REALTIME, &gettime_now);
 	start_time = gettime_now.tv_nsec;
-    while(digitalRead(38) == LOW) {
+    while(digitalRead(38) == HIGH) {
         clock_gettime(CLOCK_REALTIME, &gettime_now);
 	    if ((gettime_now.tv_nsec - start_time) > 10000000) {
             pulse_time = 0;
@@ -150,7 +150,7 @@ void setupIOExpander() {
     wiringPiI2CWriteReg8(fd, 0x0E, 0xC0);
 
     //Initialization of IO Expander interrupts
-    wiringPiISR(38, INT_EDGE_FALLING, handleEcho);
+    wiringPiISR(38, INT_EDGE_RISING, handleEcho);
 }
 
 int getUltrasonicData(int sensor) {
