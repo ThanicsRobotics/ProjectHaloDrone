@@ -203,16 +203,18 @@ void getGyroValues() {
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     delay(10);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    cout << buffer << endl;
+    
     gyroPitch = buffer[0];
+    //cout << gyroPitch << endl;
 
     //Get gyro roll
     buffer[0] = 0x03;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     delay(10);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    cout << buffer << endl;
+    
     gyroRoll = buffer[0];
+    //cout << gyroRoll << endl;
 }
 
 void calculateAbsoluteAltitude() {
