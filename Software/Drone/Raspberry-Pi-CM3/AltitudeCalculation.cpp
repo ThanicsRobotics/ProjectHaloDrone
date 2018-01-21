@@ -332,12 +332,26 @@ void calculateAbsoluteAltitude() {
 
 int main() {
     wiringPiSetup();
-
+    
     //Switch to flight controller 
     SPI_CS = 1;
     wiringPiSPISetup(SPI_CS, 1000000);
 
     setupIOExpander();
+
+    digitalIOWrite(20, LOW);
+    sleep(.5);
+    digitalIOWrite(21, LOW);
+    sleep(.5);
+    digitalIOWrite(22, LOW);
+    sleep(.5);
+    digitalIOWrite(23, LOW);
+    sleep(.5);
+    digitalIOWrite(24, LOW);
+    sleep(.5);
+    digitalIOWrite(25, LOW);
+    sleep(.5);
+    
     while(1) {
         //calculatePressureAltitude();
         calculateAbsoluteAltitude();
