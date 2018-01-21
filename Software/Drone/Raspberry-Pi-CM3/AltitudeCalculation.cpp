@@ -59,6 +59,7 @@ void handleEcho() {
         clock_gettime(CLOCK_REALTIME, &gettime_now);
 		pulse_time = gettime_now.tv_nsec - start_time;
         pulseComplete = true;
+        edge = EDGE_FALLING;
     }
 }
 
@@ -131,11 +132,7 @@ int getUltrasonicData(int sensor) {
 
 void getGyroValues() {
     unsigned char buffer[100];
-
-    //Switch to flight controller 
-    SPI_CS = 1;
-    int fd2 = wiringPiSPISetup(SPI_CS, 1000000);
-    cout << "Init result: " << fd2 << endl;
+    //cout << "Init result: " << fd2 << endl;
 
     //Write to Authentication register
     buffer[0] = 0x01;
@@ -282,6 +279,11 @@ void calculateAbsoluteAltitude() {
 
 int main() {
     wiringPiSetup();
+
+    //Switch to flight controller 
+    SPI_CS = 1;
+    wiringPiSPISetup(SPI_CS, 1000000);
+
     setupIOExpander();
     while(1) {
         //calculatePressureAltitude();
