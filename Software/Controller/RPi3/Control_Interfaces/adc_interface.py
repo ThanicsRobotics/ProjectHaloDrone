@@ -1,10 +1,9 @@
 from smbus import SMBus
-#from util import map
+from ..util import map
 
 # =====VARIABLE DEFINITIONS=====
 
 adr = 0x33
-
 config = 0x0B  # Reads values from AIN0-AIN5
 
 values_raw = []
@@ -15,17 +14,7 @@ bus = SMBus(1)
 
 
 # =====CRITICAL FUNCTIONS=====
-def map(x, in_min, in_max, out_min, out_max):
-    """
-    Function that converts a value between two different scales
-    :param x: The value to be converted
-    :param in_min: the minimum of the input range
-    :param in_max: the maximum of the input range
-    :param out_min: the minimum of the output range
-    :param out_max: the maximum of the output range
-    :return: the value converted to the output range.
-    """
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
 
 def parse(data):
     """
@@ -96,6 +85,7 @@ def update():
     """
     data = bus.read_i2c_block_data(adr, config, 12)
     parse_to_pwm(data)
+    return values_pwm
 
 
 def to_voltage(val):
