@@ -348,15 +348,30 @@ int main() {
   spi.reply(0x01);
   while (1) {
     gyro_signalen();
+
+    //65.5 = 1 deg/sec in gyro scale
+    gyro_roll_input = (gyro_roll_input * 0.7) + ((gyro_roll / 65.5) * 0.3);   //Gyro pid input is deg/sec.
+    gyro_pitch_input = (gyro_pitch_input * 0.7) + ((gyro_pitch / 65.5) * 0.3);//Gyro pid input is deg/sec.
+    gyro_yaw_input = (gyro_yaw_input * 0.7) + ((gyro_yaw / 65.5) * 0.3);      //Gyro pid input is deg/sec.
+    
+    //Gyro angle calculations
+    //0.0000611 = 1 / (250Hz / 65.5)
+    angle_pitch += gyro_pitch * 0.0000611;                                    //Calculate the traveled pitch angle and add this to the angle_pitch variable.
+    angle_roll += gyro_roll * 0.0000611;                                      //Calculate the traveled roll angle and add this to the angle_roll variable.
+  
+    //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
+    angle_pitch -= angle_roll * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the roll angle to the pitch angle.
+    angle_roll += angle_pitch * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the pitch angle to the roll angle.
+
     //If master has sent data, we'll read it
     if (spi.receive()) {
       int data = spi.read();
       switch (data) {
         case 0x02:
-          spi.reply(gyro_pitch);
+          spi.reply((int)angle_pitch);
           break;
         case 0x03:
-          spi.reply(gyro_roll);
+          spi.reply((int)angle_roll);
           break;
         default:
           break;
@@ -415,7 +430,7 @@ int main() {
   //1260 / 1023 = 1.2317.
   //The variable battery_voltage holds 1050 if the battery voltage is 10.5V.
   //battery_voltage = (analogRead(0) + 65) * 1.2317;
-  int battery_voltage = 1260;
+  //int battery_voltage = 1260;
     
   loop_timer = onTime.read_us();                                              //First timer reading (starting main loop)
   
