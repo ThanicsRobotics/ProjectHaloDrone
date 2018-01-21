@@ -344,11 +344,10 @@ int main() {
 
   set_gyro_registers();                                                       //Set the specific gyro registers
   
+  //Load SPI buffer with dummy byte
+  spi.reply(0x01);
   while (1) {
     gyro_signalen();
-    //Load SPI buffer with dummy byte
-    spi.reply(0x01);
-
     //If master has sent data, we'll read it
     if (spi.receive()) {
       int data = spi.read();
