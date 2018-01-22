@@ -129,6 +129,7 @@ int getUltrasonicData(int sensor) {
         int distance = (pulse_time/1000) * 0.034 / 2;
         pulseComplete = false;
         totalDistance += distance;
+        delay(5);
     }
     return totalDistance/4;
 }
