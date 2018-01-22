@@ -135,10 +135,10 @@ def get_calibrated_pwm():
     update()
     calibrated_pwm = [0,0,0,0]
 
-    calibrated_pwm[0] = map(values_pwm[0], 1000, yawCenter, 1000, 1500) if values_pwm[0] < yawCenter else calibrated_pwm[0] = map(values_pwm[0], yawCenter, 2000, 1500, 2000)
-    calibrated_pwm[1] = map(values_pwm[1], 1000, altitudeCenter, 1000, 1500) if values_pwm[1] < altitudeCenter else calibrated_pwm[1] = map(values_pwm[1], altitudeCenter, 2000, 1500, 2000)
-    calibrated_pwm[2] = map(values_pwm[2], 1000, rollCenter, 1000, 1500) if values_pwm[2] < rollCenter else calibrated_pwm[2] = map(values_pwm[2], rollCenter, 2000, 1500, 2000)
-    calibrated_pwm[3] = map(values_pwm[3], 1000, pitchCenter, 1000, 1500) if values_pwm[3] < pitchCenter else calibrated_pwm[3] = map(values_pwm[3], pitchCenter, 2000, 1500, 2000)
+    calibrated_pwm[0] = map(values_pwm[0], 1000, yawCenter, 1000, 1500) if values_pwm[0] < yawCenter else map(values_pwm[0], yawCenter, 2000, 1500, 2000)
+    calibrated_pwm[1] = map(values_pwm[1], 1000, altitudeCenter, 1000, 1500) if values_pwm[1] < altitudeCenter else map(values_pwm[1], altitudeCenter, 2000, 1500, 2000)
+    calibrated_pwm[2] = map(values_pwm[2], 1000, rollCenter, 1000, 1500) if values_pwm[2] < rollCenter else map(values_pwm[2], rollCenter, 2000, 1500, 2000)
+    calibrated_pwm[3] = map(values_pwm[3], 1000, pitchCenter, 1000, 1500) if values_pwm[3] < pitchCenter else map(values_pwm[3], pitchCenter, 2000, 1500, 2000)
 
 # =====EXAMPLE=====
 
