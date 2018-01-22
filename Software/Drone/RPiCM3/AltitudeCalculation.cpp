@@ -118,7 +118,7 @@ int getUltrasonicData(int sensor) {
             break;
     }
     int totalDistance;
-    for(int i = 0; i < 3; i++) {
+    //for(int i = 0; i < 3; i++) {
         digitalIOWrite(pin, LOW);
         delayMicroseconds(2);
         digitalIOWrite(pin, HIGH);
@@ -128,10 +128,11 @@ int getUltrasonicData(int sensor) {
         //pulse_time = pulseIn(38, LOW, 100000);
         int distance = (pulse_time/1000) * 0.034 / 2;
         pulseComplete = false;
-        totalDistance += distance;
-        delay(5);
-    }
-    return totalDistance/4;
+        //totalDistance += distance;
+        //delay(5);
+    //}
+    // return totalDistance/4;
+    return distance;
 }
 
 int angleCorrection(int rawDistance) {
