@@ -133,7 +133,7 @@ int getUltrasonicData(int sensor) {
             totalDistance += distance;
         }
         cout << "Distance: " << totalDistance << endl;
-        delay(50);
+        delay(5);
     }
     return totalDistance / (3 - invalids);
     //return distance;
