@@ -2,8 +2,18 @@ from RPiCM3.Control_Interfaces import adc_interface
 from .radio_interface import send
 import time
 
+def calibrateJoystickRange():
+    motor_vals = adc_interface.get_pwm()
+    print("Center joysticks within 3 seconds\r\n")
+    time.sleep(3)
+    
+    adc_interface.yawCenter = motor_vals[0]
+    adc_interface.altitudeCenter = motor_vals[1]
+    adc_interface.rollCenter = motor_vals[2]
+    adc_interface.pitchCenter = motor_vals[3]
+
+calibrateJoystickRange()
 while True:
-    calibrateJoystickRange()
     adc_interface.get_calibrated_pwm()
     #print motor_vals  # Debug
     send(3)
@@ -15,14 +25,3 @@ while True:
     send(6)
     send(adc_interface.calibrated_pwm[0])
     time.sleep(.5)
-
-def calibrateJoystickRange():
-    motor_vals = adc_interface.get_pwm()
-    print("Center joysticks within 3 seconds\r\n")
-    time.sleep(3)
-    
-    adc_interface.yawCenter = motor_vals[0]
-    adc_interface.altitudeCenter = motor_vals[1]
-    adc_interface.rollCenter = motor_vals[2]
-    adc_interface.pitchCenter = motor_vals[3]
-
