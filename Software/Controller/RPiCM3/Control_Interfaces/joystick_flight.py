@@ -21,7 +21,8 @@ def calibrateJoystickRange():
     print("Center joysticks within 3 seconds\r\n")
     time.sleep(3)
     
-    adc_interface.yawOffset = 1500 - motor_vals[0]
-    adc_interface.altitudeOffset = 1500 - motor_vals[1]
-    adc_interface.rollOffset = 1500 - motor_vals[2]
-    adc_interface.pitchOffset = 1500 - motor_vals[3]
+    adc_interface.yawCenter = motor_vals[0]
+    adc_interface.altitudeCenter = motor_vals[1]
+    adc_interface.rollCenter = motor_vals[2]
+    adc_interface.pitchCenter = motor_vals[3]
+
