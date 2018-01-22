@@ -276,18 +276,18 @@ void calculateAbsoluteAltitude() {
 //     float pressureFinal = pressureComp * (65/1023) + 50;                                //Final pressure in kPa
 // }
 
-void calculatePID() {
-    pid_error_temp = gyro_input - pid_setpoint;
-    pid_i_mem += pid_i_gain * pid_error_temp;
-    if(pid_i_mem > pid_max)pid_i_mem = pid_max;
-    else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;
+// void calculatePID() {
+//     pid_error_temp = gyro_input - pid_setpoint;
+//     pid_i_mem += pid_i_gain * pid_error_temp;
+//     if(pid_i_mem > pid_max)pid_i_mem = pid_max;
+//     else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;
 
-    pid_output = pid_p_gain * pid_error_temp + pid_i_mem + pid_d_gain * (pid_error_temp - pid_last_d_error);
-    if(pid_output > pid_max)pid_output = pid_max;
-    else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
+//     pid_output = pid_p_gain * pid_error_temp + pid_i_mem + pid_d_gain * (pid_error_temp - pid_last_d_error);
+//     if(pid_output > pid_max)pid_output = pid_max;
+//     else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
 
-    pid_last_d_error = pid_error_temp;
-}
+//     pid_last_d_error = pid_error_temp;
+// }
 
 int main() {
     wiringPiSetup();
