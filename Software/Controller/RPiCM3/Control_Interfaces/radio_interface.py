@@ -1,7 +1,7 @@
 import serial
 import re
 
-port = serial.Serial(port="/dev/ttyS0", baudrate=9600, timeout=1)
+port = serial.Serial(port="/dev/ttyAMA0", baudrate=9600, timeout=1)
 
 coefficients = {"Link Request": 0x01, "Link Acknowledge": 0x02, "Throttle": 0x03, "Roll": 0x04, "Pitch": 0x05,
                 "Yaw": 0x06, "X_Velocity": 0x07, "Y_Velocity": 0x08, "Z_Velocity": 0x09, "X_Acceleration": 0x0A,
@@ -25,7 +25,7 @@ def receive():
     try:
         read = port.readline()
         input_buffer = read
-        print "Received:", input_buffer  # Debug
+        print ("Received:", input_buffer)  # Debug
 
         parse_data()
         verify_data()
@@ -45,8 +45,8 @@ def send(val):
         "0x03:DATA,0x04:DATA,0x05:DATA,0x05:DATA,0x06:DATA,0x0D:DATA,0x0E:DATA,0x11:DATA",
         "0x12"
     """
-    port.write(val)
-    print "Sent:", val  # Debug
+    port.write((str(val)+"\r\n").encode())
+    print ("Sent:", val)  # Debug
 
 
 def parse_data():
