@@ -119,7 +119,7 @@ int getUltrasonicData(int sensor) {
     }
     int totalDistance;
     int invalids = 0;
-    for(int i = 0; i < 3; i++) {
+    //for(int i = 0; i < 3; i++) {
         digitalIOWrite(pin, LOW);
         delayMicroseconds(2);
         digitalIOWrite(pin, HIGH);
@@ -129,13 +129,13 @@ int getUltrasonicData(int sensor) {
         //pulse_time = pulseIn(38, LOW, 100000);
         int distance = (pulse_time/1000) * 0.034 / 2;
         pulseComplete = false;
-        if (distance == 0 || distance > 400) invalids++;
-        else totalDistance += distance;
-        cout << "Distance: " << totalDistance << endl;
+        //if (distance == 0 || distance > 400) invalids++;
+        //else totalDistance += distance;
+        //cout << "Distance: " << totalDistance << endl;
         //delay(5);
-    }
-    return totalDistance / (4 - invalids);
-    //return distance;
+    //}
+   // return totalDistance / (4 - invalids);
+    return distance;
 }
 
 int angleCorrection(int rawDistance) {
