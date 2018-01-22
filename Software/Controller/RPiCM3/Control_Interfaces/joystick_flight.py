@@ -1,4 +1,4 @@
-import adc_interface
+from RPiCM3.Control_Interfaces import adc_interface
 from .radio_interface import send
 import time
 
