@@ -12,6 +12,12 @@ values_pwm = []
 
 bus = SMBus(1)
 
+global yawOffset
+global pitchOffset
+global rollOffset
+global altitudeOffset
+
+global calibrated_pwm
 
 # =====CRITICAL FUNCTIONS=====
 
@@ -73,7 +79,7 @@ def parse_to_pwm(data):
     val_needed = values_volt[1:5]
     for val in val_needed:
         values_pwm.append(map(val, 0, 3.3, 1000, 2000))
-    print (values_pwm)  # Debug
+    #print (values_pwm)  # Debug
 
 
 # =====UTILITY FUNCTIONS=====
@@ -126,6 +132,14 @@ def get_pwm():
     update()
     return values_pwm
 
+def get_calibrated_pwm():
+    update()
+    calibrated_pwm = []
+    
+    calibrated_pwm[0] = map(values_pwm[0], 1000 - yawOffset, 2000 - yawOffset, 1000, 2000)
+    calibrated_pwm[1] = map(values_pwm[0], 1000 - altitudeOffset, 2000 - altitudeOffset, 1000, 2000)
+    calibrated_pwm[2] = map(values_pwm[0], 1000 - rollOffset, 2000 - rollOffset, 1000, 2000)
+    calibrated_pwm[3] = map(values_pwm[0], 1000 - pitchOffset, 2000 - pitchOffset, 1000, 2000)
 
 # =====EXAMPLE=====
 

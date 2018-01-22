@@ -303,12 +303,12 @@ int main() {
 
     setupIOExpander();
 
-    int count = 0;
+    //int count = 0;
     while(1) {
         //calculatePressureAltitude();
-        cout << "Count: " << count << endl;
+        //cout << "Count: " << count << endl;
         calculateAbsoluteAltitude();
         delay(5);
-        count++;
+        //count++;
     }
 }
