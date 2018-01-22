@@ -73,7 +73,7 @@ def parse_to_pwm(data):
     val_needed = values_volt[1:5]
     for val in val_needed:
         values_pwm.append(map(val, 0, 3.3, 1000, 2000))
-    print values_pwm  # Debug
+    print (values_pwm)  # Debug
 
 
 # =====UTILITY FUNCTIONS=====
