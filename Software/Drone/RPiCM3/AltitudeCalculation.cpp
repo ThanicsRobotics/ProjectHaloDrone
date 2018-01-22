@@ -131,7 +131,7 @@ int getUltrasonicData(int sensor) {
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
         cout << "Distance: " << totalDistance << endl;
-        //delay(5);
+        delay(3);
     }
     if ((3 - invalids) <= 0) return 0;
     else return totalDistance / (3 - invalids);
