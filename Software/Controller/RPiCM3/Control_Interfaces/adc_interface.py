@@ -134,8 +134,8 @@ def get_pwm():
 
 def get_calibrated_pwm():
     update()
-    calibrated_pwm = []
-    
+    calibrated_pwm = [0,0,0,0]
+
     calibrated_pwm[0] = map(values_pwm[0], 1000 - yawOffset, 2000 - yawOffset, 1000, 2000)
     calibrated_pwm[1] = map(values_pwm[0], 1000 - altitudeOffset, 2000 - altitudeOffset, 1000, 2000)
     calibrated_pwm[2] = map(values_pwm[0], 1000 - rollOffset, 2000 - rollOffset, 1000, 2000)
