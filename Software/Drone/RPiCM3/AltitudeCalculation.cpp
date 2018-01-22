@@ -117,7 +117,7 @@ int getUltrasonicData(int sensor) {
         default:
             break;
     }
-    int totalDistance;
+    int totalDistance = 0;
     int invalids = 0;
     for(int i = 0; i < 3; i++) {
         digitalIOWrite(pin, LOW);
@@ -132,8 +132,8 @@ int getUltrasonicData(int sensor) {
         else {
             totalDistance += distance;
         }
-        //cout << "Distance: " << totalDistance << endl;
-        //delay(5);
+        cout << "Distance: " << totalDistance << endl;
+        delay(50);
     }
     return totalDistance / (3 - invalids);
     //return distance;
