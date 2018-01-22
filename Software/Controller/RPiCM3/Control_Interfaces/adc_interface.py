@@ -17,8 +17,6 @@ global pitchOffset
 global rollOffset
 global altitudeOffset
 
-global calibrated_pwm
-
 # =====CRITICAL FUNCTIONS=====
 
 
@@ -133,6 +131,7 @@ def get_pwm():
     return values_pwm
 
 def get_calibrated_pwm():
+    global calibrated_pwm
     update()
     calibrated_pwm = [0,0,0,0]
 
