@@ -36,7 +36,7 @@ float gyroRoll;
 long int start_time;
 long int pulse_time;
 struct timespec gettime_now;
-int edge = EDGE_FALLING;
+//int edge = EDGE_FALLING;
 bool pulseComplete = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +131,7 @@ int getUltrasonicData(int sensor) {
         pulseComplete = false;
         if (distance == 0 || distance > 400) invalids++;
         else totalDistance += distance;
+        cout << "Distance: " << totalDistance << endl;
         //delay(5);
     }
     return totalDistance / (4 - invalids);
