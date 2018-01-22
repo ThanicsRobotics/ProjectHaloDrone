@@ -46,7 +46,7 @@ def send(val):
         "0x12"
     """
     port.write((str(val)+"\r\n").encode())
-    print ("Sent:", val)  # Debug
+    # print ("Sent:", val)  # Debug
 
 
 def parse_data():
