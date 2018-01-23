@@ -544,10 +544,10 @@ int main() {
         int data = spi.read();
         switch (data) {
           case 0x02:
-            spi.reply(static_cast<int>(angle_pitch));
+            spi.reply(76);
             break;
           case 0x03:
-            spi.reply(static_cast<int>(angle_roll));
+            spi.reply(54);
             break;
           default:
             break;
