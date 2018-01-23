@@ -143,6 +143,7 @@ int angleCorrection(int rawDistance) {
 }
 
 void authFlightController() {
+    unsigned char buffer[100];
     int authKey = 0;
     cout << "Authenticating..." << endl;
     while(authKey != 0xF3) {
