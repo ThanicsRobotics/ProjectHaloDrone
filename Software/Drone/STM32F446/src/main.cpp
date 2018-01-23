@@ -538,7 +538,7 @@ int main() {
     //We wait until 4000us are passed.
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
-        
+      
       //If master has sent data, we'll read it
       if (spi.receive()) {
         int data = spi.read();

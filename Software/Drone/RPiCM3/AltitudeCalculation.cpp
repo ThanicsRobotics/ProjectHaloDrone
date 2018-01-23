@@ -29,8 +29,8 @@ char baroCoefficients[17];
 // int temperature;
 
 //Gyro variables
-float gyroPitch;
-float gyroRoll;
+int gyroPitch;
+int gyroRoll;
 
 //Pulse timing variables
 long int start_time;
@@ -130,7 +130,7 @@ int getUltrasonicData(int sensor) {
         pulseComplete = false;
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
-        cout << "Distance: " << totalDistance << endl;
+        //cout << "Distance: " << totalDistance << endl;
         delay(3);
     }
     if ((3 - invalids) <= 0) return 0;
@@ -142,26 +142,33 @@ int angleCorrection(int rawDistance) {
     return sqrt(pow(rawDistance, 2) / (1 + pow(tan(gyroPitch),2) + pow(tan(gyroRoll),2)));
 }
 
+void authFlightController() {
+    int authKey = 0;
+    cout << "Authenticating..." << endl;
+    while(authKey != 0xF3) {
+        //Write to Authentication register
+        buffer[0] = 0x01;
+        wiringPiSPIDataRW(SPI_CS, buffer, 1);
+        //delay(10);
+
+        //Get Auth Key and send it back
+        wiringPiSPIDataRW(SPI_CS, buffer, 1);
+        authKey = buffer[0];
+        //delay(10);
+        wiringPiSPIDataRW(SPI_CS, buffer, 1);
+        delay(10);
+    }
+    cout << "Authenticated" << endl;
+}
+
 void getGyroValues() {
     unsigned char buffer[100];
     //cout << "Init result: " << fd2 << endl;
 
-    //Write to Authentication register
-    buffer[0] = 0x01;
-    wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    delay(10);
-
-    //Get Auth Key and send it back
-    wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    //int authKey = buffer[0];
-    delay(10);
-    wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    delay(10);
-
     //Get gyro pitch
     buffer[0] = 0x02;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    delay(10);
+    delayMicroseconds(100);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     
     gyroPitch = buffer[0];
@@ -170,7 +177,7 @@ void getGyroValues() {
     //Get gyro roll
     buffer[0] = 0x03;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    delay(10);
+    delayMicroseconds(100);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     
     gyroRoll = buffer[0];
@@ -302,7 +309,7 @@ int main() {
     wiringPiSPISetup(SPI_CS, 1000000);
 
     setupIOExpander();
-
+    authFlightController();
     //int count = 0;
     while(1) {
         //calculatePressureAltitude();
