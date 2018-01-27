@@ -525,21 +525,22 @@ int main() {
     //We wait until 4000us are passed.
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
-      
+      unsigned int gyroValues = (int)gyro_pitch << 8 | (int)gyro_roll;
+      spi.reply((int)gyro_pitch);
       //If master has sent data, we'll read it
-      if (spi.receive()) {
-        int data = spi.read();
-        switch (data) {
-          case 0x02:
-            spi.reply(76);
-            break;
-          case 0x03:
-            spi.reply(54);
-            break;
-          default:
-            break;
-        }
-      }
+      // if (spi.receive()) {
+      //   int data = spi.read();
+      //   switch (data) {
+      //     case 0x02:
+      //       spi.reply();
+      //       break;
+      //     case 0x03:
+      //       spi.reply(54);
+      //       break;
+      //     default:
+      //       break;
+      //   }
+      // }
     }
                             
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
