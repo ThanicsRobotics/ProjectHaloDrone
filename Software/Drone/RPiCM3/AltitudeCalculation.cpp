@@ -155,6 +155,7 @@ void authFlightController() {
         //Get Auth Key and send it back
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         authKey = buffer[1] << 8 | buffer[0];
+        cout << authKey << endl;
         //delay(10);
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         delay(10);
