@@ -37,4 +37,4 @@ while True:
     send(6)
     send(yaw)
     time.sleep(.003)
-    print("Roll: "+roll+" | Pitch: "+pitch+" | Yaw: "+yaw+" | Altitude: "+altitude)
+    print("Roll: "+str(roll)+" | Pitch: "+str(pitch)+" | Yaw: "+str(yaw)+" | Altitude: "+str(altitude))
