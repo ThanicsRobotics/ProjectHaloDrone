@@ -149,14 +149,14 @@ void authFlightController() {
     while(authKey != 0xF4) {
         //Write to Authentication register
         buffer[0] = 0x01;
-        wiringPiSPIDataRW(SPI_CS, buffer, 1);
+        wiringPiSPIDataRW(SPI_CS, buffer, 2);
         //delay(10);
 
         //Get Auth Key and send it back
-        wiringPiSPIDataRW(SPI_CS, buffer, 1);
+        wiringPiSPIDataRW(SPI_CS, buffer, 2);
         authKey = buffer[1] << 8 | buffer[0];
         //delay(10);
-        wiringPiSPIDataRW(SPI_CS, buffer, 1);
+        wiringPiSPIDataRW(SPI_CS, buffer, 2);
         delay(10);
     }
     cout << "Authenticated" << endl;
