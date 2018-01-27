@@ -24,10 +24,10 @@ adc_interface.pitchCenter = 1524
 # calibrateJoystickRange()
 while True:
     print(adc_interface.get_calibrated_pwm())
-    yaw = adc_interface.calibrated_pwm[0]
-    altitude = adc_interface.calibrated_pwm[1]
-    roll = adc_interface.calibrated_pwm[2]
-    pitch = adc_interface.calibrated_pwm[3]
+    yaw = int(adc_interface.calibrated_pwm[0])
+    altitude = int(adc_interface.calibrated_pwm[1])
+    roll = int(adc_interface.calibrated_pwm[2])
+    pitch = int(adc_interface.calibrated_pwm[3])
     send(3)
     send(altitude)
     send(4)
