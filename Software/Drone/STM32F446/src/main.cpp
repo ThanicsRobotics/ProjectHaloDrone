@@ -317,7 +317,7 @@ int main() {
   device.attach(&rxInterrupt);
   
   //Setup the spi for 8 bit data, mode 0 and 1MHz clock rate
-  spi.format(8,0);
+  spi.format(16,0);
   spi.frequency(1500000);
   
   //Load authentication key into SPI buffer
