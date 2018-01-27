@@ -1,5 +1,5 @@
 #include <mbed.h>
-#include <BufferedSerial.h>
+//#include <BufferedSerial.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -9,7 +9,7 @@
 //Communication Pins
 I2C i2c(PB_9,PB_8);                         //sda,scl
 //Serial pc(USBTX, USBRX);                    //tx,rx
-Serial device(PB_6, PB_7);
+Serial radio(PB_6, PB_7);
 SPISlave spi(PA_7, PA_6, PA_5, PA_4);       //mosi, miso, sclk, ssel
 Timer onTime;
 
@@ -19,8 +19,8 @@ DigitalOut motor2(D9);
 DigitalOut motor3(D5);
 DigitalOut motor4(D6);
 
-//Device Serial Buffer
-char buffer[128];
+//Radio Serial Buffer
+char radioBuffer[128];
 
 //RF Protocol Coefficients
 const int throttleCoefficient = 3;
@@ -99,20 +99,20 @@ void motors_on() {
 
 void readline() {
   //Read character incoming on serial bus
-  char thisChar = device.getc();
+  char thisChar = radio.getc();
   //pc.printf("%c\r\n", thisChar);
 
   //Check if this character is the end of message
   if (thisChar == '\n') {
     wordEnd = true;
-    buffer[count] = '\0';
+    radioBuffer[count] = '\0';
     count = 0;
     return;
   }
 
   //If we just finished a message, start a new one in the buffer
   else if (wordEnd == true) {
-    buffer[count] = thisChar;
+    radioBuffer[count] = thisChar;
     count++;
     wordEnd = false;
     return;
@@ -120,7 +120,7 @@ void readline() {
 
   //Assign the next character to the current buffer
   else {
-    buffer[count] = thisChar;
+    radioBuffer[count] = thisChar;
     count++;
     return;
   }
@@ -149,7 +149,7 @@ void updateTelemetry(int data, int myCoefficient) {
 void rxInterrupt() {
   readline();                                                             //Read data from serial bus 
   if (wordEnd == true) {                                                  //If we have finished a message
-    int data = (int)strtol(buffer, NULL, 10);                             //Convert hex data to decimal
+    int data = (int)strtol(radioBuffer, NULL, 10);                             //Convert hex data to decimal
     //pc.printf("%d\r\n", data);
     if (coFlag == true && data > 999) {                                   //If we have a coefficient and data for PWM is valid
       updateTelemetry(data, coefficient);                                 //Update the input values
@@ -161,7 +161,7 @@ void rxInterrupt() {
       }
       coefficient = data;
     }
-    memset(buffer,0,sizeof(buffer));
+    memset(radioBuffer,0,sizeof(radioBuffer));
   }
   else {
     return;
@@ -313,8 +313,8 @@ int main() {
   onTime.start();                                                             //Start loop timer
   i2c.frequency(400000);                                                      //I2C Frequency set to 400kHz
   //pc.baud(9600);                                                              //Serial Debugging baud rate at 9600bps
-  device.baud(9600);                                                          //Serial Radio baud rate at 9600bps
-  device.attach(&rxInterrupt);
+  radio.baud(9600);                                                          //Serial Radio baud rate at 9600bps
+  radio.attach(&rxInterrupt);
   
   //Setup the spi for 8 bit data, mode 0 and 1MHz clock rate
   spi.format(16,0);
@@ -522,7 +522,7 @@ int main() {
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
       //unsigned int gyroValues = (int)gyro_pitch << 8 | (int)gyro_roll;
-      spi.reply((signed char)angle_pitch_acc << 8 | (signed char)angle_roll_acc);
+      
       //If master has sent data, we'll read it
       // if (spi.receive()) {
       //   int data = spi.read();
@@ -541,7 +541,9 @@ int main() {
                             
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
-    //__disable_irq();
+    __disable_irq();
+
+    //RISING EDGE of PWM motor pulses (start of loop)
     motors_on();
         
     timer_channel_1 = esc_1 + loop_timer;                                     //Calculate the time of the falling edge of the esc-1 pulse.
@@ -552,7 +554,11 @@ int main() {
     //There is always 1000us of spare time. So let's do something useful that is very time consuming.
     //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
     gyro_signalen();
-      
+
+    //Load gyro angle data into SPI buffer
+    spi.reply((signed char)angle_pitch_acc << 8 | (signed char)angle_roll_acc);
+    
+    //FALLING EDGES of PWM motor pulses
     while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {        //Stay in this loop until all motor PWM signals are low
       esc_loop_timer = onTime.read_us();                                      //Read the current time.
       if(timer_channel_1 <= esc_loop_timer) motor1 = 0;                        //Set digital output 7 to low if the time is expired.
@@ -560,6 +566,6 @@ int main() {
       if(timer_channel_3 <= esc_loop_timer) motor3 = 0;                        //Set digital output 5 to low if the time is expired.
       if(timer_channel_4 <= esc_loop_timer) motor4 = 0;                        //Set digital output 4 to low if the time is expired.
     }
-    //__enable_irq();
+    __enable_irq();
   }
 }

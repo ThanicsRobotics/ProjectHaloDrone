@@ -1,15 +1,23 @@
-#include <bits/stdc++.h>
-#include <iostream>
-#include <errno.h>
+//WiringPi Libraries
 #include <wiringPiSPI.h>
 #include <wiringPiI2C.h>
+#include <wiringSerial.h>
 #include <wiringPi.h>
+
+//Standard Librarues
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
 #include <math.h>
+#include <bits/stdc++.h>
+#include <iostream>
+#include <errno.h>
 
-#define ADDR 0x22                     //I2C address of IO Expander
+//I2C address of IO Expander
+#define ADDR 0x22
+#define INT_PIN 38
+
+//Defining word representations for program readability
 #define LOW 0
 #define EDGE_FALLING 0
 #define HIGH 1
@@ -28,7 +36,7 @@ char baroCoefficients[17];
 // int pressure;
 // int temperature;
 
-//Gyro variables
+//Gyro angle variables
 signed int gyroPitch;
 signed int gyroRoll;
 
@@ -36,7 +44,6 @@ signed int gyroRoll;
 long int start_time;
 long int pulse_time;
 struct timespec gettime_now;
-//int edge = EDGE_FALLING;
 bool pulseComplete = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,25 +53,32 @@ float pid_p_gain = 3.8;                //Gain setting for the roll P-controller
 float pid_i_gain = 0.01;               //Gain setting for the roll I-controller
 float pid_d_gain = 20.0;               //Gain setting for the roll D-controller
 int pid_max = 400;                     //Maximum output of the PID-controller (+/-)
-
 float pid_error_temp;
 float pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 
+//Handles IO Expander interrupt (measures ultrasonic sensor echo pulse)
 void handleEcho() {
+    //Get current time
     clock_gettime(CLOCK_REALTIME, &gettime_now);
 	start_time = gettime_now.tv_nsec;
-    while(digitalRead(38) == HIGH) {
+
+    //Get time when pulse is HIGH
+    while(digitalRead(INT_PIN) == HIGH) {
         clock_gettime(CLOCK_REALTIME, &gettime_now);
+        //Stop if HIGH for 10ms (timeout)
 	    if ((gettime_now.tv_nsec - start_time) > 10000000) {
             pulse_time = 0;
             break;
         }
     }
+
+    //Pulse time is the time difference before and after HIGH pulse
     clock_gettime(CLOCK_REALTIME, &gettime_now);
 	pulse_time = gettime_now.tv_nsec - start_time;
     pulseComplete = true;
 }
 
+//Utility function for setting individual pin on IO Expander
 void digitalIOWrite(int pin, int state) {
     //Figure out port number based on pin number
     int port;
@@ -88,6 +102,7 @@ void digitalIOWrite(int pin, int state) {
     }
 }
 
+//Configures inputs and outputs of IO Expander
 void setupIOExpander() {
     fd = wiringPiI2CSetup(ADDR);
 
@@ -105,8 +120,11 @@ void setupIOExpander() {
     wiringPiISR(38, INT_EDGE_RISING, handleEcho);
 }
 
+//Gets distance value (in centimeters) from downward facing sensor
 int getUltrasonicData(int sensor) {
     int pin;
+
+    //Toggles between downward facing sensor 1 and 2
     switch (sensor) {
         case 1:
             pin = 17;
@@ -117,20 +135,30 @@ int getUltrasonicData(int sensor) {
         default:
             break;
     }
+
     int totalDistance = 0;
     int invalids = 0;
+
+    //Takes average of 3 distance measurements
     for(int i = 0; i < 3; i++) {
+        //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
         delayMicroseconds(2);
+
+        //Starting TRIG pulse
         digitalIOWrite(pin, HIGH);
         delayMicroseconds(10);
         digitalIOWrite(pin, LOW);
+
+        //Wait until pulse is complete (when handleEcho is complete)
         while(pulseComplete == false);
+
+        //Calculate distance based on speed of sound and travel time, and
+        //factor out invalid results
         int distance = (pulse_time/1000) * 0.034 / 2;
         pulseComplete = false;
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
-        //cout << "Distance: " << totalDistance << endl;
         delay(3);
     }
     if ((3 - invalids) <= 0) return 0;
@@ -138,10 +166,12 @@ int getUltrasonicData(int sensor) {
     //return distance;
 }
 
+//Corrects downward facing distance measurement when vehicle changes attitude
 int angleCorrection(int rawDistance) {
     return sqrt(pow(rawDistance, 2) / (1 + pow(tan(gyroPitch),2) + pow(tan(gyroRoll),2)));
 }
 
+//Making sure the STM32F446 is listening...
 void authFlightController() {
     unsigned char buffer[100];
     unsigned int authKey = 0;
@@ -150,46 +180,35 @@ void authFlightController() {
         //Write to Authentication register
         buffer[1] = 0x01;
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
-        //delay(10);
 
         //Get Auth Key and send it back
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         authKey = buffer[0] << 8 | buffer[1];
         cout << authKey << endl;
-        //delay(10);
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         delay(10);
     }
     cout << "Authenticated" << endl;
 }
 
+//Request gyro angles from STM32F446 flight controller
 void getGyroValues() {
     unsigned char buffer[100];
-    //cout << "Init result: " << fd2 << endl;
-
-    //Get gyro pitch
-    //buffer[1] = 0x00;
-    //wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    //delayMicroseconds(200);
+    
+    //Gyro pitch and roll are stored in two incoming bytes
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
     gyroPitch = (signed char)buffer[0];
-
-    //Get gyro roll
-    //buffer[0] = 0x03;
-    //wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    //delayMicroseconds(200);
-    //wiringPiSPIDataRW(SPI_CS, buffer, 1);
     gyroRoll = (signed char)buffer[1];
 }
 
+//Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
     getGyroValues();
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll << endl;
-    //cout << "Gyro Roll: " << gyroRoll << endl;
     int rawDistance = getUltrasonicData(1);
     //cout << "Raw Distance: " << rawDistance << endl;
-    //int altitude = angleCorrection(rawDistance);
-    //cout << "Altitude: " << altitude << endl;
+    int altitude = angleCorrection(rawDistance);
+    cout << "Altitude: " << altitude << endl;
 }
 
 // Function to convert binary fractional to decimal
@@ -286,34 +305,36 @@ void calculateAbsoluteAltitude() {
 //     float pressureFinal = pressureComp * (65/1023) + 50;                                //Final pressure in kPa
 // }
 
-// void calculatePID() {
-//     pid_error_temp = gyro_input - pid_setpoint;
-//     pid_i_mem += pid_i_gain * pid_error_temp;
-//     if(pid_i_mem > pid_max)pid_i_mem = pid_max;
-//     else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;
+//Calculate throttle factor for altitude management through PID loop
+void calculatePID() {
+    pid_error_temp = gyro_input - pid_setpoint;
+    pid_i_mem += pid_i_gain * pid_error_temp;
+    if(pid_i_mem > pid_max)pid_i_mem = pid_max;
+    else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;
 
-//     pid_output = pid_p_gain * pid_error_temp + pid_i_mem + pid_d_gain * (pid_error_temp - pid_last_d_error);
-//     if(pid_output > pid_max)pid_output = pid_max;
-//     else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
+    pid_output = pid_p_gain * pid_error_temp + pid_i_mem + pid_d_gain * (pid_error_temp - pid_last_d_error);
+    if(pid_output > pid_max)pid_output = pid_max;
+    else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
 
-//     pid_last_d_error = pid_error_temp;
-// }
+    pid_last_d_error = pid_error_temp;
+}
 
+//Main Program loop
 int main() {
+    //Setup function calls
     wiringPiSetup();
-    
-    //Switch to flight controller 
+    setupIOExpander();
+
+    //Switch to flight controller, setup SPI @ 1.5MHz
     SPI_CS = 1;
     wiringPiSPISetup(SPI_CS, 1500000);
-
-    setupIOExpander();
     authFlightController();
-    //int count = 0;
+
+
     while(1) {
         //calculatePressureAltitude();
         //cout << "Count: " << count << endl;
         calculateAbsoluteAltitude();
         delay(100);
-        //count++;
     }
 }
