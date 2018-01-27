@@ -146,9 +146,9 @@ void authFlightController() {
     unsigned char buffer[100];
     unsigned int authKey = 0;
     cout << "Authenticating..." << endl;
-    while(authKey != 0xF4) {
+    while(authKey != 0x00F4) {
         //Write to Authentication register
-        buffer[0] = 0x01;
+        buffer[1] = 0x01;
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         //delay(10);
 
