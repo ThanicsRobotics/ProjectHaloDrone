@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define AUTH_KEY 0xF4
+#define AUTH_KEY 0x00F4
 
 //Communication Pins
 I2C i2c(PB_9,PB_8);                         //sda,scl
@@ -321,7 +321,7 @@ int main() {
   spi.frequency(1500000);
   
   //Load authentication key into SPI buffer
-  spi.reply(0x00);
+  spi.reply(0x01);
   bool authenticated = false;
 
   //Stay in this loop until the flight controller (STM32) has made contact with the Raspberry Pi
