@@ -171,7 +171,7 @@ void getGyroValues() {
     buffer[1] = 0x00;
     //wiringPiSPIDataRW(SPI_CS, buffer, 1);
     //delayMicroseconds(200);
-    wiringPiSPIDataRW(SPI_CS, buffer, 1);
+    wiringPiSPIDataRW(SPI_CS, buffer, 2);
     gyroPitch = buffer[0] << 8 | buffer[1];
 
     //Get gyro roll
