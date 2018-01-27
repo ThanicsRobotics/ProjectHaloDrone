@@ -181,10 +181,10 @@ void gyro_signalen() {
   acc_axis[1] = (short)(cmd[0]<<8|cmd[1]);                               //Add the low and high byte to the acc_x variable.
   acc_axis[2] = (short)(cmd[2]<<8|cmd[3]);                               //Add the low and high byte to the acc_y variable.
   acc_axis[3] = (short)(cmd[4]<<8|cmd[5]);                               //Add the low and high byte to the acc_z variable.
-  temperature = (short)(cmd[6]<<8|cmd[7]);                               //Add the low and high byte to the temperature variable.
-  gyro_axis[1] = (short)(cmd[8]<<8|cmd[9]);                              //Read high and low part of the angular data. x
-  gyro_axis[2] = (short)(cmd[10]<<8|cmd[11]);                            //Read high and low part of the angular data. y
-  gyro_axis[3] = (short)(cmd[12]<<8|cmd[13]);                            //Read high and low part of the angular data. z
+  gyro_axis[1] = (short)(cmd[6]<<8|cmd[7]);                               //Add the low and high byte to the temperature variable.
+  gyro_axis[2] = (short)(cmd[8]<<8|cmd[9]);                              //Read high and low part of the angular data. x
+  gyro_axis[3] = (short)(cmd[10]<<8|cmd[11]);                            //Read high and low part of the angular data. y
+  temperature = (short)(cmd[12]<<8|cmd[13]);                            //Read high and low part of the angular data. z
   memset(cmd,0,sizeof(cmd));
   
   //Only compensate after the calibration.
@@ -525,7 +525,7 @@ int main() {
     //We wait until 4000us are passed.
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
-      unsigned int gyroValues = (int)gyro_pitch << 8 | (int)gyro_roll;
+      //unsigned int gyroValues = (int)gyro_pitch << 8 | (int)gyro_roll;
       spi.reply(gyro_axis[1]);
       //If master has sent data, we'll read it
       // if (spi.receive()) {
