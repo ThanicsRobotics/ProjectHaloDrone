@@ -29,8 +29,8 @@ char baroCoefficients[17];
 // int temperature;
 
 //Gyro variables
-int gyroPitch;
-int gyroRoll;
+unsigned int gyroPitch;
+unsigned int gyroRoll;
 
 //Pulse timing variables
 long int start_time;
