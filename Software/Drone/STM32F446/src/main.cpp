@@ -328,12 +328,8 @@ int main() {
   while (authenticated == false) {
     if (spi.receive()) {
       unsigned short int response = spi.read();
-      if (response == 0x01) {
-        spi.reply(AUTH_KEY);
-      }
-      if (response == AUTH_KEY) {
-        authenticated = true;
-      }
+      if (response == 0x01) spi.reply(AUTH_KEY);
+      if (response == AUTH_KEY) authenticated = true;
     }
   }
 
