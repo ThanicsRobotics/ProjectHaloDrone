@@ -168,18 +168,18 @@ void getGyroValues() {
     //cout << "Init result: " << fd2 << endl;
 
     //Get gyro pitch
-    buffer[0] = 0x00;
+    buffer[1] = 0x00;
     //wiringPiSPIDataRW(SPI_CS, buffer, 1);
     //delayMicroseconds(200);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    gyroPitch = buffer[0];
+    gyroPitch = buffer[0] << 8 | buffer[1];
 
     //Get gyro roll
     //buffer[0] = 0x03;
     //wiringPiSPIDataRW(SPI_CS, buffer, 1);
     //delayMicroseconds(200);
     //wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    gyroRoll = buffer[0];
+    gyroRoll = buffer[0] << 8 | buffer[1];
 }
 
 void calculateAbsoluteAltitude() {
