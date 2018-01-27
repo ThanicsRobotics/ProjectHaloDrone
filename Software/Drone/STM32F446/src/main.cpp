@@ -367,6 +367,8 @@ int main() {
   gyro_axis_cal[2] /= 2000;                                                   //Divide the pitch total by 2000.
   gyro_axis_cal[3] /= 2000;                                                   //Divide the yaw total by 2000.
   
+  spi.reply(0x04);
+
   //Wait until the receiver is active and the throttle is set to the lower position.
   //pc.printf("Waiting for arming...\r\n");
   while(receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) {
@@ -380,7 +382,7 @@ int main() {
   }
   start = 0;                                                                  //Set start back to 0.
   //pc.printf("Ready\r\n");
-  spi.reply(0x04);
+  spi.reply(0x05);
   //Load the battery voltage to the battery_voltage variable.
   //65 is the voltage compensation for the diode.
   //12.6V equals ~5V @ Analog 0.
