@@ -1,6 +1,6 @@
 import serial
 
-port = serial.Serial(port="/dev/ttyS0", baudrate=9600, timeout=1)
+port = serial.Serial(port="/dev/ttyAMA0", baudrate=9600, timeout=1)
 ack = 0
 connected = True
 

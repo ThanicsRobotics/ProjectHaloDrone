@@ -139,7 +139,7 @@ def get_calibrated_pwm():
     calibrated_pwm[1] = map(values_pwm[1], 1000, altitudeCenter, 1000, 1500) if values_pwm[1] < altitudeCenter else map(values_pwm[1], altitudeCenter, 2000, 1500, 2000)
     calibrated_pwm[2] = map(values_pwm[2], 1000, rollCenter, 1000, 1500) if values_pwm[2] < rollCenter else map(values_pwm[2], rollCenter, 2000, 1500, 2000)
     calibrated_pwm[3] = map(values_pwm[3], 1000, pitchCenter, 1000, 1500) if values_pwm[3] < pitchCenter else map(values_pwm[3], pitchCenter, 2000, 1500, 2000)
-
+    return calibrated_pwm
 # =====EXAMPLE=====
 
 

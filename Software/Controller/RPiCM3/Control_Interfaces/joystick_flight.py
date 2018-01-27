@@ -23,7 +23,7 @@ adc_interface.pitchCenter = 1524
 
 # calibrateJoystickRange()
 while True:
-    adc_interface.get_calibrated_pwm()
+    print(adc_interface.get_calibrated_pwm())
     #print motor_vals  # Debug
     send(3)
     send(adc_interface.calibrated_pwm[1])
@@ -34,3 +34,4 @@ while True:
     send(6)
     send(adc_interface.calibrated_pwm[0])
     time.sleep(.003)
+    print("Roll: "+
