@@ -172,14 +172,14 @@ void getGyroValues() {
     //wiringPiSPIDataRW(SPI_CS, buffer, 1);
     //delayMicroseconds(200);
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
-    gyroPitch = (signed int)buffer[0];
+    gyroPitch = (signed char)buffer[0];
 
     //Get gyro roll
     //buffer[0] = 0x03;
     //wiringPiSPIDataRW(SPI_CS, buffer, 1);
     //delayMicroseconds(200);
     //wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    gyroRoll = (signed int)buffer[1];
+    gyroRoll = (signed char)buffer[1];
 }
 
 void calculateAbsoluteAltitude() {
