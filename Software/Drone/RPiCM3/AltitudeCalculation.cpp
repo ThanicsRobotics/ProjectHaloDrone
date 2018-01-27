@@ -313,7 +313,7 @@ int main() {
         //calculatePressureAltitude();
         //cout << "Count: " << count << endl;
         calculateAbsoluteAltitude();
-        delay(10);
+        delay(100);
         //count++;
     }
 }
