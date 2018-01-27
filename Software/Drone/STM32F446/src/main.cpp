@@ -338,7 +338,7 @@ int main() {
   }
 
   //Load SPI buffer with dummy byte
-  spi.reply(0x01);
+  spi.reply(0x03);
 
   start = 0;                                                                  //Set start back to zero
   gyro_address = 0x69<<1;                                                     //Store the gyro address
@@ -380,7 +380,7 @@ int main() {
   }
   start = 0;                                                                  //Set start back to 0.
   //pc.printf("Ready\r\n");
-
+  spi.reply(0x04);
   //Load the battery voltage to the battery_voltage variable.
   //65 is the voltage compensation for the diode.
   //12.6V equals ~5V @ Analog 0.
