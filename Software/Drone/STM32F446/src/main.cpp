@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define AUTH_KEY 0xF3
+#define AUTH_KEY 0xF4
 
 //Communication Pins
 I2C i2c(PB_9,PB_8);                         //sda,scl
@@ -45,8 +45,6 @@ float pid_p_gain_yaw = 9.0;                 //Gain setting for the pitch P-contr
 float pid_i_gain_yaw = 0.1;                 //Gain setting for the pitch I-controller. //0.02
 float pid_d_gain_yaw = 0.0;                 //Gain setting for the pitch D-controller.
 int pid_max_yaw = 400;                      //Maximum output of the PID-controller (+/-)
-
-bool auto_level = true;                     //Auto level on (true) or off (false)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Declaring global variables
@@ -348,15 +346,7 @@ int main() {
   set_gyro_registers();                                                       //Set the specific gyro registers
 
   //pc.printf("Done registers\r\n");
-
-  //I don't think we need this****************************************************************************************************
-  // for (cal_int = 0; cal_int < 1250 ; cal_int ++){                             //Wait 5 seconds before continuing
-  //   motors_on();                                                              //Set motor PWM signals high
-  //   wait(.001);                                                               //Wait 1000us
-  //   motors_off();                                                             //Set motor PWM signals low
-  //   wait(.003);                                                               //Wait 3000us
-  // }
-    
+  
   //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
   for (cal_int = 0; cal_int < 2000 ; cal_int ++) {                            //Take 2000 readings for calibration.
     gyro_signalen();                                                          //Read the gyro output.
@@ -438,11 +428,6 @@ int main() {
     
     pitch_level_adjust = angle_pitch * 12;                                    //Calculate the pitch angle correction
     roll_level_adjust = angle_roll * 12;                                      //Calculate the roll angle correction
-  
-    if (!auto_level) {                                                        //If the quadcopter is not in auto-level mode
-      pitch_level_adjust = 0;                                                 //Set the pitch angle correction to zero.
-      roll_level_adjust = 0;                                                  //Set the roll angle correcion to zero.
-    }
   
     //For starting the motors: throttle low and yaw left (step 1)
     if(receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) {
@@ -538,16 +523,16 @@ int main() {
     //We wait until 4000us are passed.
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
-        
+      
       //If master has sent data, we'll read it
       if (spi.receive()) {
         int data = spi.read();
         switch (data) {
           case 0x02:
-            spi.reply(static_cast<int>(angle_pitch));
+            spi.reply(76);
             break;
           case 0x03:
-            spi.reply(static_cast<int>(angle_roll));
+            spi.reply(54);
             break;
           default:
             break;
