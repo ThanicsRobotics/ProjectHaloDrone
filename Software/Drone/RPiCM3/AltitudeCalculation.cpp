@@ -303,7 +303,7 @@ int main() {
     
     //Switch to flight controller 
     SPI_CS = 1;
-    wiringPiSPISetup(SPI_CS, 1000000);
+    wiringPiSPISetup(SPI_CS, 1500000);
 
     setupIOExpander();
     authFlightController();
