@@ -169,14 +169,14 @@ void getGyroValues() {
     //Get gyro pitch
     buffer[0] = 0x02;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    delayMicroseconds(200);
+    //delayMicroseconds(200);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     gyroPitch = buffer[0];
 
     //Get gyro roll
     buffer[0] = 0x03;
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
-    delayMicroseconds(200);
+    //delayMicroseconds(200);
     wiringPiSPIDataRW(SPI_CS, buffer, 1);
     gyroRoll = buffer[0];
 }
