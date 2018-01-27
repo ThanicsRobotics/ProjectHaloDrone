@@ -526,7 +526,7 @@ int main() {
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
       //unsigned int gyroValues = (int)gyro_pitch << 8 | (int)gyro_roll;
-      spi.reply(888888);
+      spi.reply(70000);
       //If master has sent data, we'll read it
       // if (spi.receive()) {
       //   int data = spi.read();
