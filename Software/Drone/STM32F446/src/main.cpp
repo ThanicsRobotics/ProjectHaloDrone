@@ -327,7 +327,7 @@ int main() {
   //Stay in this loop until the flight controller (STM32) has made contact with the Raspberry Pi
   while (authenticated == false) {
     if (spi.receive()) {
-      unsigned int response = spi.read();
+      unsigned short int response = spi.read();
       if (response == 0x01) {
         spi.reply(AUTH_KEY);
       }
