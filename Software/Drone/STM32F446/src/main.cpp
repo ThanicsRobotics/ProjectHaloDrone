@@ -27,6 +27,7 @@ const int throttleCoefficient = 3;
 const int rollCoefficient = 4;
 const int pitchCoefficient = 5;
 const int yawCoefficient = 6;
+bool authenticated = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
@@ -79,7 +80,6 @@ int coefficient;
 int count = 0;
 bool wordStart = false;
 bool wordEnd = false;
-int throttleFactor = 0;
 
 //Sends all motor PWM signals LOW
 void motors_off() {
@@ -130,7 +130,7 @@ void updateTelemetry(int data, int myCoefficient) {
   //Figuring out which coefficient the data corresponds to, and setting it
   switch (myCoefficient) {
     case throttleCoefficient:
-      receiver_input_throttle = data;
+      if (authenticated = false) receiver_input_throttle = data;
       break;
     case rollCoefficient:
       receiver_input_roll = data;
@@ -245,7 +245,6 @@ void calculate_pid() {
 }
 
 void set_gyro_registers(){
-  //pc.printf("Setting Gyro Registers\r\n");
   char cmd[2];
   
   //Changing register bank
@@ -259,12 +258,6 @@ void set_gyro_registers(){
   i2c.write(gyro_address, cmd, 2);
   memset(cmd,0,sizeof(cmd));
 
-  //Just checking to make sure register is set correctly
-  // cmd[0] = 0x06;                                                                
-  // i2c.write(gyro_address, cmd, 1);
-  // i2c.read(gyro_address, cmd, 1);
-  // pc.printf("PWR_MGMT_1: %d\r\n", cmd[0]);
-
   //Changing register bank
   cmd[0] = 0x7F;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
   cmd[1] = 0x20;                                                                //Set the register bits as 00100000 to select USER BANK 2
@@ -275,30 +268,11 @@ void set_gyro_registers(){
   cmd[1] = 0x23;                                                                //Set the register bits as 00100011 (500dps full scale)
   i2c.write(gyro_address, cmd, 2);
   memset(cmd,0,sizeof(cmd));
-
-  //Just checking to make sure register is set correctly   
-  // i2c.write(gyro_address, cmd, 1);
-  // i2c.read(gyro_address, cmd, 1);
-  // pc.printf("GYRO_CONFIG: %d\r\n", cmd[0]);
   
   cmd[0] = 0x14;                                                                //We want to write to the ACCEL_CONFIG register (1C hex)
   cmd[1] = 0x25;                                                                //Set the register bits as 00100101 (+/- 8g full scale range)
   i2c.write(gyro_address, cmd, 2);
   memset(cmd,0,sizeof(cmd));
-
-  //Just checking to make sure register is set correctly
-  // i2c.write(gyro_address, cmd, 1);
-  // i2c.read(gyro_address, cmd, 1);
-  // pc.printf("ACCEL_CONFIG: %d\r\n", cmd[0]);
-
-  // cmd[0] = 0x1A;                                                                //We want to write to the CONFIG register (1A hex)
-  // cmd[1] = 0x03;                                                                //Set the register bits as 00000011 (Set Digital Low Pass Filter to ~43Hz)
-  // i2c.write(gyro_address, cmd, 2);
-
-  // //Just checking to make sure register is set correctly
-  // i2c.write(gyro_address, cmd, 1);
-  // i2c.read(gyro_address, cmd, 1);
-  // pc.printf("CONFIG: %d\r\n", cmd[0]);
 
   //Changing register bank
   cmd[0] = 0x7F;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
@@ -307,22 +281,10 @@ void set_gyro_registers(){
   memset(cmd,0,sizeof(cmd));
 }
 
-int main() {
-  //Configure communications
-  //pc.printf("Program Start\r\n");
-  onTime.start();                                                             //Start loop timer
-  i2c.frequency(400000);                                                      //I2C Frequency set to 400kHz
-  //pc.baud(9600);                                                              //Serial Debugging baud rate at 9600bps
-  radio.baud(9600);                                                          //Serial Radio baud rate at 9600bps
-  radio.attach(&rxInterrupt);
-  
-  //Setup the spi for 8 bit data, mode 0 and 1MHz clock rate
-  spi.format(16,0);
-  spi.frequency(1500000);
-  
+void authRasPiCM3() {
   //Load authentication key into SPI buffer
   spi.reply(0x01);
-  bool authenticated = false;
+  authenticated = false;
 
   //Stay in this loop until the flight controller (STM32) has made contact with the Raspberry Pi
   while (authenticated == false) {
@@ -332,6 +294,21 @@ int main() {
       if (response == AUTH_KEY) authenticated = true;
     }
   }
+}
+
+
+int main() {
+  //Configure communications
+  onTime.start();                                                             //Start loop timer
+  i2c.frequency(400000);                                                      //I2C Frequency set to 400kHz
+  radio.baud(9600);                                                           //Serial Radio baud rate at 9600bps
+  radio.attach(&rxInterrupt);
+  
+  //Setup the spi for 8 bit data, mode 0 and 1MHz clock rate
+  spi.format(16,0);
+  spi.frequency(1500000);
+  
+  authRasPiCM3();
 
   //Load SPI buffer with dummy byte
   spi.reply(0x03);
@@ -491,7 +468,7 @@ int main() {
     
     calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
 
-    throttle = receiver_input_throttle + throttleFactor;                      //We need the throttle signal as a base signal, and add PID altitude control factor
+    throttle = receiver_input_throttle;                                       //We need the throttle signal as a base signal, and add PID altitude control factor
 
     if (start == 2){                                                          //The motors are started.
       //pc.printf("hi %d\r\n", throttle);
@@ -521,22 +498,16 @@ int main() {
     //We wait until 4000us are passed.
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
-      //unsigned int gyroValues = (int)gyro_pitch << 8 | (int)gyro_roll;
       
-      //If master has sent data, we'll read it
-      // if (spi.receive()) {
-      //   int data = spi.read();
-      //   switch (data) {
-      //     case 0x02:
-      //       spi.reply();
-      //       break;
-      //     case 0x03:
-      //       spi.reply(54);
-      //       break;
-      //     default:
-      //       break;
-      //   }
-      // }
+      //Getting throttle value from Raspberry Pi CM3
+      if (spi.receive()) {
+        authenticated = true;
+        int data = spi.read();
+        if (data >= 0 && data <= 900) {
+          receiver_input_throttle = data + 1000;
+        }
+      }
+      else authenticated = false;
     }
                             
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.

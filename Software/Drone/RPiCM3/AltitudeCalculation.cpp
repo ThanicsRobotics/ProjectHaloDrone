@@ -42,6 +42,7 @@ char baroCoefficients[17];
 // int pressure;
 // int temperature;
 int altitude;
+int lastAltitude;
 
 //Gyro angle variables
 signed int gyroPitch;
@@ -253,7 +254,7 @@ void authFlightController() {
 //Request gyro angles from STM32F446 flight controller
 void getGyroValues() {
     unsigned char buffer[100];
-    
+
     //Gyro pitch and roll are stored in two incoming bytes
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
     gyroPitch = (signed char)buffer[0];
@@ -368,6 +369,8 @@ void calculateAbsoluteAltitude() {
 
 //Calculate throttle factor for altitude management through PID loop
 void calculatePID() {
+    if (throttleInput >= 1520 && throttleInput <= 1480) lastAltitude = altitude;
+
     pid_error_temp = altitude - lastAltitude + (throttleInput - 1500)/10;
     pid_i_mem += pid_i_gain * pid_error_temp;
     if(pid_i_mem > pid_max)pid_i_mem = pid_max;
@@ -378,6 +381,19 @@ void calculatePID() {
     else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
 
     pid_last_d_error = pid_error_temp;
+}
+
+void sendThrottle() {
+    unsigned char buffer[100];
+
+    int newThrottle = throttleInput + pid_output;
+    if (newThrottle > 1900) newThrottle = 1900;
+    if (newThrottle < 1000) newThrottle = 1000;
+
+    cout << "Throttle: " << newThrottle << endl;
+
+    buffer[1] = newThrottle - 1000;
+    wiringPiSPIDataRW(SPI_CS, buffer, 2);
 }
 
 //Main Program loop
@@ -398,6 +414,7 @@ int main() {
         //cout << "Count: " << count << endl;
         calculateAbsoluteAltitude();
         calculatePID();
+        sendThrottle();
         delay(100);
     }
 }
