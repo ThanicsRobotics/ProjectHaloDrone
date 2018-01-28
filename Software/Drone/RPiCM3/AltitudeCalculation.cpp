@@ -265,7 +265,7 @@ void getGyroValues() {
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
     getGyroValues();
-    cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll << endl;
+    cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
     int rawDistance = getUltrasonicData(1);
     //cout << "Raw Distance: " << rawDistance << endl;
     altitude = angleCorrection(rawDistance);
@@ -391,7 +391,7 @@ void sendThrottle() {
     if (newThrottle > 1900) newThrottle = 1900;
     if (newThrottle < 1000) newThrottle = 1000;
 
-    cout << "Throttle: " << newThrottle << endl;
+    cout << " | Throttle: " << newThrottle << endl;
 
     buffer[1] = newThrottle - 1000;
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
