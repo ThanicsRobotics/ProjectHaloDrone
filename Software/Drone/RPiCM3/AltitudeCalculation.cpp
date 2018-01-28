@@ -25,9 +25,15 @@
 
 using namespace std;
 
+//Serial UART port file descriptor
+int serialFd;
+char serialBuffer[100];
+bool wordEnd = false;
+bool coFlag = false;
+
 //CS0 is barometer, CS1 is STM32 flight controller
 int SPI_CS = 0;
-int fd;
+int i2cFd;
 
 //Pressure Altitude variables
 char baroData[9];
@@ -35,6 +41,7 @@ char baroCoefficients[17];
 
 // int pressure;
 // int temperature;
+int altitude;
 
 //Gyro angle variables
 signed int gyroPitch;
@@ -49,12 +56,13 @@ bool pulseComplete = false;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float pid_p_gain = 3.8;                //Gain setting for the roll P-controller
-float pid_i_gain = 0.01;               //Gain setting for the roll I-controller
-float pid_d_gain = 20.0;               //Gain setting for the roll D-controller
-int pid_max = 400;                     //Maximum output of the PID-controller (+/-)
-float pid_error_temp;
-float pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
+int pid_p_gain = 38;                    //Gain setting for the roll P-controller
+int pid_i_gain = 1;                     //Gain setting for the roll I-controller
+int pid_d_gain = 200;                   //Gain setting for the roll D-controller
+int pid_max = 400;                      //Maximum output of the PID-controller (+/-)
+int pid_error_temp;
+int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
+int throttleInput = 0;
 
 //Handles IO Expander interrupt (measures ultrasonic sensor echo pulse)
 void handleEcho() {
@@ -78,6 +86,50 @@ void handleEcho() {
     pulseComplete = true;
 }
 
+void readline() {
+    while (serialDataAvail(serialFd)) {
+        //Read character incoming on serial bus
+        char thisChar = serialGetchar(serialFd);
+
+        //Check if this character is the end of message
+        if (thisChar == '\n') {
+            wordEnd = true;
+            serialBuffer[count] = '\0';
+            count = 0;
+            return;
+        }
+
+        //If we just finished a message, start a new one in the buffer
+        else if (wordEnd == true) {
+        serialBuffer[count] = thisChar;
+        count++;
+        wordEnd = false;
+        return;
+        }
+
+        //Assign the next character to the current buffer
+        else {
+        serialBuffer[count] = thisChar;
+        count++;
+        return;
+        }
+    }
+}
+
+void handleSerialInterrupt() {
+    readline();
+    if (wordEnd == true) {                                                  //If we have finished a message
+        int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
+        if (coFlag == true && data > 999) {                                 //If we have a coefficient and data for PWM is valid
+            throttleInput = data                                            //Set throttle input
+            coFlag = false;
+        }
+        else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
+        memset(serialBuffer,0,sizeof(serialBuffer));
+    }
+    else return;
+}
+
 //Utility function for setting individual pin on IO Expander
 void digitalIOWrite(int pin, int state) {
     //Figure out port number based on pin number
@@ -89,35 +141,42 @@ void digitalIOWrite(int pin, int state) {
     //Change output depending on port and pin number
     switch (port) {
         case 0:
-            wiringPiI2CWriteReg8(fd, 0x04, state << pin);
+            wiringPiI2CWriteReg8(i2cFd, 0x04, state << pin);
             break;
         case 1:
-            wiringPiI2CWriteReg8(fd, 0x05, state << (pin - 10));
+            wiringPiI2CWriteReg8(i2cFd, 0x05, state << (pin - 10));
             break;
         case 2:
-            wiringPiI2CWriteReg8(fd, 0x06, state << (pin - 20));
+            wiringPiI2CWriteReg8(i2cFd, 0x06, state << (pin - 20));
             break;
         default:
             break;
     }
 }
 
+void setupSerial() {
+    if ((serialFd = serialOpen ("/dev/ttyAMA0", 9600)) < 0) {
+        cout << "Unable to open serial interface" << endl;
+    }
+    wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
+}
+
 //Configures inputs and outputs of IO Expander
 void setupIOExpander() {
-    fd = wiringPiI2CSetup(ADDR);
+    i2cFd = wiringPiI2CSetup(ADDR);
 
     //Configuration bytes (Inputs are 1's, Outputs 0's)
     //Port 0: 01010101
-    wiringPiI2CWriteReg8(fd, 0x0C, 0x55);
+    wiringPiI2CWriteReg8(i2cFd, 0x0C, 0x55);
 
     //Port 1: 01010101
-    wiringPiI2CWriteReg8(fd, 0x0D, 0x55);
+    wiringPiI2CWriteReg8(i2cFd, 0x0D, 0x55);
 
     //Port 2: 11000000
-    wiringPiI2CWriteReg8(fd, 0x0E, 0xC0);
+    wiringPiI2CWriteReg8(i2cFd, 0x0E, 0xC0);
 
     //Initialization of IO Expander interrupts
-    wiringPiISR(38, INT_EDGE_RISING, handleEcho);
+    wiringPiISR(INT_PIN, INT_EDGE_RISING, handleEcho);
 }
 
 //Gets distance value (in centimeters) from downward facing sensor
@@ -207,7 +266,7 @@ void calculateAbsoluteAltitude() {
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll << endl;
     int rawDistance = getUltrasonicData(1);
     //cout << "Raw Distance: " << rawDistance << endl;
-    int altitude = angleCorrection(rawDistance);
+    altitude = angleCorrection(rawDistance);
     cout << "Altitude: " << altitude << endl;
 }
 
@@ -305,9 +364,11 @@ void calculateAbsoluteAltitude() {
 //     float pressureFinal = pressureComp * (65/1023) + 50;                                //Final pressure in kPa
 // }
 
+/*****if throttle is no longer changing (around 1500), set lastAltitude to current altitude*****/
+
 //Calculate throttle factor for altitude management through PID loop
 void calculatePID() {
-    pid_error_temp = gyro_input - pid_setpoint;
+    pid_error_temp = altitude - lastAltitude + (throttleInput - 1500)/10;
     pid_i_mem += pid_i_gain * pid_error_temp;
     if(pid_i_mem > pid_max)pid_i_mem = pid_max;
     else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;
@@ -330,11 +391,13 @@ int main() {
     wiringPiSPISetup(SPI_CS, 1500000);
     authFlightController();
 
+    
 
     while(1) {
         //calculatePressureAltitude();
         //cout << "Count: " << count << endl;
         calculateAbsoluteAltitude();
+        calculatePID();
         delay(100);
     }
 }
