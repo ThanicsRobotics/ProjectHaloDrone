@@ -27,6 +27,7 @@ using namespace std;
 
 //Serial UART port file descriptor
 int serialFd;
+int count = 0;
 char serialBuffer[100];
 bool wordEnd = false;
 bool coFlag = false;
