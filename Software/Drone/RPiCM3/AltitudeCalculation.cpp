@@ -269,7 +269,7 @@ void calculateAbsoluteAltitude() {
     int rawDistance = getUltrasonicData(1);
     //cout << "Raw Distance: " << rawDistance << endl;
     altitude = angleCorrection(rawDistance);
-    cout << "Altitude: " << altitude << endl;
+    cout << " | Altitude: " << altitude;
 }
 
 // Function to convert binary fractional to decimal
