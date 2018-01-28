@@ -53,6 +53,7 @@ int pid_max_yaw = 400;                      //Maximum output of the PID-controll
 uint8_t last_channel_1, last_channel_2, last_channel_3, last_channel_4;
 uint8_t highByte, lowByte;
 volatile int receiver_input_roll, receiver_input_pitch, receiver_input_throttle, receiver_input_yaw;
+volatile int mod_receiver_input_throttle;
 int counter_channel_1, counter_channel_2, counter_channel_3, counter_channel_4, loop_counter;
 int esc_1, esc_2, esc_3, esc_4;
 int throttle; 
@@ -130,7 +131,7 @@ void updateTelemetry(int data, int myCoefficient) {
   //Figuring out which coefficient the data corresponds to, and setting it
   switch (myCoefficient) {
     case throttleCoefficient:
-      if (authenticated = false) receiver_input_throttle = data;
+      receiver_input_throttle = data;
       break;
     case rollCoefficient:
       receiver_input_roll = data;
@@ -468,7 +469,7 @@ int main() {
     
     calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
 
-    throttle = receiver_input_throttle;                                       //We need the throttle signal as a base signal, and add PID altitude control factor
+    throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
 
     if (start == 2){                                                          //The motors are started.
       //pc.printf("hi %d\r\n", throttle);
@@ -504,7 +505,7 @@ int main() {
         authenticated = true;
         int data = spi.read();
         if (data >= 0 && data <= 900) {
-          receiver_input_throttle = data + 1000;
+          mod_receiver_input_throttle = data + 1000;
         }
       }
       else authenticated = false;
