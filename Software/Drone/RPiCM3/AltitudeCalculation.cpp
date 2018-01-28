@@ -103,17 +103,17 @@ void readline() {
 
         //If we just finished a message, start a new one in the buffer
         else if (wordEnd == true) {
-        serialBuffer[count] = thisChar;
-        count++;
-        wordEnd = false;
-        return;
+            serialBuffer[count] = thisChar;
+            count += 1;
+            wordEnd = false;
+            return;
         }
 
         //Assign the next character to the current buffer
         else {
-        serialBuffer[count] = thisChar;
-        count++;
-        return;
+            serialBuffer[count] = thisChar;
+            count += 1;
+            return;
         }
     }
 }
@@ -123,7 +123,7 @@ void handleSerialInterrupt() {
     if (wordEnd == true) {                                                  //If we have finished a message
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
         if (coFlag == true && data > 999) {                                 //If we have a coefficient and data for PWM is valid
-            throttleInput = data                                            //Set throttle input
+            throttleInput = data;                                            //Set throttle input
             coFlag = false;
         }
         else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
