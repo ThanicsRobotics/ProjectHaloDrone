@@ -27,7 +27,7 @@ using namespace std;
 
 //Serial UART port file descriptor
 int serialFd;
-int count = 0;
+int charCount = 0;
 char serialBuffer[100];
 bool wordEnd = false;
 bool coFlag = false;
@@ -96,23 +96,23 @@ void readline() {
         //Check if this character is the end of message
         if (thisChar == '\n') {
             wordEnd = true;
-            serialBuffer[count] = '\0';
-            count = 0;
+            serialBuffer[charCount] = '\0';
+            charCount = 0;
             return;
         }
 
         //If we just finished a message, start a new one in the buffer
         else if (wordEnd == true) {
-            serialBuffer[count] = thisChar;
-            count += 1;
+            serialBuffer[charCount] = thisChar;
+            charCount += 1;
             wordEnd = false;
             return;
         }
 
         //Assign the next character to the current buffer
         else {
-            serialBuffer[count] = thisChar;
-            count += 1;
+            serialBuffer[charCount] = thisChar;
+            charCount += 1;
             return;
         }
     }
