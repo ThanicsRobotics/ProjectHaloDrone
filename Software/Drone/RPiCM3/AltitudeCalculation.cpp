@@ -66,6 +66,16 @@ int pid_error_temp;
 int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 int throttleInput = 0;
 
+//Request gyro angles from STM32F446 flight controller
+void getGyroValues() {
+    unsigned char buffer[100];
+
+    //Gyro pitch and roll are stored in two incoming bytes
+    wiringPiSPIDataRW(SPI_CS, buffer, 2);
+    gyroPitch = (signed char)buffer[0];
+    gyroRoll = (signed char)buffer[1];
+}
+
 //Handles IO Expander interrupt (measures ultrasonic sensor echo pulse)
 void handleEcho() {
     //Get current time
@@ -220,9 +230,9 @@ int getUltrasonicData(int sensor, int iterations) {
         pulseComplete = false;
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
-        delay(3);
+        getGyroValues();
     }
-    if ((iterations - invalids) <= 0) return 0;
+    if ((iterations - invalids) <= 0) getUltrasonicData(sensor, iterations);
     else return totalDistance / (iterations - invalids);
     //return distance;
 }
@@ -256,23 +266,15 @@ void authFlightController() {
     cout << "Authenticated" << endl;
 }
 
-//Request gyro angles from STM32F446 flight controller
-void getGyroValues() {
-    unsigned char buffer[100];
-
-    //Gyro pitch and roll are stored in two incoming bytes
-    wiringPiSPIDataRW(SPI_CS, buffer, 2);
-    gyroPitch = (signed char)buffer[0];
-    gyroRoll = (signed char)buffer[1];
-}
-
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
     getGyroValues();
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
     int rawDistance = getUltrasonicData(1, 10);
+    getGyroValues();
     cout << " | Raw Distance: " << rawDistance;
     altitude = angleCorrection(rawDistance);
+    getGyroValues()
     cout << " | Altitude: " << altitude;
 }
 
@@ -398,7 +400,11 @@ void sendThrottle() {
     cout << " | Throttle: " << newThrottle << endl;
 
     buffer[1] = newThrottle - 1000;
+    
+    //Gyro pitch and roll are stored in two incoming bytes
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
+    gyroPitch = (signed char)buffer[0];
+    gyroRoll = (signed char)buffer[1];
 
     //CLOCK SPEED TEST
     //unsigned long int clockspeed = buffer[1];
@@ -423,7 +429,7 @@ int main() {
         //cout << "Count: " << count << endl;
         calculateAbsoluteAltitude();
         calculatePID();
+        getGyroValues();
         sendThrottle();
-        delay(100);
     }
 }
