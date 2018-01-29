@@ -528,7 +528,7 @@ int main() {
     gyro_signalen();
 
     //Load gyro angle data into SPI buffer
-    spi.reply((signed char)angle_pitch_acc << 8 | (signed char)angle_roll_acc);
+    spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
     
     //FALLING EDGES of PWM motor pulses
     while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {        //Stay in this loop until all motor PWM signals are low
