@@ -182,7 +182,7 @@ void setupIOExpander() {
 }
 
 //Gets distance value (in centimeters) from downward facing sensor
-int getUltrasonicData(int sensor) {
+int getUltrasonicData(int sensor, int iterations) {
     int pin;
 
     //Toggles between downward facing sensor 1 and 2
@@ -201,7 +201,7 @@ int getUltrasonicData(int sensor) {
     int invalids = 0;
 
     //Takes average of 3 distance measurements
-    for(int i = 0; i < 3; i++) {
+    for(int i = 0; i < iterations; i++) {
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
         delayMicroseconds(2);
@@ -222,8 +222,8 @@ int getUltrasonicData(int sensor) {
         else totalDistance += distance;
         delay(3);
     }
-    if ((3 - invalids) <= 0) return 0;
-    else return totalDistance / (3 - invalids);
+    if ((iterations - invalids) <= 0) return 0;
+    else return totalDistance / (iterations - invalids);
     //return distance;
 }
 
@@ -266,7 +266,7 @@ void getGyroValues() {
 void calculateAbsoluteAltitude() {
     getGyroValues();
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
-    int rawDistance = getUltrasonicData(1);
+    int rawDistance = getUltrasonicData(1, 6);
     cout << " | Raw Distance: " << rawDistance;
     altitude = angleCorrection(rawDistance);
     cout << " | Altitude: " << altitude;
