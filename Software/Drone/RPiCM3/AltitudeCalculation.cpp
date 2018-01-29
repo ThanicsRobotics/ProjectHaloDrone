@@ -227,9 +227,13 @@ int getUltrasonicData(int sensor, int iterations) {
     //return distance;
 }
 
+float radian(int degree) {
+    return degree * M_PI / 180;
+}
+
 //Corrects downward facing distance measurement when vehicle changes attitude
 int angleCorrection(int rawDistance) {
-    return sqrt(pow(rawDistance, 2) / (1 + pow(tan(gyroPitch),2) + pow(tan(gyroRoll),2)));
+    return sqrt(pow(rawDistance, 2) / (1 + pow(tan(radian(gyroPitch)),2) + pow(tan(radian(gyroRoll)),2)));
 }
 
 //Making sure the STM32F446 is listening...
