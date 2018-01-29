@@ -232,7 +232,7 @@ int getUltrasonicData(int sensor, int iterations) {
         else totalDistance += distance;
         getGyroValues();
     }
-    if ((iterations - invalids) <= 0) getUltrasonicData(sensor, iterations);
+    if ((iterations - invalids) <= 0) return getUltrasonicData(sensor, iterations);
     else return totalDistance / (iterations - invalids);
     //return distance;
 }
@@ -274,7 +274,7 @@ void calculateAbsoluteAltitude() {
     getGyroValues();
     cout << " | Raw Distance: " << rawDistance;
     altitude = angleCorrection(rawDistance);
-    getGyroValues()
+    getGyroValues();
     cout << " | Altitude: " << altitude;
 }
 
