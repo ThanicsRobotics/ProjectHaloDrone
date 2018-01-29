@@ -399,6 +399,8 @@ void sendThrottle() {
 
     buffer[1] = newThrottle - 1000;
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
+    unsigned int clockspeed = buffer[1] << 8 | buffer[0];
+    cout << " | Clock: " << clockspeed << endl;
 }
 
 //Main Program loop

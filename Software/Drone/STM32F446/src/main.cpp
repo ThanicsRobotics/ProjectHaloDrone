@@ -521,7 +521,7 @@ int main() {
 
     // //Load gyro angle data into SPI buffer
     // spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
-
+    spi.reply(SystemCoreClock);
     // //Getting throttle value from Raspberry Pi CM3
     // if (spi.receive()) {
     //   authenticated = true;
