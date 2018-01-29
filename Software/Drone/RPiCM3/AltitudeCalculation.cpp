@@ -267,7 +267,7 @@ void calculateAbsoluteAltitude() {
     getGyroValues();
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
     int rawDistance = getUltrasonicData(1);
-    //cout << "Raw Distance: " << rawDistance << endl;
+    cout << " | Raw Distance: " << rawDistance << endl;
     altitude = angleCorrection(rawDistance);
     cout << " | Altitude: " << altitude;
 }
