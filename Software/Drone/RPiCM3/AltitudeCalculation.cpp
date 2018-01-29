@@ -393,7 +393,7 @@ void sendThrottle() {
 
     int newThrottle = throttleInput + pid_output;
     if (newThrottle > 1900) newThrottle = 1900;
-    if (newThrottle < 1000) newThrottle = 1000;
+    //if (newThrottle < 1000) newThrottle = 1000;
 
     cout << " | Throttle: " << newThrottle << endl;
 

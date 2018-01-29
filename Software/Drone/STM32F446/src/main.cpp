@@ -500,18 +500,7 @@ int main() {
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
       
-      //Load gyro angle data into SPI buffer
-      spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
-
-      //Getting throttle value from Raspberry Pi CM3
-      if (spi.receive()) {
-        authenticated = true;
-        int data = spi.read();
-        if (data >= 0 && data <= 900) {
-          mod_receiver_input_throttle = data + 1000;
-        }
-      }
-      else authenticated = false;
+      
     }
                             
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
@@ -530,7 +519,18 @@ int main() {
     //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
     gyro_signalen();
 
-    
+    //Load gyro angle data into SPI buffer
+      spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
+
+    //Getting throttle value from Raspberry Pi CM3
+    if (spi.receive()) {
+      authenticated = true;
+      int data = spi.read();
+      if (data >= 0 && data <= 900) {
+        mod_receiver_input_throttle = data + 1000;
+      }
+    }
+    else authenticated = false;
     
     //FALLING EDGES of PWM motor pulses
     while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {        //Stay in this loop until all motor PWM signals are low
