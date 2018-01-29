@@ -505,7 +505,7 @@ int main() {
                             
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
-    __disable_irq();
+    //__disable_irq();
 
     //RISING EDGE of PWM motor pulses (start of loop)
     motors_on();
@@ -540,6 +540,6 @@ int main() {
       if(timer_channel_3 <= esc_loop_timer) motor3 = 0;                        //Set digital output 5 to low if the time is expired.
       if(timer_channel_4 <= esc_loop_timer) motor4 = 0;                        //Set digital output 4 to low if the time is expired.
     }
-    __enable_irq();
+    //__enable_irq();
   }
 }
