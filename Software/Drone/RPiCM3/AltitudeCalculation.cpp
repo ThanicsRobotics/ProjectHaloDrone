@@ -29,6 +29,8 @@
 using namespace std;
 
 pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
+void *mainLoop();
+void *gyroLoop();
 
 //Serial UART port file descriptor
 int serialFd;
