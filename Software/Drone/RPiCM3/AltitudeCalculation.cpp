@@ -446,8 +446,8 @@ int main() {
     int rc1, rc2;
     pthread_t mainThread, gyroThread;
 
-    rc1 = pthread_create(&mainThread, NULL, &mainLoop(void*), NULL);
-    rc2 = pthread_create(&gyroThread, NULL, &gyroLoop(void*), NULL);
+    rc1 = pthread_create(&mainThread, NULL, &mainLoop, NULL);
+    rc2 = pthread_create(&gyroThread, NULL, &gyroLoop, NULL);
 
     pthread_join(mainThread, NULL);
     pthread_join(gyroThread, NULL);
