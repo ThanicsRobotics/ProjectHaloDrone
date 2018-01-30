@@ -12,6 +12,8 @@
 #include <bits/stdc++.h>
 #include <iostream>
 #include <errno.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 //POSIX Thread Library
 #include <pthread.h>
