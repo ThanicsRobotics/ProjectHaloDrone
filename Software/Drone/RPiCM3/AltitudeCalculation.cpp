@@ -4,7 +4,7 @@
 #include <wiringSerial.h>
 #include <wiringPi.h>
 
-//Standard Librarues
+//Standard Libraries
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
@@ -12,6 +12,9 @@
 #include <bits/stdc++.h>
 #include <iostream>
 #include <errno.h>
+
+//POSIX Thread Library
+#include <pthread.h>
 
 //I2C address of IO Expander
 #define ADDR 0x22
@@ -24,6 +27,8 @@
 #define EDGE_RISING 1
 
 using namespace std;
+
+pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //Serial UART port file descriptor
 int serialFd;
@@ -72,8 +77,11 @@ void getGyroValues() {
 
     //Gyro pitch and roll are stored in two incoming bytes
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
+    
+    pthread_mutex_lock(&gyro_mutex);
     gyroPitch = (signed char)buffer[0];
     gyroRoll = (signed char)buffer[1];
+    pthread_mutex_unlock(&gyro_mutex);
 }
 
 //Handles IO Expander interrupt (measures ultrasonic sensor echo pulse)
@@ -230,7 +238,6 @@ int getUltrasonicData(int sensor, int iterations) {
         pulseComplete = false;
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
-        getGyroValues();
     }
     if ((iterations - invalids) <= 0) return getUltrasonicData(sensor, iterations);
     else return totalDistance / (iterations - invalids);
@@ -268,13 +275,10 @@ void authFlightController() {
 
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
-    getGyroValues();
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
     int rawDistance = getUltrasonicData(1, 10);
-    getGyroValues();
     cout << " | Raw Distance: " << rawDistance;
     altitude = angleCorrection(rawDistance);
-    getGyroValues();
     cout << " | Altitude: " << altitude;
 }
 
@@ -400,15 +404,28 @@ void sendThrottle() {
     cout << " | Throttle: " << newThrottle << endl;
 
     buffer[1] = newThrottle - 1000;
-    
-    //Gyro pitch and roll are stored in two incoming bytes
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
-    gyroPitch = (signed char)buffer[0];
-    gyroRoll = (signed char)buffer[1];
 
     //CLOCK SPEED TEST
     //unsigned long int clockspeed = buffer[1];
     //cout << " | Clock: " << clockspeed << endl;
+}
+
+void *mainLoop() {
+    while(1) {
+        //calculatePressureAltitude();
+        //cout << "Count: " << count << endl;
+        calculateAbsoluteAltitude();
+        calculatePID();
+        //getGyroValues();
+        sendThrottle();
+    }
+}
+
+void *gyroLoop() {
+    while(1) {
+        getGyroValues();
+    }
 }
 
 //Main Program loop
@@ -422,14 +439,12 @@ int main() {
     wiringPiSPISetup(SPI_CS, 1500000);
     authFlightController();
 
-    
+    int rc1, rc2;
+    pthread_t mainThread, gyroThread;
 
-    while(1) {
-        //calculatePressureAltitude();
-        //cout << "Count: " << count << endl;
-        calculateAbsoluteAltitude();
-        calculatePID();
-        getGyroValues();
-        sendThrottle();
-    }
+    rc1 = pthread_create(&mainThread, NULL, &mainLoop, NULL);
+    rc2 = pthread_create(&gyroThread, NULL, &gyroLoop, NULL);
+
+    pthread_join(mainThread, NULL);
+    pthread_join(gyroThread, NULL);
 }
