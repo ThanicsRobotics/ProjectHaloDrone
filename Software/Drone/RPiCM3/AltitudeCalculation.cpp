@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
+#include <string.h>
 
 //POSIX Thread Library
 #include <pthread.h>
@@ -119,6 +120,7 @@ void readline() {
     //while (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
         char thisChar = serialGetchar(serialFd);
+        fflush(stdout);
 
         //Check if this character is the end of message
         if (thisChar == '\n') {
@@ -158,7 +160,6 @@ void handleSerialInterrupt() {
         memset(serialBuffer,0,sizeof(serialBuffer));
     }
     else return;
-    
 }
 
 //Utility function for setting individual pin on IO Expander
@@ -189,7 +190,7 @@ void setupSerial() {
     if ((serialFd = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
         cout << "Unable to open serial interface" << endl;
     }
-    wiringPiISR(15, INT_EDGE_RISING, handleSerialInterrupt);
+    
 }
 
 //Configures inputs and outputs of IO Expander
@@ -352,7 +353,9 @@ void *gyroLoop(void *void_ptr) {
 //Main Program loop
 int main() {
     //Setup function calls
+    setupSerial();
     wiringPiSetup();
+    wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
     //setupIOExpander();
     signal(SIGINT, signal_callback_handler);
 
@@ -361,7 +364,7 @@ int main() {
     //wiringPiSPISetup(SPI_CS, 1500000);
     //authFlightController();
 
-    setupSerial();
+    
 
     //pthread_t gyroThread;
 
