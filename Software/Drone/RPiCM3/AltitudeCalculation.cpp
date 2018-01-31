@@ -207,7 +207,7 @@ void setupIOExpander() {
     wiringPiI2CWriteReg8(i2cFd, 0x0E, 0xC0);
 
     //Initialization of IO Expander interrupts
-    //wiringPiISR(INT_PIN, INT_EDGE_RISING, handleEcho);
+    wiringPiISR(INT_PIN, INT_EDGE_RISING, handleEcho);
 }
 
 //Gets distance value (in centimeters) from downward facing sensor
@@ -287,10 +287,10 @@ void authFlightController() {
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
-    //int rawDistance = getUltrasonicData(1, 10);
-    //cout << " | Raw Distance: " << rawDistance;
-    //altitude = angleCorrection(rawDistance);
-    //cout << " | Altitude: " << altitude;
+    int rawDistance = getUltrasonicData(1, 10);
+    cout << " | Raw Distance: " << rawDistance;
+    altitude = angleCorrection(rawDistance);
+    cout << " | Altitude: " << altitude;
 }
 
 /*****if throttle is no longer changing (around 1500), set lastAltitude to current altitude*****/
@@ -334,10 +334,10 @@ void mainLoop() {
         //calculatePressureAltitude();
         //cout << "Count: " << count << endl;
         //handleSerialInterrupt();
-        calculateAbsoluteAltitude();
-        calculatePID();
+        //calculateAbsoluteAltitude();
+        //calculatePID();
         //getGyroValues();
-        sendThrottle();
+        //sendThrottle();
     }
     //return NULL;
 }
@@ -353,25 +353,25 @@ void *gyroLoop(void *void_ptr) {
 int main() {
     //Setup function calls
     wiringPiSetup();
-    setupIOExpander();
+    //setupIOExpander();
     signal(SIGINT, signal_callback_handler);
 
     //Switch to flight controller, setup SPI @ 1.5MHz
-    SPI_CS = 1;
-    wiringPiSPISetup(SPI_CS, 1500000);
-    authFlightController();
+    //SPI_CS = 1;
+    //wiringPiSPISetup(SPI_CS, 1500000);
+    //authFlightController();
 
     setupSerial();
 
-    pthread_t gyroThread;
+    //pthread_t gyroThread;
 
     //pthread_create(&mainThread, NULL, mainLoop, NULL);
-    pthread_create(&gyroThread, NULL, gyroLoop, NULL);
+    //pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     mainLoop();
 
     //pthread_join(mainThread, NULL);
-    pthread_join(gyroThread, NULL);
+    //pthread_join(gyroThread, NULL);
 }
 
 void signal_callback_handler(int signum) {
