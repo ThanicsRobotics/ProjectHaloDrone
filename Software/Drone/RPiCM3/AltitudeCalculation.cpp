@@ -189,7 +189,7 @@ void setupSerial() {
     if ((serialFd = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
         cout << "Unable to open serial interface" << endl;
     }
-    wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
+    wiringPiISR(15, INT_EDGE_RISING, handleSerialInterrupt);
 }
 
 //Configures inputs and outputs of IO Expander
