@@ -67,9 +67,9 @@ bool pulseComplete = false;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int pid_p_gain = 38;                    //Gain setting for the roll P-controller
-int pid_i_gain = 1;                     //Gain setting for the roll I-controller
-int pid_d_gain = 200;                   //Gain setting for the roll D-controller
+int pid_p_gain = 2;                    //Gain setting for the roll P-controller
+int pid_i_gain = 0;                     //Gain setting for the roll I-controller
+int pid_d_gain = 0;                   //Gain setting for the roll D-controller
 int pid_max = 400;                      //Maximum output of the PID-controller (+/-)
 int pid_error_temp;
 int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
