@@ -448,7 +448,7 @@ int main() {
     pthread_t gyroThread;
 
     //pthread_create(&mainThread, NULL, mainLoop, NULL);
-    pthread_create(&gyroThread, NULL, gyroLoop, NULL);
+    pthread_create(&gyroThread, NULL, &gyroLoop, NULL);
 
     mainLoop();
 
