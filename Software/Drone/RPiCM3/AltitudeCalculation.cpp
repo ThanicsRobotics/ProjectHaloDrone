@@ -31,8 +31,8 @@
 using namespace std;
 
 pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
-void *mainLoop();
-void *gyroLoop();
+void *mainLoop(void *void_ptr);
+void *gyroLoop(void *void_ptr);
 
 //Serial UART port file descriptor
 int serialFd;
@@ -415,7 +415,7 @@ void sendThrottle() {
     //cout << " | Clock: " << clockspeed << endl;
 }
 
-void *mainLoop() {
+void *mainLoop(void *void_ptr) {
     while(1) {
         //calculatePressureAltitude();
         //cout << "Count: " << count << endl;
@@ -424,12 +424,14 @@ void *mainLoop() {
         //getGyroValues();
         sendThrottle();
     }
+    return NULL;
 }
 
-void *gyroLoop() {
+void *gyroLoop(void *void_ptr) {
     while(1) {
         getGyroValues();
     }
+    return NULL;
 }
 
 //Main Program loop
