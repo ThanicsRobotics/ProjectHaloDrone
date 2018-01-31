@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
 
 //POSIX Thread Library
 #include <pthread.h>
@@ -33,6 +34,8 @@ using namespace std;
 pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
 //void *mainLoop(void *void_ptr);
 void *gyroLoop(void *void_ptr);
+
+void signal_callback_handler(int);
 
 //Serial UART port file descriptor
 int serialFd;
@@ -181,7 +184,7 @@ void digitalIOWrite(int pin, int state) {
 }
 
 void setupSerial() {
-    if ((serialFd = serialOpen ("/dev/ttyAMA0", 9600)) < 0) {
+    if ((serialFd = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
         cout << "Unable to open serial interface" << endl;
     }
     wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
@@ -348,6 +351,7 @@ int main() {
     //Setup function calls
     wiringPiSetup();
     setupIOExpander();
+    signal(SIGINT, signal_callback_handler);
 
     //Switch to flight controller, setup SPI @ 1.5MHz
     SPI_CS = 1;
@@ -365,4 +369,11 @@ int main() {
 
     //pthread_join(mainThread, NULL);
     pthread_join(gyroThread, NULL);
+}
+
+void signal_callback_handler(int signum) {
+	cout << "Caught signal: " << signum << endl;
+	serialClose(serialFd);
+    
+	exit(signum);
 }
