@@ -445,7 +445,7 @@ int main() {
     wiringPiSPISetup(SPI_CS, 1500000);
     authFlightController();
 
-    pthread_t mainThread, gyroThread;
+    pthread_t gyroThread;
 
     //pthread_create(&mainThread, NULL, mainLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
