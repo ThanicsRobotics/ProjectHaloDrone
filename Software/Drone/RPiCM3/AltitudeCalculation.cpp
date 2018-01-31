@@ -403,6 +403,7 @@ void calculatePID() {
 void sendThrottle() {
     unsigned char buffer[100];
 
+    cout << " | input: " << throttleInput;
     int newThrottle = throttleInput + pid_output;
     if (newThrottle > 1900) newThrottle = 1900;
     //if (newThrottle < 1000) newThrottle = 1000;
