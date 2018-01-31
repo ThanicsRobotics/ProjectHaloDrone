@@ -31,7 +31,7 @@
 using namespace std;
 
 pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
-void *mainLoop(void *void_ptr);
+//void *mainLoop(void *void_ptr);
 void *gyroLoop(void *void_ptr);
 
 //Serial UART port file descriptor
@@ -415,7 +415,7 @@ void sendThrottle() {
     //cout << " | Clock: " << clockspeed << endl;
 }
 
-void *mainLoop(void *void_ptr) {
+void mainLoop() {
     while(1) {
         //calculatePressureAltitude();
         //cout << "Count: " << count << endl;
@@ -424,7 +424,7 @@ void *mainLoop(void *void_ptr) {
         //getGyroValues();
         sendThrottle();
     }
-    return NULL;
+    //return NULL;
 }
 
 void *gyroLoop(void *void_ptr) {
@@ -445,12 +445,13 @@ int main() {
     wiringPiSPISetup(SPI_CS, 1500000);
     authFlightController();
 
-    int rc1, rc2;
     pthread_t mainThread, gyroThread;
 
-    rc1 = pthread_create(&mainThread, NULL, mainLoop, NULL);
-    rc2 = pthread_create(&gyroThread, NULL, gyroLoop, NULL);
+    //pthread_create(&mainThread, NULL, mainLoop, NULL);
+    pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
-    pthread_join(mainThread, NULL);
+    mainLoop();
+
+    //pthread_join(mainThread, NULL);
     pthread_join(gyroThread, NULL);
 }
