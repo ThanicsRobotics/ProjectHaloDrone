@@ -207,7 +207,7 @@ void setupIOExpander() {
     wiringPiI2CWriteReg8(i2cFd, 0x0E, 0xC0);
 
     //Initialization of IO Expander interrupts
-    wiringPiISR(INT_PIN, INT_EDGE_RISING, handleEcho);
+    //wiringPiISR(INT_PIN, INT_EDGE_RISING, handleEcho);
 }
 
 //Gets distance value (in centimeters) from downward facing sensor
@@ -287,10 +287,10 @@ void authFlightController() {
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
-    int rawDistance = getUltrasonicData(1, 10);
-    cout << " | Raw Distance: " << rawDistance;
-    altitude = angleCorrection(rawDistance);
-    cout << " | Altitude: " << altitude;
+    //int rawDistance = getUltrasonicData(1, 10);
+    //cout << " | Raw Distance: " << rawDistance;
+    //altitude = angleCorrection(rawDistance);
+    //cout << " | Altitude: " << altitude;
 }
 
 /*****if throttle is no longer changing (around 1500), set lastAltitude to current altitude*****/
