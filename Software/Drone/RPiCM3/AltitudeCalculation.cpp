@@ -86,6 +86,8 @@ void getGyroValues() {
     gyroPitch = (signed char)buffer[0];
     gyroRoll = (signed char)buffer[1];
     pthread_mutex_unlock(&gyro_mutex);
+
+    delay(2);
 }
 
 //Handles IO Expander interrupt (measures ultrasonic sensor echo pulse)
@@ -448,7 +450,7 @@ int main() {
     pthread_t gyroThread;
 
     //pthread_create(&mainThread, NULL, mainLoop, NULL);
-    pthread_create(&gyroThread, NULL, &gyroLoop, NULL);
+    pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     mainLoop();
 
