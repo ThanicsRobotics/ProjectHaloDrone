@@ -157,6 +157,7 @@ void handleSerialInterrupt() {
         memset(serialBuffer,0,sizeof(serialBuffer));
     }
     else return;
+    cout << endl << "INT" << endl;
 }
 
 //Utility function for setting individual pin on IO Expander
@@ -372,8 +373,8 @@ int main() {
 }
 
 void signal_callback_handler(int signum) {
-	cout << "Caught signal: " << signum << endl;
+	cout << endl << "Caught signal: " << signum << endl;
 	serialClose(serialFd);
-    
+
 	exit(signum);
 }
