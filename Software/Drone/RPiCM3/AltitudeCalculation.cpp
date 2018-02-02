@@ -119,9 +119,10 @@ void handleEcho() {
 void readline() {
     //while (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
+        cout << "1.1" << endl;
         char thisChar = (char)serialGetchar(serialFd);
         //fflush(stdout);
-
+        cout << "1.2" << endl;
         //Check if this character is the end of message
         if (thisChar == '\n') {
             wordEnd = true;
@@ -129,7 +130,7 @@ void readline() {
             charCount = 0;
             return;
         }
-
+        cout << "1.3" << endl;
         //If we just finished a message, start a new one in the buffer
         else if (wordEnd == true) {
             serialBuffer[charCount] = thisChar;
@@ -144,6 +145,7 @@ void readline() {
             charCount += 1;
             return;
         }
+        cout << "1.4" << endl;
     //}
 }
 
