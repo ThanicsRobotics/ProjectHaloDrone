@@ -190,7 +190,7 @@ void setupSerial() {
     if ((serialFd = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
         cout << "Unable to open serial interface" << endl;
     }
-    
+    wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
 }
 
 //Configures inputs and outputs of IO Expander
@@ -353,9 +353,7 @@ void *gyroLoop(void *void_ptr) {
 //Main Program loop
 int main() {
     //Setup function calls
-    setupSerial();
     wiringPiSetup();
-    wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
     //setupIOExpander();
     signal(SIGINT, signal_callback_handler);
 
@@ -364,7 +362,7 @@ int main() {
     //wiringPiSPISetup(SPI_CS, 1500000);
     //authFlightController();
 
-    
+    setupSerial();
 
     //pthread_t gyroThread;
 
