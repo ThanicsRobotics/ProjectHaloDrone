@@ -159,8 +159,10 @@ void handleSerialInterrupt() {
             coFlag = false;
         }
         cout << "3" << endl;
-        else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
-        memset(serialBuffer,0,sizeof(serialBuffer));
+        else {
+            if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
+            memset(serialBuffer,0,sizeof(serialBuffer));
+        }
     }
     else return;
     cout << "4" << endl;
