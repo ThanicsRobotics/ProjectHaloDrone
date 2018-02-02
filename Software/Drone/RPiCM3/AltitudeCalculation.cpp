@@ -122,7 +122,7 @@ void readline() {
         cout << "1.1" << endl;
         char thisChar = (char)serialGetchar(serialFd);
         //fflush(stdout);
-        cout << "1.2" << endl;
+        cout << "1.2 " << thisChar << endl;
         //Check if this character is the end of message
         if (thisChar == '\n') {
             wordEnd = true;
