@@ -154,7 +154,6 @@ void readline() {
 
 void handleSerialInterrupt() {
     cout << endl << "INT" << endl;
-    fflush(stdout);
     readline();
     cout << "1" << endl;
     if (wordEnd == true) {                                                  //If we have finished a message
