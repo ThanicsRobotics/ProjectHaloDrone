@@ -120,10 +120,9 @@ void readline() {
     //while (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
         cout << "1.1" << endl;
-        cout << "fd: " << serialFd << endl;
         while(serialDataAvail(serialFd) == 0);
-        char thisChar = (char)serialGetchar(serialFd);
-        //fflush(stdout);
+        char thisChar = serialGetchar(serialFd);
+        fflush(stdout);
         cout << "1.2 " << thisChar << endl;
         //Check if this character is the end of message
         if (thisChar == '\n') {
