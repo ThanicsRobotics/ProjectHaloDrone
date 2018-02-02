@@ -120,6 +120,7 @@ void readline() {
     //while (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
         cout << "1.1" << endl;
+        cout << "fd: " << serialFd << endl;
         while(serialDataAvail(serialFd) == 0);
         char thisChar = (char)serialGetchar(serialFd);
         //fflush(stdout);
@@ -194,7 +195,7 @@ void digitalIOWrite(int pin, int state) {
 }
 
 void setupSerial() {
-    if ((serialFd = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
+    if ((serialFd = serialOpen("/dev/serial0", 9600)) < 0) {
         cout << "Unable to open serial interface" << endl;
     }
     wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
