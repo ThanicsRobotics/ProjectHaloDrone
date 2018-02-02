@@ -120,6 +120,7 @@ void readline() {
     //while (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
         cout << "1.1" << endl;
+        cout << serialDataAvail(serialFd) << endl;
         char thisChar = (char)serialGetchar(serialFd);
         //fflush(stdout);
         cout << "1.2 " << thisChar << endl;
