@@ -130,7 +130,7 @@ void readline() {
             charCount = 0;
             return;
         }
-        cout << "1.3" << endl;
+        
         //If we just finished a message, start a new one in the buffer
         else if (wordEnd == true) {
             serialBuffer[charCount] = thisChar;
@@ -145,7 +145,7 @@ void readline() {
             charCount += 1;
             return;
         }
-        cout << "1.4" << endl;
+        cout << "1.3" << endl;
     //}
 }
 
