@@ -32,10 +32,11 @@
 
 using namespace std;
 
+//Thread mutex and gyro thread function
 pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
-//void *mainLoop(void *void_ptr);
 void *gyroLoop(void *void_ptr);
 
+//Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
 
 //Serial UART port file descriptor
@@ -121,8 +122,9 @@ void readline() {
         //Read character incoming on serial bus
         cout << "1.1" << endl;
         while(serialDataAvail(serialFd) == 0);
+        
         char thisChar = serialGetchar(serialFd);
-        fflush(stdout);
+        
         cout << "1.2 " << thisChar << endl;
         //Check if this character is the end of message
         if (thisChar == '\n') {
@@ -152,6 +154,7 @@ void readline() {
 
 void handleSerialInterrupt() {
     cout << endl << "INT" << endl;
+    fflush(stdout);
     readline();
     cout << "1" << endl;
     if (wordEnd == true) {                                                  //If we have finished a message
@@ -347,7 +350,6 @@ void mainLoop() {
         //getGyroValues();
         //sendThrottle();
     }
-    //return NULL;
 }
 
 void *gyroLoop(void *void_ptr) {
