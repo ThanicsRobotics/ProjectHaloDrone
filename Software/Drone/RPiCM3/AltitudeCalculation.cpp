@@ -156,21 +156,21 @@ void readline() {
 
 void handleSerialInterrupt() {
     cout << endl << "INT" << endl;
-    readline();
-    cout << "1" << endl;
-    if (wordEnd == true) {                                                  //If we have finished a message
-        int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
-        cout << "2" << endl;
-        if (coFlag == true && data > 999) {                                 //If we have a coefficient and data for PWM is valid
-            throttleInput = data;                                            //Set throttle input
-            coFlag = false;
-        }
-        //cout << "3" << endl;
-        else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
-        memset(serialBuffer,0,sizeof(serialBuffer));
-    }
-    else return;
-    cout << "4" << endl;
+    // readline();
+    // cout << "1" << endl;
+    // if (wordEnd == true) {                                                  //If we have finished a message
+    //     int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
+    //     cout << "2" << endl;
+    //     if (coFlag == true && data > 999) {                                 //If we have a coefficient and data for PWM is valid
+    //         throttleInput = data;                                            //Set throttle input
+    //         coFlag = false;
+    //     }
+    //     //cout << "3" << endl;
+    //     else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
+    //     memset(serialBuffer,0,sizeof(serialBuffer));
+    // }
+    // else return;
+    // cout << "4" << endl;
 }
 
 //Utility function for setting individual pin on IO Expander
