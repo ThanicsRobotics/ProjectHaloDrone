@@ -349,8 +349,8 @@ void mainLoop() {
     while(1) {
         //calculatePressureAltitude();
         calculateAbsoluteAltitude();
-        //calculatePID();
-        //sendThrottle();
+        calculatePID();
+        sendThrottle();
     }
 }
 
