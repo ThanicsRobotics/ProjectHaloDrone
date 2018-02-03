@@ -122,8 +122,8 @@ void handleEcho() {
 void readline() {
     //while (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
-        cout << "1.1" << endl;
-        //while(serialDataAvail(serialFd) == 0);
+        cout << "Waiting for data..." << endl;
+        while(serialDataAvail(serialFd) == 0);
         
         char thisChar = serialGetchar(serialFd);
         
@@ -156,21 +156,21 @@ void readline() {
 
 void handleSerialInterrupt() {
     cout << endl << "INT" << endl;
-    // readline();
-    // cout << "1" << endl;
-    // if (wordEnd == true) {                                                  //If we have finished a message
-    //     int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
-    //     cout << "2" << endl;
-    //     if (coFlag == true && data > 999) {                                 //If we have a coefficient and data for PWM is valid
-    //         throttleInput = data;                                            //Set throttle input
-    //         coFlag = false;
-    //     }
-    //     //cout << "3" << endl;
-    //     else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
-    //     memset(serialBuffer,0,sizeof(serialBuffer));
-    // }
-    // else return;
-    // cout << "4" << endl;
+    readline();
+    cout << "1" << endl;
+    if (wordEnd == true) {                                                  //If we have finished a message
+        int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
+        cout << "2" << endl;
+        if (coFlag == true && data > 999) {                                 //If we have a coefficient and data for PWM is valid
+            throttleInput = data;                                            //Set throttle input
+            coFlag = false;
+        }
+        //cout << "3" << endl;
+        else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
+        memset(serialBuffer,0,sizeof(serialBuffer));
+    }
+    else return;
+    cout << "4" << endl;
 }
 
 //Utility function for setting individual pin on IO Expander
@@ -264,7 +264,6 @@ int getUltrasonicData(int sensor, int iterations) {
     }
     if ((iterations - invalids) <= 0) return getUltrasonicData(sensor, iterations);
     else return totalDistance / (iterations - invalids);
-    //return distance;
 }
 
 float radian(int degree) {
@@ -289,7 +288,7 @@ void authFlightController() {
         //Get Auth Key and send it back
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         authKey = buffer[0] << 8 | buffer[1];
-        cout << authKey << endl;
+        cout << "Key: " << authKey << endl;
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         delay(10);
     }
@@ -304,8 +303,6 @@ void calculateAbsoluteAltitude() {
     altitude = angleCorrection(rawDistance);
     cout << " | Altitude: " << altitude;
 }
-
-/*****if throttle is no longer changing (around 1500), set lastAltitude to current altitude*****/
 
 //Calculate throttle factor for altitude management through PID loop
 void calculatePID() {
