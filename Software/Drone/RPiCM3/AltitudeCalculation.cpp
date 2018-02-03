@@ -368,7 +368,7 @@ int main() {
     signal(SIGINT, signal_callback_handler);
 
     //Switch to flight controller, setup SPI @ 1.5MHz
-    //SPI_CS = 1;
+    SPI_CS = 1;
     wiringPiSPISetup(SPI_CS, 1500000);
     authFlightController();
 
