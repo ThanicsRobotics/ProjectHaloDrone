@@ -365,7 +365,7 @@ void *gyroLoop(void *void_ptr) {
 int main() {
     //Setup function calls
     wiringPiSetup();
-    //setupIOExpander();
+    setupIOExpander();
     signal(SIGINT, signal_callback_handler);
 
     //Switch to flight controller, setup SPI @ 1.5MHz
