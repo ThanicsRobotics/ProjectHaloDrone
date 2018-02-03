@@ -123,7 +123,7 @@ void readline() {
         cout << "1.1" << endl;
         while(serialDataAvail(serialFd) == 0);
         
-        char thisChar = serialGetchar(serialFd);
+        int thisChar = serialGetchar(serialFd);
         
         cout << "1.2 " << thisChar << endl;
         //Check if this character is the end of message
