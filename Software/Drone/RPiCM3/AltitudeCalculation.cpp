@@ -88,11 +88,13 @@ void getGyroValues() {
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
     
     pthread_mutex_lock(&gyro_mutex);
-    gyroPitch = (signed char)buffer[0];
-    gyroRoll = (signed char)buffer[1];
+    //gyroPitch = (signed char)buffer[0];
+    //gyroRoll = (signed char)buffer[1];
+    gyroRoll = buffer[0] << 8 | buffer[1];
     pthread_mutex_unlock(&gyro_mutex);
 
-    delay(2);
+    //delay(2);
+    cout << gyroRoll << endl;
 }
 
 //Handles IO Expander interrupt (measures ultrasonic sensor echo pulse)
@@ -367,20 +369,20 @@ int main() {
 
     //Switch to flight controller, setup SPI @ 1.5MHz
     //SPI_CS = 1;
-    //wiringPiSPISetup(SPI_CS, 1500000);
-    //authFlightController();
+    wiringPiSPISetup(SPI_CS, 1500000);
+    authFlightController();
 
-    setupSerial();
+    //setupSerial();
 
-    //pthread_t gyroThread;
+    pthread_t gyroThread;
 
     //pthread_create(&mainThread, NULL, mainLoop, NULL);
-    //pthread_create(&gyroThread, NULL, gyroLoop, NULL);
+    pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     mainLoop();
 
     //pthread_join(mainThread, NULL);
-    //pthread_join(gyroThread, NULL);
+    pthread_join(gyroThread, NULL);
 }
 
 void signal_callback_handler(int signum) {
