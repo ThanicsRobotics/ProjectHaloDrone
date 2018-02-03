@@ -93,7 +93,7 @@ void getGyroValues() {
     //gyroRoll = buffer[0] << 8 | buffer[1];
     pthread_mutex_unlock(&gyro_mutex);
 
-    delay(2);
+    delay(1);
     //cout << gyroRoll << endl;
 }
 
