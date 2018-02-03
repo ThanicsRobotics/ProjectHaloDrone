@@ -369,7 +369,7 @@ int main() {
     wiringPiSPISetup(SPI_CS, 1500000);
     authFlightController();
 
-    //setupSerial();
+    setupSerial();
 
     pthread_t gyroThread;
 
