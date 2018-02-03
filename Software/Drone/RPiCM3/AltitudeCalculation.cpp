@@ -88,13 +88,13 @@ void getGyroValues() {
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
     
     pthread_mutex_lock(&gyro_mutex);
-    //gyroPitch = (signed char)buffer[0];
-    //gyroRoll = (signed char)buffer[1];
-    gyroRoll = buffer[0] << 8 | buffer[1];
+    gyroPitch = (signed char)buffer[0];
+    gyroRoll = (signed char)buffer[1];
+    //gyroRoll = buffer[0] << 8 | buffer[1];
     pthread_mutex_unlock(&gyro_mutex);
 
-    //delay(2);
-    cout << gyroRoll << endl;
+    delay(2);
+    //cout << gyroRoll << endl;
 }
 
 //Handles IO Expander interrupt (measures ultrasonic sensor echo pulse)
@@ -298,6 +298,10 @@ void authFlightController() {
 
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
+    cout << "Waiting for gyro calibration..." << endl;
+    while (gyroPitch == 3);
+    cout << "Calibration complete. Arm quadcopter." << endl;
+    while (gyroPitch == 4);
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
     int rawDistance = getUltrasonicData(1, 10);
     cout << " | Raw Distance: " << rawDistance;
@@ -344,11 +348,8 @@ void sendThrottle() {
 void mainLoop() {
     while(1) {
         //calculatePressureAltitude();
-        //cout << "Count: " << count << endl;
-        //handleSerialInterrupt();
-        //calculateAbsoluteAltitude();
+        calculateAbsoluteAltitude();
         //calculatePID();
-        //getGyroValues();
         //sendThrottle();
     }
 }
@@ -372,7 +373,7 @@ int main() {
     wiringPiSPISetup(SPI_CS, 1500000);
     authFlightController();
 
-    //setupSerial();
+    setupSerial();
 
     pthread_t gyroThread;
 
