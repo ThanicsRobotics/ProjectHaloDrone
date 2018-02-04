@@ -316,7 +316,7 @@ int getUltrasonicData(int sensor, int iterations) {
         //factor out invalid results
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
-        //delay(60);
+        delay(30);
     }
     if ((iterations - invalids) <= 0) return -1;
     else return totalDistance / (iterations - invalids);
@@ -354,8 +354,8 @@ void authFlightController() {
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
     //cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
-    int rawDistance = getUltrasonicData(1, 5);
-    while (rawDistance == -1) rawDistance = getUltrasonicData(1, 5);
+    int rawDistance = getUltrasonicData(1, 2);
+    while (rawDistance == -1) rawDistance = getUltrasonicData(1, 2);
     cout << " | Raw Distance: " << rawDistance << endl;
     //altitude = angleCorrection(rawDistance);
     //cout << " | Altitude: " << altitude;
