@@ -345,7 +345,7 @@ void authFlightController() {
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
-    int rawDistance = getUltrasonicData(1, 10);
+    int rawDistance = getUltrasonicData(1, 3);
     cout << " | Raw Distance: " << rawDistance;
     altitude = angleCorrection(rawDistance);
     cout << " | Altitude: " << altitude;
@@ -429,7 +429,7 @@ int main() {
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     cout << "Waiting for gyro calibration..." << endl;
-    while (gyroRoll <= 3);
+    while (gyroRoll != 4);
     cout << "Calibration complete. Arm quadcopter." << endl;
     while (gyroRoll == 4);
 
