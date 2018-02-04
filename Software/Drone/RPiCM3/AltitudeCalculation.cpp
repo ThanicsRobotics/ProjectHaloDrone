@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
+#include <fcntl.h>
+#include <termios.h>
 
 //POSIX Thread Library
 #include <pthread.h>
@@ -35,7 +37,7 @@ using namespace std;
 //Thread mutex and gyro thread function
 pthread_mutex_t var_mutex = PTHREAD_MUTEX_INITIALIZER;
 void *gyroLoop(void *void_ptr);
-void *serialLoop(void *void_ptr);
+//void *serialLoop(void *void_ptr);
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
@@ -46,6 +48,7 @@ int charCount = 0;
 char serialBuffer[100];
 bool wordEnd = false;
 bool coFlag = false;
+int uart0_filestream = -1;
 
 //CS0 is barometer, CS1 is STM32 flight controller
 int SPI_CS = 0;
@@ -120,13 +123,34 @@ void handleEcho() {
     pulseComplete = true;
 }
 
+char getChar() {
+    while(rx_length < 1) {
+        if (uart0_filestream != -1) {
+            // Read up to 255 characters from the port if they are there
+            unsigned char rx_buffer[1];
+            int rx_length = read(uart0_filestream, (void*)rx_buffer, 1);		//Filestream, buffer to store in, number of bytes to read (max)
+            if (rx_length < 0) {
+                cout << "error" << endl;
+            }
+            else if (rx_length == 0) {
+                cout << "No chars" << endl;
+            }
+            else {
+                //Bytes received
+                //cout << rx_buffer[0] << endl;
+                return rx_buffer[0];
+            }
+        }
+    }
+}
+
 void readline() {
     //while (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
-        cout << "Waiting for data..." << endl;
-        while(serialDataAvail(serialFd) == 0);
+        //cout << "Waiting for data..." << endl;
+        //while(serialDataAvail(serialFd) == 0);
         
-        char thisChar = serialGetchar(serialFd);
+        char thisChar = getChar();
         
         cout << "1.2 " << thisChar << endl;
         //Check if this character is the end of message
@@ -201,10 +225,27 @@ void digitalIOWrite(int pin, int state) {
 }
 
 void setupSerial() {
-    if ((serialFd = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
-        cout << "Unable to open serial interface" << endl;
-    }
-    //wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
+    // if ((serialFd = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
+    //     cout << "Unable to open serial interface" << endl;
+    // }
+
+    uart0_filestream = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY);		//Open in non blocking read/write mode
+	if (uart0_filestream == -1)
+	{
+		//ERROR - CAN'T OPEN SERIAL PORT
+		printf("Error - Unable to open UART. Ensure it is not in use by another application\n");
+	}
+
+    struct termios options;
+	tcgetattr(uart0_filestream, &options);
+	options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;		//<Set baud rate
+	options.c_iflag = IGNPAR;
+	options.c_oflag = 0;
+	options.c_lflag = 0;
+	tcflush(uart0_filestream, TCIFLUSH);
+	tcsetattr(uart0_filestream, TCSANOW, &options);
+
+    wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
 }
 
 //Configures inputs and outputs of IO Expander
@@ -378,9 +419,9 @@ int main() {
 
     setupSerial();
 
-    pthread_t gyroThread, serialThread;
+    pthread_t gyroThread;
 
-    pthread_create(&serialThread, NULL, serialLoop, NULL);
+    //pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     cout << "Waiting for gyro calibration..." << endl;
@@ -390,13 +431,13 @@ int main() {
 
     mainLoop();
 
-    pthread_join(serialThread, NULL);
+    //pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
 }
 
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
-	serialClose(serialFd);
-
+	//serialClose(serialFd);
+    close(uart0_filestream);
 	exit(signum);
 }
