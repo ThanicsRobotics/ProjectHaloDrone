@@ -309,10 +309,11 @@ int getUltrasonicData(int sensor, int iterations) {
         //Wait until pulse is complete (when handleEcho is complete)
         while(pulseComplete == false);
 
-        //Calculate distance based on speed of sound and travel time, and
-        //factor out invalid results
-        int distance = pulse_time * 0.034 / 2;
+        //Calculate distance based on speed of sound and travel time
+        int distance = pulse_time * 345 / 2 / 10000;
         pulseComplete = false;
+
+        //factor out invalid results
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
     }
