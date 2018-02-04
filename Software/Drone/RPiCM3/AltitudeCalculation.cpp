@@ -154,7 +154,7 @@ void readline() {
         
         char thisChar = serialGetchar(serialFd);
         
-        cout << thisChar << endl;
+        //cout << thisChar << endl;
         fflush(stdout);
         //Check if this character is the end of message
         if (thisChar == '\n') {
@@ -439,10 +439,11 @@ int main() {
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
 	serialClose(serialFd);
-
+    
     pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
 
+    delay(100);
     //close(uart0_filestream);
 	exit(signum);
 }
