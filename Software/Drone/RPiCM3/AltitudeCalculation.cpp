@@ -316,7 +316,7 @@ int getUltrasonicData(int sensor, int iterations) {
         //factor out invalid results
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
-        delay(60);
+        //delay(60);
     }
     if ((iterations - invalids) <= 0) return -1;
     else return totalDistance / (iterations - invalids);
