@@ -36,6 +36,7 @@ using namespace std;
 
 //Thread mutex and gyro thread function
 pthread_mutex_t var_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_t gyroThread, serialThread;
 void *gyroLoop(void *void_ptr);
 void *serialLoop(void *void_ptr);
 
@@ -424,8 +425,6 @@ int main() {
 
     setupSerial();
     
-    pthread_t gyroThread, serialThread;
-
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
