@@ -131,7 +131,7 @@ char getChar() {
             unsigned char rx_buffer[1];
             rx_length = read(uart0_filestream, (void*)rx_buffer, 1);		//Filestream, buffer to store in, number of bytes to read (max)
             if (rx_length < 0) {
-                cout << "error" << endl;
+                cout << errno << endl;
             }
             else if (rx_length == 0) {
                 cout << "No chars" << endl;
