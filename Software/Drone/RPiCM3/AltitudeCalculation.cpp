@@ -123,13 +123,13 @@ void handleEcho() {
     pulseComplete = true;
 }
 
-char getChar() {
+void getChar() {
     int rx_length = 0;
     while(rx_length < 1) {
         if (uart0_filestream != -1) {
             // Read up to 255 characters from the port if they are there
-            unsigned char rx_buffer[1];
-            rx_length = read(uart0_filestream, (void*)rx_buffer, 1);		//Filestream, buffer to store in, number of bytes to read (max)
+            unsigned char rx_buffer[256];
+            rx_length = read(uart0_filestream, (void*)rx_buffer, 255);		//Filestream, buffer to store in, number of bytes to read (max)
             if (rx_length < 0) {
                 cout << strerror(errno) << endl;
             }
@@ -138,8 +138,8 @@ char getChar() {
             }
             else {
                 //Bytes received
-                //cout << rx_buffer[0] << endl;
-                return rx_buffer[0];
+                cout << rx_buffer << endl;
+                //return rx_buffer[0];
             }
         }
     }
@@ -151,7 +151,8 @@ void readline() {
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
         
-        char thisChar = getChar();
+        char thisChar = 0;
+        getChar();
         
         cout << "1.2 " << thisChar << endl;
         //Check if this character is the end of message
@@ -230,7 +231,7 @@ void setupSerial() {
     //     cout << "Unable to open serial interface" << endl;
     // }
 
-    uart0_filestream = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY);		//Open in non blocking read/write mode
+    uart0_filestream = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY);		//Open in non blocking read/write mode
 	if (uart0_filestream == -1)
 	{
 		//ERROR - CAN'T OPEN SERIAL PORT
