@@ -238,14 +238,14 @@ void setupSerial() {
 	// 	printf("Error - Unable to open UART. Ensure it is not in use by another application\n");
 	// }
 
-    struct termios options;
-	tcgetattr(uart0_filestream, &options);
-	options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;		//<Set baud rate
-	options.c_iflag = IGNPAR;
-	options.c_oflag = 0;
-	options.c_lflag = 0;
-	tcflush(uart0_filestream, TCIFLUSH);
-	tcsetattr(uart0_filestream, TCSANOW, &options);
+    // struct termios options;
+	// tcgetattr(uart0_filestream, &options);
+	// options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;		//<Set baud rate
+	// options.c_iflag = IGNPAR;
+	// options.c_oflag = 0;
+	// options.c_lflag = 0;
+	// tcflush(uart0_filestream, TCIFLUSH);
+	// tcsetattr(uart0_filestream, TCSANOW, &options);
 
     wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
 }
@@ -439,7 +439,7 @@ int main() {
 
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
-	//serialClose(serialFd);
+	serialClose(serialFd);
     close(uart0_filestream);
 	exit(signum);
 }
