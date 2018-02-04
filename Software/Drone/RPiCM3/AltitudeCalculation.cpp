@@ -118,7 +118,7 @@ void handleEcho() {
         //     pulse_time = 0;
         //     break;
         // }
-        if ((micros() - start_time) > 10000) {
+        if ((micros() - start_time) > 20000) {
             pulse_time = 0;
             break;
         }
@@ -316,7 +316,7 @@ int getUltrasonicData(int sensor, int iterations) {
         //factor out invalid results
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
-        delay(20);
+        delay(10);
     }
     if ((iterations - invalids) <= 0) return -1;
     else return totalDistance / (iterations - invalids);
