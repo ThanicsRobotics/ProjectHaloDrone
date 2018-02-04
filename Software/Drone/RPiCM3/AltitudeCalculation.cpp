@@ -153,7 +153,7 @@ void readline() {
         
         char thisChar = serialGetchar(serialFd);
         
-        cout << "1.2 " << thisChar << endl;
+        cout << thisChar << endl;
         fflush(stdout);
         //Check if this character is the end of message
         if (thisChar == '\n') {
@@ -177,7 +177,7 @@ void readline() {
             charCount += 1;
             return;
         }
-        cout << "1.3" << endl;
+        //cout << "1.3" << endl;
     //}
 }
 
@@ -410,6 +410,7 @@ void *gyroLoop(void *void_ptr) {
 //Main Program loop
 int main() {
     //Setup function calls
+    system("sudo openocd");
     wiringPiSetup();
     setupIOExpander();
     signal(SIGINT, signal_callback_handler);
