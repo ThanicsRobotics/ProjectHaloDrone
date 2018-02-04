@@ -124,11 +124,12 @@ void handleEcho() {
 }
 
 char getChar() {
+    int rx_length = 0;
     while(rx_length < 1) {
         if (uart0_filestream != -1) {
             // Read up to 255 characters from the port if they are there
             unsigned char rx_buffer[1];
-            int rx_length = read(uart0_filestream, (void*)rx_buffer, 1);		//Filestream, buffer to store in, number of bytes to read (max)
+            rx_length = read(uart0_filestream, (void*)rx_buffer, 1);		//Filestream, buffer to store in, number of bytes to read (max)
             if (rx_length < 0) {
                 cout << "error" << endl;
             }
