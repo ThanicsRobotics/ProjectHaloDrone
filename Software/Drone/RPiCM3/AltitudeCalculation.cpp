@@ -184,10 +184,10 @@ void readline() {
 void handleSerialInterrupt() {
     cout << endl << "INT" << endl;
     readline();
-    cout << "1" << endl;
+    //cout << "1" << endl;
     if (wordEnd == true) {                                                  //If we have finished a message
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
-        cout << "2" << endl;
+        //cout << "2" << endl;
         if (coFlag == true && data > 999) {                                 //If we have a coefficient and data for PWM is valid
             //pthread_mutex_lock(&var_mutex);
             throttleInput = data;                                            //Set throttle input
@@ -199,7 +199,7 @@ void handleSerialInterrupt() {
         memset(serialBuffer,0,sizeof(serialBuffer));
     }
     else return;
-    cout << "4" << endl;
+    //cout << "4" << endl;
 }
 
 //Utility function for setting individual pin on IO Expander
@@ -247,7 +247,7 @@ void setupSerial() {
 	// tcflush(uart0_filestream, TCIFLUSH);
 	// tcsetattr(uart0_filestream, TCSANOW, &options);
 
-    //wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
+    wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
 }
 
 //Configures inputs and outputs of IO Expander
@@ -409,8 +409,10 @@ void *gyroLoop(void *void_ptr) {
 
 //Main Program loop
 int main() {
-    //Setup function calls
+    //Reset flight controller using OpenOCD
     system("sudo openocd");
+
+    //Setup function calls
     wiringPiSetup();
     setupIOExpander();
     signal(SIGINT, signal_callback_handler);
@@ -421,23 +423,21 @@ int main() {
     authFlightController();
 
     setupSerial();
-    while(1) {
-        readline();
-    }
-    // pthread_t gyroThread;
+    
+    pthread_t gyroThread;
 
-    // //pthread_create(&serialThread, NULL, serialLoop, NULL);
-    // pthread_create(&gyroThread, NULL, gyroLoop, NULL);
+    //pthread_create(&serialThread, NULL, serialLoop, NULL);
+    pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
-    // cout << "Waiting for gyro calibration..." << endl;
-    // while (gyroRoll <= 3);
-    // cout << "Calibration complete. Arm quadcopter." << endl;
-    // while (gyroRoll == 4);
+    cout << "Waiting for gyro calibration..." << endl;
+    while (gyroRoll <= 3);
+    cout << "Calibration complete. Arm quadcopter." << endl;
+    while (gyroRoll == 4);
 
-    // mainLoop();
+    mainLoop();
 
-    // //pthread_join(serialThread, NULL);
-    // pthread_join(gyroThread, NULL);
+    //pthread_join(serialThread, NULL);
+    pthread_join(gyroThread, NULL);
 }
 
 void signal_callback_handler(int signum) {
