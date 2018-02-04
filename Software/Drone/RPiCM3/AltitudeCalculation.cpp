@@ -416,7 +416,7 @@ int main() {
     system("sudo openocd");
 
     //Setup function calls
-    wiringPiSetupGpio();
+    wiringPiSetup();
     setupIOExpander();
     signal(SIGINT, signal_callback_handler);
 
