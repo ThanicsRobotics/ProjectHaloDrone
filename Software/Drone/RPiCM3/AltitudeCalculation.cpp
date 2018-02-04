@@ -123,27 +123,27 @@ void handleEcho() {
     pulseComplete = true;
 }
 
-void getChar() {
-    int rx_length = 0;
-    //while(rx_length < 1) {
-        if (uart0_filestream != -1) {
-            // Read up to 255 characters from the port if they are there
-            unsigned char rx_buffer[256];
-            rx_length = read(uart0_filestream, (void*)rx_buffer, 255);		//Filestream, buffer to store in, number of bytes to read (max)
-            if (rx_length < 0) {
-                cout << strerror(errno) << endl;
-            }
-            else if (rx_length == 0) {
-                cout << "No chars" << endl;
-            }
-            else {
-                //Bytes received
-                cout << rx_buffer << endl;
-                //return rx_buffer[0];
-            }
-        }
-    //}
-}
+// void getChar() {
+//     int rx_length = 0;
+//     //while(rx_length < 1) {
+//         if (uart0_filestream != -1) {
+//             // Read up to 255 characters from the port if they are there
+//             unsigned char rx_buffer[256];
+//             rx_length = read(uart0_filestream, (void*)rx_buffer, 255);		//Filestream, buffer to store in, number of bytes to read (max)
+//             if (rx_length < 0) {
+//                 cout << strerror(errno) << endl;
+//             }
+//             else if (rx_length == 0) {
+//                 cout << "No chars" << endl;
+//             }
+//             else {
+//                 //Bytes received
+//                 cout << rx_buffer << endl;
+//                 //return rx_buffer[0];
+//             }
+//         }
+//     //}
+// }
 
 void readline() {
     //while (serialDataAvail(serialFd)) {
@@ -151,10 +151,10 @@ void readline() {
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
         
-        char thisChar = 0;
-        getChar();
+        char thisChar = serialGetchar(serialFd);
         
         cout << "1.2 " << thisChar << endl;
+        fflush(stdout);
         //Check if this character is the end of message
         if (thisChar == '\n') {
             wordEnd = true;
@@ -227,16 +227,16 @@ void digitalIOWrite(int pin, int state) {
 }
 
 void setupSerial() {
-    // if ((serialFd = serialOpen("/dev/ttyAMA0", 9600)) < 0) {
-    //     cout << "Unable to open serial interface" << endl;
-    // }
+    if ((serialFd = serialOpen("/dev/serial0", 9600)) < 0) {
+        cout << "Unable to open serial interface" << endl;
+    }
 
-    uart0_filestream = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY);		//Open in non blocking read/write mode
-	if (uart0_filestream == -1)
-	{
-		//ERROR - CAN'T OPEN SERIAL PORT
-		printf("Error - Unable to open UART. Ensure it is not in use by another application\n");
-	}
+    // uart0_filestream = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY);		//Open in non blocking read/write mode
+	// if (uart0_filestream == -1)
+	// {
+	// 	//ERROR - CAN'T OPEN SERIAL PORT
+	// 	printf("Error - Unable to open UART. Ensure it is not in use by another application\n");
+	// }
 
     struct termios options;
 	tcgetattr(uart0_filestream, &options);
