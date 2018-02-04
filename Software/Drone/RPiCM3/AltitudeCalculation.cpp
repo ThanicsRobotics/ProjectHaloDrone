@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
-#include <fcntl.h>
-#include <termios.h>
+//#include <fcntl.h>
+//#include <termios.h>
 
 //POSIX Thread Library
 #include <pthread.h>
@@ -48,7 +48,7 @@ int charCount = 0;
 char serialBuffer[100];
 bool wordEnd = false;
 bool coFlag = false;
-int uart0_filestream = -1;
+//int uart0_filestream = -1;
 
 //CS0 is barometer, CS1 is STM32 flight controller
 int SPI_CS = 0;
@@ -440,6 +440,6 @@ int main() {
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
 	serialClose(serialFd);
-    close(uart0_filestream);
+    //close(uart0_filestream);
 	exit(signum);
 }
