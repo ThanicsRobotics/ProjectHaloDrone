@@ -420,21 +420,23 @@ int main() {
     authFlightController();
 
     setupSerial();
+    while(1) {
+        readline();
+    }
+    // pthread_t gyroThread;
 
-    pthread_t gyroThread;
+    // //pthread_create(&serialThread, NULL, serialLoop, NULL);
+    // pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
-    //pthread_create(&serialThread, NULL, serialLoop, NULL);
-    pthread_create(&gyroThread, NULL, gyroLoop, NULL);
+    // cout << "Waiting for gyro calibration..." << endl;
+    // while (gyroRoll <= 3);
+    // cout << "Calibration complete. Arm quadcopter." << endl;
+    // while (gyroRoll == 4);
 
-    cout << "Waiting for gyro calibration..." << endl;
-    while (gyroRoll <= 3);
-    cout << "Calibration complete. Arm quadcopter." << endl;
-    while (gyroRoll == 4);
+    // mainLoop();
 
-    mainLoop();
-
-    //pthread_join(serialThread, NULL);
-    pthread_join(gyroThread, NULL);
+    // //pthread_join(serialThread, NULL);
+    // pthread_join(gyroThread, NULL);
 }
 
 void signal_callback_handler(int signum) {
