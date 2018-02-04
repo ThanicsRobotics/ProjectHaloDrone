@@ -247,7 +247,7 @@ void setupSerial() {
 	// tcflush(uart0_filestream, TCIFLUSH);
 	// tcsetattr(uart0_filestream, TCSANOW, &options);
 
-    wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
+    //wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
 }
 
 //Configures inputs and outputs of IO Expander
