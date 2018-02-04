@@ -106,22 +106,28 @@ void getGyroValues() {
 //Handles IO Expander interrupt (measures ultrasonic sensor echo pulse)
 void handleEcho() {
     //Get current time
-    clock_gettime(CLOCK_REALTIME, &gettime_now);
-	start_time = gettime_now.tv_nsec;
+    //clock_gettime(CLOCK_REALTIME, &gettime_now);
+	//start_time = gettime_now.tv_nsec;
+    start_time = micros();
 
     //Get time when pulse is HIGH
     while(digitalRead(INT_PIN) == HIGH) {
-        clock_gettime(CLOCK_REALTIME, &gettime_now);
+        //clock_gettime(CLOCK_REALTIME, &gettime_now);
         //Stop if HIGH for 10ms (timeout)
-	    if ((gettime_now.tv_nsec - start_time) > 10000000) {
+	    // if ((gettime_now.tv_nsec - start_time) > 10000000) {
+        //     pulse_time = 0;
+        //     break;
+        // }
+        if ((micros() - start_time) > 10000) {
             pulse_time = 0;
             break;
         }
     }
 
     //Pulse time is the time difference before and after HIGH pulse
-    clock_gettime(CLOCK_REALTIME, &gettime_now);
-	pulse_time = gettime_now.tv_nsec - start_time;
+    //clock_gettime(CLOCK_REALTIME, &gettime_now);
+	//pulse_time = gettime_now.tv_nsec - start_time;
+    pulse_time = micros() - start_time;
     pulseComplete = true;
 }
 
@@ -305,7 +311,7 @@ int getUltrasonicData(int sensor, int iterations) {
 
         //Calculate distance based on speed of sound and travel time, and
         //factor out invalid results
-        int distance = (pulse_time/1000) * 0.034 / 2;
+        int distance = pulse_time * 0.034 / 2;
         pulseComplete = false;
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
