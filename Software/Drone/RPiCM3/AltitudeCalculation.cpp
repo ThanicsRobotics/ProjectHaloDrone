@@ -118,7 +118,7 @@ void handleEcho() {
         //     pulse_time = 0;
         //     break;
         // }
-        if ((micros() - start_time) > 20000) {
+        if ((micros() - start_time) > 100000) {
             pulse_time = 0;
             break;
         }
