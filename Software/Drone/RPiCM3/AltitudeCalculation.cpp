@@ -70,10 +70,11 @@ signed int gyroPitch;
 signed int gyroRoll;
 
 //Pulse timing variables
-long int start_time;
-long int pulse_time;
-struct timespec gettime_now;
+int start_time = 0;
+int pulse_time = 0;
+//struct timespec gettime_now;
 bool pulseComplete = false;
+int lastUltrasonicPulse = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
@@ -297,6 +298,9 @@ int getUltrasonicData(int sensor, int iterations) {
 
     //Takes average of 3 distance measurements
     for(int i = 0; i < iterations; i++) {
+
+        while (millis() - lastUltrasonicPulse < 150);
+
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
         delayMicroseconds(2);
@@ -312,11 +316,12 @@ int getUltrasonicData(int sensor, int iterations) {
         //Calculate distance based on speed of sound and travel time
         int distance = pulse_time * 345 / 2 / 10000;
         pulseComplete = false;
+        lastUltrasonicPulse = millis();
 
         //factor out invalid results
         if (distance <= 0 || distance > 400) invalids++;
         else totalDistance += distance;
-        delay(30);
+        //delay(30);
     }
     if ((iterations - invalids) <= 0) return -1;
     else return totalDistance / (iterations - invalids);
@@ -346,7 +351,7 @@ void authFlightController() {
         authKey = buffer[0] << 8 | buffer[1];
         cout << "Key: " << authKey << endl;
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
-        delay(10);
+        delay(1);
     }
     cout << "Authenticated" << endl;
 }
@@ -354,8 +359,9 @@ void authFlightController() {
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
     //cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
-    int rawDistance = getUltrasonicData(1, 2);
-    while (rawDistance == -1) rawDistance = getUltrasonicData(1, 2);
+
+    int rawDistance = getUltrasonicData(1, 1);
+    while (rawDistance == -1) rawDistance = getUltrasonicData(1, 1);
     cout << " | Raw Distance: " << rawDistance << endl;
     //altitude = angleCorrection(rawDistance);
     //cout << " | Altitude: " << altitude;
