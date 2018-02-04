@@ -182,7 +182,7 @@ void readline() {
 }
 
 void handleSerialInterrupt() {
-    cout << endl << "INT" << endl;
+    //cout << endl << "INT" << endl;
     readline();
     //cout << "1" << endl;
     if (wordEnd == true) {                                                  //If we have finished a message
