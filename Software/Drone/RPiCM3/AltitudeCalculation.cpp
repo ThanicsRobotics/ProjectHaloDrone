@@ -125,7 +125,7 @@ void handleEcho() {
 
 void getChar() {
     int rx_length = 0;
-    while(rx_length < 1) {
+    //while(rx_length < 1) {
         if (uart0_filestream != -1) {
             // Read up to 255 characters from the port if they are there
             unsigned char rx_buffer[256];
@@ -142,7 +142,7 @@ void getChar() {
                 //return rx_buffer[0];
             }
         }
-    }
+    //}
 }
 
 void readline() {
@@ -189,9 +189,9 @@ void handleSerialInterrupt() {
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
         cout << "2" << endl;
         if (coFlag == true && data > 999) {                                 //If we have a coefficient and data for PWM is valid
-            pthread_mutex_lock(&var_mutex);
+            //pthread_mutex_lock(&var_mutex);
             throttleInput = data;                                            //Set throttle input
-            pthread_mutex_unlock(&var_mutex);
+            //pthread_mutex_unlock(&var_mutex);
             coFlag = false;
         }
         //cout << "3" << endl;
