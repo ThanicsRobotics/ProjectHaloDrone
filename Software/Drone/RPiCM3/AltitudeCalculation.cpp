@@ -415,7 +415,7 @@ int main() {
     system("sudo openocd");
 
     //Setup function calls
-    wiringPiSetup();
+    wiringPiSetupGpio();
     setupIOExpander();
     signal(SIGINT, signal_callback_handler);
 
@@ -429,10 +429,10 @@ int main() {
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
-    cout << "Waiting for gyro calibration..." << endl;
-    while (gyroRoll != 4);
-    cout << "Calibration complete. Arm quadcopter." << endl;
-    while (gyroRoll == 4);
+    // cout << "Waiting for gyro calibration..." << endl;
+    // while (gyroRoll != 4);
+    // cout << "Calibration complete. Arm quadcopter." << endl;
+    // while (gyroRoll == 4);
 
     mainLoop();
 
