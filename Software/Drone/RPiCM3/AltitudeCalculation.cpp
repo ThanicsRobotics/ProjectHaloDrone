@@ -398,12 +398,12 @@ void *gyroLoop(void *void_ptr) {
     return NULL;
 }
 
-void *serialLoop(void *void_ptr) {
-    while(1) {
-        handleSerialInterrupt();
-    }
-    return NULL;
-}
+// void *serialLoop(void *void_ptr) {
+//     while(1) {
+//         handleSerialInterrupt();
+//     }
+//     return NULL;
+// }
 
 //Main Program loop
 int main() {
