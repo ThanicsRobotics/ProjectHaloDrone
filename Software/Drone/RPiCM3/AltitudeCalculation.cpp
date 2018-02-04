@@ -99,7 +99,7 @@ void getGyroValues() {
     //gyroRoll = buffer[0] << 8 | buffer[1];
     pthread_mutex_unlock(&gyro_mutex);
 
-    //delay(1);
+    delay(1);
     //cout << gyroRoll << endl;
 }
 
@@ -190,7 +190,7 @@ void handleSerialInterrupt() {
     if (wordEnd == true) {                                                  //If we have finished a message
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
         //cout << "2" << endl;
-        if (coFlag == true && data > 999) {                                 //If we have a coefficient and data for PWM is valid
+        if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
             pthread_mutex_lock(&serial_mutex);
             throttleInput = data;                                            //Set throttle input
             pthread_mutex_unlock(&serial_mutex);
