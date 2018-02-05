@@ -303,7 +303,7 @@ int getUltrasonicData(int sensor, int iterations) {
 
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
-        delayMicroseconds(2);
+        //delayMicroseconds(2);
 
         //Starting TRIG pulse
         digitalIOWrite(pin, HIGH);
@@ -341,6 +341,7 @@ void authFlightController() {
     unsigned char buffer[100];
     unsigned int authKey = 0;
     cout << "Authenticating..." << endl;
+    int time = 0;
     while(authKey != 0x00F4) {
         //Write to Authentication register
         buffer[1] = 0x01;
@@ -352,6 +353,12 @@ void authFlightController() {
         cout << "Key: " << authKey << endl;
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         delay(1);
+        time += millis();
+        if (time > 2000) {
+            time = 0;
+            cout << "Auth Timeout" << endl;
+            system("sudo openocd");
+        }
     }
     cout << "Authenticated" << endl;
 }
