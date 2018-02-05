@@ -299,7 +299,7 @@ int getUltrasonicData(int sensor, int iterations) {
     //Takes average of 3 distance measurements
     for(int i = 0; i < iterations; i++) {
 
-        while (millis() - lastUltrasonicPulse < 120);
+        while (millis() - lastUltrasonicPulse < 30);
 
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
