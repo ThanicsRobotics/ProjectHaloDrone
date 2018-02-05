@@ -307,7 +307,7 @@ int getUltrasonicData(int sensor, int iterations) {
 
         //Starting TRIG pulse
         digitalIOWrite(pin, HIGH);
-        delayMicroseconds(20);
+        delayMicroseconds(30);
         digitalIOWrite(pin, LOW);
 
         //Wait until pulse is complete (when handleEcho is complete)
