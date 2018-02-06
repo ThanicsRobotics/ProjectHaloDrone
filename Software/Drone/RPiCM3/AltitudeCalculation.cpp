@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
+#include <algorithm>
 //#include <fcntl.h>
 //#include <termios.h>
 
