@@ -324,6 +324,9 @@ int getUltrasonicData(int sensor, const int iterations) {
             loops++;
         }
     }
+    for (int i=0;i<iterations;i++) {
+        cout << sizeof(distances[i]);
+    }
     cout << sizeof(distances) << endl;
     sort(distances, distances + sizeof(distances));
     return distances[iterations/2];
