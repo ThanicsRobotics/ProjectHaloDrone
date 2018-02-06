@@ -296,18 +296,17 @@ int getUltrasonicData(int sensor, int iterations) {
     int totalDistance = 0;
     int invalids = 0;
 
-    //Takes average of 3 distance measurements
-    for(int i = 0; i < iterations; i++) {
-
-        while (millis() - lastUltrasonicPulse < 150);
+    int distances[iterations];
+    int loops = 0;
+    //Takes average of x distance measurements
+    while(loops < iterations) {
+        while (millis() - lastUltrasonicPulse < 60);
 
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
-        //delayMicroseconds(2);
 
         //Starting TRIG pulse
         digitalIOWrite(pin, HIGH);
-        //delayMicroseconds(15);
         digitalIOWrite(pin, LOW);
 
         //Wait until pulse is complete (when handleEcho is complete)
@@ -319,12 +318,12 @@ int getUltrasonicData(int sensor, int iterations) {
         lastUltrasonicPulse = millis();
 
         //factor out invalid results
-        if (distance <= 0 || distance > 400) invalids++;
-        else totalDistance += distance;
-        //delay(30);
+        if (distance >= 0 && distance < 600) {
+            distances[loops] = distance;
+            loops++;
     }
-    if ((iterations - invalids) <= 0) return -1;
-    else return totalDistance / (iterations - invalids);
+    sort(begin(distances), end(distances));
+    return distances[iterations/2]
 }
 
 float radian(int degree) {
@@ -368,8 +367,8 @@ void authFlightController() {
 void calculateAbsoluteAltitude() {
     //cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
 
-    int rawDistance = getUltrasonicData(1, 1);
-    while (rawDistance == -1) rawDistance = getUltrasonicData(1, 1);
+    int rawDistance = getUltrasonicData(1, 4);
+    //while (rawDistance == -1) rawDistance = getUltrasonicData(1, 1);
     cout << " | Raw Distance: " << rawDistance << endl;
     //altitude = angleCorrection(rawDistance);
     //cout << " | Altitude: " << altitude;
