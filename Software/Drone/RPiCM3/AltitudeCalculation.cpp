@@ -324,7 +324,7 @@ int getUltrasonicData(int sensor, int iterations) {
             loops++;
         }
     }
-    sort(distances, distances + sizeof(distances));
+    sort(begin(distances), end(distances));
     return distances[iterations/2];
 }
 
