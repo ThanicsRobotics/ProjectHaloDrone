@@ -301,7 +301,7 @@ int getUltrasonicData(int sensor, const int iterations) {
     int loops = 0;
     //Takes average of x distance measurements
     while(loops < iterations) {
-        while (millis() - lastUltrasonicPulse < 100);
+        while (millis() - lastUltrasonicPulse < 60);
 
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
