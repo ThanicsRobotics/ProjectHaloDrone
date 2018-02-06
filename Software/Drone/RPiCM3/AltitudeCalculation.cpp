@@ -322,6 +322,7 @@ int getUltrasonicData(int sensor, int iterations) {
         if (distance >= 0 && distance < 600) {
             distances[loops] = distance;
             loops++;
+        }
     }
     sort(distances, distances + sizeof(distances));
     return distances[iterations/2];
