@@ -324,7 +324,7 @@ int getUltrasonicData(int sensor, int iterations) {
             loops++;
     }
     sort(distances, distances + sizeof(distances));
-    return distances[iterations/2]
+    return distances[iterations/2];
 }
 
 float radian(int degree) {
