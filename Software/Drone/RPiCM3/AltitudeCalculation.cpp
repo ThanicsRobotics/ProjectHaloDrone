@@ -301,7 +301,7 @@ int getUltrasonicData(int sensor, const int iterations) {
     int loops = 0;
     //Takes average of x distance measurements
     while(loops < iterations) {
-        while (millis() - lastUltrasonicPulse < 60);
+        while (millis() - lastUltrasonicPulse < 100);
 
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
@@ -324,10 +324,6 @@ int getUltrasonicData(int sensor, const int iterations) {
             loops++;
         }
     }
-    for (int i=0;i<iterations;i++) {
-        cout << sizeof(distances[i]);
-    }
-    cout << sizeof(distances) << endl;
     sort(distances, distances + iterations);
     return distances[iterations/2];
 }
