@@ -279,7 +279,7 @@ void setupIOExpander() {
 }
 
 //Gets distance value (in centimeters) from downward facing sensor
-int getUltrasonicData(int sensor, int iterations) {
+int getUltrasonicData(int sensor, const int iterations) {
     int pin;
 
     //Toggles between downward facing sensor 1 and 2
@@ -324,7 +324,7 @@ int getUltrasonicData(int sensor, int iterations) {
             loops++;
         }
     }
-    sort(begin(&distances), end(&distances));
+    sort(begin(distances), end(distances));
     return distances[iterations/2];
 }
 
