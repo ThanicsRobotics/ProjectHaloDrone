@@ -294,8 +294,8 @@ int getUltrasonicData(int sensor, int iterations) {
             break;
     }
 
-    int totalDistance = 0;
-    int invalids = 0;
+    //int totalDistance = 0;
+    //int invalids = 0;
 
     int distances[iterations];
     int loops = 0;
@@ -323,7 +323,7 @@ int getUltrasonicData(int sensor, int iterations) {
             distances[loops] = distance;
             loops++;
     }
-    sort(begin(distances), end(distances));
+    sort(distances, distances + sizeof(distances));
     return distances[iterations/2]
 }
 
@@ -368,7 +368,7 @@ void authFlightController() {
 void calculateAbsoluteAltitude() {
     //cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
 
-    int rawDistance = getUltrasonicData(1, 4);
+    int rawDistance = getUltrasonicData(1, 5);
     //while (rawDistance == -1) rawDistance = getUltrasonicData(1, 1);
     cout << " | Raw Distance: " << rawDistance << endl;
     //altitude = angleCorrection(rawDistance);
