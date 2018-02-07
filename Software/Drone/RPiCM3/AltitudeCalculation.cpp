@@ -370,16 +370,19 @@ void calculateAbsoluteAltitude() {
     //cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
     for (int it = 1; it < 12; it += 2) {
         for (int s = 30; s < 250; s += 30) {
-            int total = 0;
+            //int total = 0;
+            int distances[50];
             for (int i = 0; i < 50; i++) {
                 int rawDistance = getUltrasonicData(1, it, s);
                 //cout << " | Raw Distance: " << rawDistance << endl;
-                total += rawDistance;
-                cout << "|";
+                //total += rawDistance;
+                distances[i] = rawDistance;
+                cout << ".";
                 fflush(stdout);
             }
+            sort(distances, distances + 50);
             cout << endl << "Average for " << it << " iterations and " << s << " seconds: " 
-            << total/100 << endl;
+            << distances[25] << endl;
         }
     }
     
