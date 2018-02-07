@@ -37,10 +37,10 @@ using namespace std;
 
 //Thread mutex and gyro thread function
 pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_t gyroThread, serialThread;
+//pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_t gyroThread;
 void *gyroLoop(void *void_ptr);
-void *serialLoop(void *void_ptr);
+//void *serialLoop(void *void_ptr);
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
@@ -200,9 +200,9 @@ void handleSerialInterrupt() {
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
         //cout << "2" << endl;
         if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
-            pthread_mutex_lock(&serial_mutex);
+            //pthread_mutex_lock(&serial_mutex);
             throttleInput = data;                                            //Set throttle input
-            pthread_mutex_unlock(&serial_mutex);
+            //pthread_mutex_unlock(&serial_mutex);
             coFlag = false;
             cout << throttleInput << endl;
             fflush(stdout);
@@ -260,7 +260,7 @@ void setupSerial() {
 	// tcflush(uart0_filestream, TCIFLUSH);
 	// tcsetattr(uart0_filestream, TCSANOW, &options);
 
-    //wiringPiISR(15, INT_EDGE_RISING, handleSerialInterrupt);
+    wiringPiISR(15, INT_EDGE_RISING, handleSerialInterrupt);
 }
 
 //Configures inputs and outputs of IO Expander
@@ -447,13 +447,13 @@ void *gyroLoop(void *void_ptr) {
     return NULL;
 }
 
-void *serialLoop(void *void_ptr) {
-    while(1) {
-        handleSerialInterrupt();
-        //delay(1);
-    }
-    return NULL;
-}
+// void *serialLoop(void *void_ptr) {
+//     while(1) {
+//         handleSerialInterrupt();
+//         //delay(1);
+//     }
+//     return NULL;
+// }
 
 //Main Program loop
 int main() {
@@ -469,7 +469,7 @@ int main() {
 
     setupSerial();
     
-    pthread_create(&serialThread, NULL, serialLoop, NULL);
+    //pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     // cout << "Waiting for gyro calibration..." << endl;
@@ -504,7 +504,7 @@ void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
 	serialClose(serialFd);
     
-    pthread_join(serialThread, NULL);
+    //pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
 
     delay(1000);
