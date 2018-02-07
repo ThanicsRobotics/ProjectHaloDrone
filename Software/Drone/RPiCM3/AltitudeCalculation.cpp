@@ -279,7 +279,7 @@ void setupIOExpander() {
 }
 
 //Gets distance value (in centimeters) from downward facing sensor
-int getUltrasonicData(int sensor, const int iterations) {
+int getUltrasonicData(int sensor, int iterations, int delay) {
     int pin;
 
     //Toggles between downward facing sensor 1 and 2
@@ -301,7 +301,7 @@ int getUltrasonicData(int sensor, const int iterations) {
     int loops = 0;
     //Takes average of x distance measurements
     while(loops < iterations) {
-        while (millis() - lastUltrasonicPulse < 60);
+        while (millis() - lastUltrasonicPulse < delay);
 
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
@@ -368,10 +368,19 @@ void authFlightController() {
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
     //cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
-
-    int rawDistance = getUltrasonicData(1, 9);
-    //while (rawDistance == -1) rawDistance = getUltrasonicData(1, 1);
-    cout << " | Raw Distance: " << rawDistance << endl;
+    for (int it = 1; it < 12; it += 2) {
+        for (int s = 30; s < 250; s += 30) {
+            int total = 0;
+            for (int i = 0; i < 100; i++) {
+                int rawDistance = getUltrasonicData(1, it, s);
+                //cout << " | Raw Distance: " << rawDistance << endl;
+                total += rawDistance
+            }
+            cout << "Average for " << it << " iterations and " << s << "seconds: " 
+            << total/100 << endl;
+        }
+    }
+    
     //altitude = angleCorrection(rawDistance);
     //cout << " | Altitude: " << altitude;
 }
