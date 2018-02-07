@@ -163,7 +163,7 @@ void readline() {
         serialFlush(serialFd);
         char thisChar = serialGetchar(serialFd);
         
-        cout << thisChar << endl;
+        //cout << thisChar << endl;
         
         //Check if this character is the end of message
         if (thisChar == '\n') {
