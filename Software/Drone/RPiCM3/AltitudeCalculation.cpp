@@ -164,7 +164,7 @@ void readline() {
         char thisChar = serialGetchar(serialFd);
         
         //cout << thisChar << endl;
-        fflush(stdout);
+        
         //Check if this character is the end of message
         if (thisChar == '\n') {
             wordEnd = true;
@@ -421,7 +421,7 @@ void sendThrottle() {
     cout << " | Throttle: " << newThrottle << endl;
 
     buffer[1] = (newThrottle - 1000) & 0xFF;
-    buffer[0] = (newThrottle - 1000) & 0xFF00;
+    buffer[0] = ((newThrottle - 1000) & 0xFF00) >> 8;
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
 
     //CLOCK SPEED TEST
@@ -431,8 +431,8 @@ void sendThrottle() {
 
 void mainLoop() {
     while(1) {
-        calculateAbsoluteAltitude();
-        calculatePID();
+        //calculateAbsoluteAltitude();
+        //calculatePID();
         sendThrottle();
     }
 }
