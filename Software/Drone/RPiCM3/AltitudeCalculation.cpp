@@ -376,6 +376,7 @@ void calculateAbsoluteAltitude() {
                 //cout << " | Raw Distance: " << rawDistance << endl;
                 total += rawDistance;
                 cout << ".";
+                fflush(stdout);
             }
             cout << endl << "Average for " << it << " iterations and " << s << " seconds: " 
             << total/100 << endl;
