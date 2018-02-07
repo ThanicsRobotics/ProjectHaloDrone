@@ -471,14 +471,15 @@ int main() {
 
     cout << "Waiting for gyro calibration..." << endl;
     int start = millis();
-    bool repeat = false;
-    while (gyroRoll != 4 || repeat == true) {
+    bool repeat = true;
+    while (gyroRoll != 4 && repeat == true) {
         repeat = false;
-        if (millis() - start > 20000) {
+        if (millis() - start > 30000) {
             cout << "Gyro not responding, resetting..." << endl;
+            delay(1000);
             authFlightController();
             start = 0;
-            repeat = true;
+            repeat = false;
         }
         delay(50);
     }
@@ -494,15 +495,15 @@ int main() {
     }
 
     mainLoop();
-
-    pthread_join(serialThread, NULL);
-    pthread_join(gyroThread, NULL);
 }
 
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
 	serialClose(serialFd);
     
+    pthread_join(serialThread, NULL);
+    pthread_join(gyroThread, NULL);
+
     delay(100);
     //close(uart0_filestream);
 	exit(signum);
