@@ -420,7 +420,8 @@ void sendThrottle() {
 
     cout << " | Throttle: " << newThrottle << endl;
 
-    buffer[1] = newThrottle - 1000;
+    buffer[1] = (newThrottle - 1000) &= 0xFF;
+    buffer[0] = (newThrottle - 1000) &= 0xFF00;
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
 
     //CLOCK SPEED TEST
@@ -430,11 +431,9 @@ void sendThrottle() {
 
 void mainLoop() {
     while(1) {
-        //calculatePressureAltitude();
         calculateAbsoluteAltitude();
         calculatePID();
         sendThrottle();
-        //delay(10);
     }
 }
 
@@ -485,7 +484,7 @@ int main() {
     }
     repeat = false;
     cout << "Calibration complete. Arm quadcopter." << endl;
-    cout << "To bypass controller, type 'yes': " << endl;
+    cout << "To bypass controller, type 'yes': ";
     string input = "";
     while (gyroRoll == 4 && repeat == false) {
         getline(cin, input);
