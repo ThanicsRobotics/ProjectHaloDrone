@@ -204,6 +204,7 @@ void handleSerialInterrupt() {
             pthread_mutex_unlock(&serial_mutex);
             coFlag = false;
             cout << throttleInput << endl;
+            fflush(stdout);
         }
         //cout << "3" << endl;
         else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
@@ -448,7 +449,7 @@ void *gyroLoop(void *void_ptr) {
 void *serialLoop(void *void_ptr) {
     while(1) {
         handleSerialInterrupt();
-        delay(1);
+        //delay(1);
     }
     return NULL;
 }
