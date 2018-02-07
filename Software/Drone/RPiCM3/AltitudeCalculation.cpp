@@ -498,16 +498,16 @@ int main() {
     // }
 
     mainLoop();
-
-    pthread_join(serialThread, NULL);
-    pthread_join(gyroThread, NULL);
 }
 
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
 	serialClose(serialFd);
     
-    delay(100);
+    pthread_join(serialThread, NULL);
+    pthread_join(gyroThread, NULL);
+
+    delay(1000);
     //close(uart0_filestream);
 	exit(signum);
 }
