@@ -160,10 +160,10 @@ void readline() {
         //Read character incoming on serial bus
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
-        
+        serialFlush(serialFd);
         char thisChar = serialGetchar(serialFd);
         
-        //cout << thisChar << endl;
+        cout << thisChar << endl;
         
         //Check if this character is the end of message
         if (thisChar == '\n') {
