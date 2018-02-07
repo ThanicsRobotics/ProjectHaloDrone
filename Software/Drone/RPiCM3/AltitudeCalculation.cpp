@@ -371,10 +371,10 @@ void calculateAbsoluteAltitude() {
     for (int it = 1; it < 12; it += 2) {
         for (int s = 30; s < 250; s += 30) {
             int total = 0;
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 50; i++) {
                 int rawDistance = getUltrasonicData(1, it, s);
                 //cout << " | Raw Distance: " << rawDistance << endl;
-                total += rawDistance
+                total += rawDistance;
             }
             cout << "Average for " << it << " iterations and " << s << "seconds: " 
             << total/100 << endl;
