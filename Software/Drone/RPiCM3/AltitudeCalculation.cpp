@@ -314,7 +314,7 @@ int getUltrasonicData(int sensor, int iterations, int delay) {
         while(pulseComplete == false);
 
         //Calculate distance based on speed of sound and travel time
-        int distance = pulse_time * 345 / 2 / 10000;
+        int distance = pulse_time * 340 / 10000;
         pulseComplete = false;
         lastUltrasonicPulse = millis();
 
