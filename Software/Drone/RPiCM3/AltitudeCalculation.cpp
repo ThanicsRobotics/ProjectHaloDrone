@@ -192,27 +192,27 @@ void readline() {
 }
 
 void handleSerialInterrupt() {
-    //cout << endl << "INT" << endl;
-    readline();
-    //serialFlush(serialFd);
-    //cout << "1" << endl;
-    if (wordEnd == true) {                                                  //If we have finished a message
-        int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
-        //cout << "2" << endl;
-        if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
-            //pthread_mutex_lock(&serial_mutex);
-            throttleInput = data;                                            //Set throttle input
-            //pthread_mutex_unlock(&serial_mutex);
-            coFlag = false;
-            cout << throttleInput << endl;
-            fflush(stdout);
-        }
-        //cout << "3" << endl;
-        else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
-        memset(serialBuffer,0,sizeof(serialBuffer));
-    }
-    else return;
-    //cout << "4" << endl;
+    cout << endl << "INT" << endl;
+    // readline();
+    // //serialFlush(serialFd);
+    // //cout << "1" << endl;
+    // if (wordEnd == true) {                                                  //If we have finished a message
+    //     int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
+    //     //cout << "2" << endl;
+    //     if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
+    //         //pthread_mutex_lock(&serial_mutex);
+    //         throttleInput = data;                                            //Set throttle input
+    //         //pthread_mutex_unlock(&serial_mutex);
+    //         coFlag = false;
+    //         cout << throttleInput << endl;
+    //         fflush(stdout);
+    //     }
+    //     //cout << "3" << endl;
+    //     else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
+    //     memset(serialBuffer,0,sizeof(serialBuffer));
+    // }
+    // else return;
+    // //cout << "4" << endl;
 }
 
 //Utility function for setting individual pin on IO Expander
@@ -260,7 +260,7 @@ void setupSerial() {
 	// tcflush(uart0_filestream, TCIFLUSH);
 	// tcsetattr(uart0_filestream, TCSANOW, &options);
 
-    wiringPiISR(15, INT_EDGE_RISING, handleSerialInterrupt);
+    wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
 }
 
 //Configures inputs and outputs of IO Expander
