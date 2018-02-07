@@ -339,6 +339,9 @@ int angleCorrection(int rawDistance) {
 
 //Making sure the STM32F446 is listening...
 void authFlightController() {
+    //Reset flight controller using OpenOCD
+    system("sudo openocd");
+
     unsigned char buffer[100];
     unsigned int authKey = 0;
     cout << "Authenticating..." << endl;
@@ -452,9 +455,6 @@ void *serialLoop(void *void_ptr) {
 
 //Main Program loop
 int main() {
-    //Reset flight controller using OpenOCD
-    system("sudo openocd");
-
     //Setup function calls
     wiringPiSetupGpio();
     setupIOExpander();
@@ -471,9 +471,28 @@ int main() {
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     cout << "Waiting for gyro calibration..." << endl;
-    while (gyroRoll != 4);
+    int start = millis();
+    bool repeat = false;
+    while (gyroRoll != 4 || repeat == true) {
+        repeat = false;
+        if (millis() - start > 20000) {
+            cout << "Gyro not responding, resetting..." << endl;
+            authFlightController();
+            start = 0;
+            repeat = true;
+        }
+        delay(50);
+    }
+    repeat = false;
     cout << "Calibration complete. Arm quadcopter." << endl;
-    while (gyroRoll == 4);
+    cout << "To bypass controller, type 'yes': " << endl;
+    string input = "";
+    while (gyroRoll == 4 && repeat == false) {
+        getline(cin, input);
+        if (input == "yes" || input == "Yes") {
+            break;
+        }
+    }
 
     mainLoop();
 
