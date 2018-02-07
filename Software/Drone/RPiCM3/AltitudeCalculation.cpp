@@ -420,8 +420,8 @@ void sendThrottle() {
 
     cout << " | Throttle: " << newThrottle << endl;
 
-    buffer[1] = (newThrottle - 1000) &= 0xFF;
-    buffer[0] = (newThrottle - 1000) &= 0xFF00;
+    buffer[1] = (newThrottle - 1000) & 0xFF;
+    buffer[0] = (newThrottle - 1000) & 0xFF00;
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
 
     //CLOCK SPEED TEST
