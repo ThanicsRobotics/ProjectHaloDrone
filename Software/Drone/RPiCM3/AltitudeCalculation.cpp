@@ -375,8 +375,9 @@ void calculateAbsoluteAltitude() {
                 int rawDistance = getUltrasonicData(1, it, s);
                 //cout << " | Raw Distance: " << rawDistance << endl;
                 total += rawDistance;
+                cout << ".";
             }
-            cout << "Average for " << it << " iterations and " << s << "seconds: " 
+            cout << endl << "Average for " << it << " iterations and " << s << " seconds: " 
             << total/100 << endl;
         }
     }
