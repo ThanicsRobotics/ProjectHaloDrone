@@ -203,6 +203,7 @@ void handleSerialInterrupt() {
             throttleInput = data;                                            //Set throttle input
             pthread_mutex_unlock(&serial_mutex);
             coFlag = false;
+            cout << throttleInput << endl;
         }
         //cout << "3" << endl;
         else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
@@ -431,9 +432,9 @@ void sendThrottle() {
 
 void mainLoop() {
     while(1) {
-        calculateAbsoluteAltitude();
-        calculatePID();
-        sendThrottle();
+        //calculateAbsoluteAltitude();
+        //calculatePID();
+        //sendThrottle();
     }
 }
 
