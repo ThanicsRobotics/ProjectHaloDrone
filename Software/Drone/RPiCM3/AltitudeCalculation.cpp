@@ -38,9 +38,11 @@ using namespace std;
 //Thread mutex and gyro thread function
 pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t run_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t gyroThread, serialThread;
 void *gyroLoop(void *void_ptr);
 void *serialLoop(void *void_ptr);
+bool run = true;
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
@@ -418,13 +420,12 @@ void calculatePID() {
 void sendThrottle() {
     unsigned char buffer[100];
 
-    pthread_mutex_lock(&serial_mutex);
+    //pthread_mutex_lock(&serial_mutex);
     int input = throttleInput;
-    pthread_mutex_unlock(&serial_mutex);
+   // pthread_mutex_unlock(&serial_mutex);
     cout << " | input: " << input;
     int newThrottle = input + pid_output;
     
-
     if (newThrottle > 1900) newThrottle = 1900;
     //if (newThrottle < 1000) newThrottle = 1000;
 
@@ -448,14 +449,14 @@ void mainLoop() {
 }
 
 void *gyroLoop(void *void_ptr) {
-    while(1) {
+    while(run == true) {
         getGyroValues();
     }
     return NULL;
 }
 
 void *serialLoop(void *void_ptr) {
-    while(1) {
+    while(run == true) {
         handleSerialInterrupt();
         //delay(1);
     }
@@ -512,6 +513,10 @@ int main() {
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
 	serialClose(serialFd);
+    
+    pthread_mutex_lock(&run_mutex);
+    run = false;
+    pthread_mutex_unlock(&run_mutex);
     
     pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
