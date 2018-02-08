@@ -519,7 +519,7 @@ int main() {
     gyro_signalen();
 
     //Load gyro angle data into SPI buffer
-    spi.reply((signed char)-15 << 8 | (signed char)31);
+    spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
     
     //spi.reply((int)receiver_input_pitch);
     //CLOCK SPEED TEST
