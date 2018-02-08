@@ -291,7 +291,7 @@ void setupIOExpander() {
 }
 
 //Gets distance value (in centimeters) from downward facing sensor
-int getUltrasonicData(int sensor, int iterations, int pulseDelay) {
+int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
     int pin;
 
     //Toggles between downward facing sensor 1 and 2
@@ -498,30 +498,30 @@ int main() {
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     cout << "Waiting for gyro calibration..." << endl;
-    //int start = millis();
-    //bool repeat = true;
-    //int currentGyroRoll = gyroRoll;
-    // while (gyroRoll != 4 && repeat == true) {
-    //     repeat = true;
-    //     if (millis() - start > 30000) {
-    //         cout << "Gyro not responding, resetting..." << endl;
-    //         delay(1000);
-    //         authFlightController();
-    //         start = 0;
-    //         repeat = false;
-    //     }
-    //     delay(50);
-    // }
+    int start = millis();
+    bool repeat = true;
+    int currentGyroRoll = gyroRoll;
+    while (gyroRoll != 4 && repeat) {
+        repeat = true;
+        if (millis() - start > 10000) {
+            cout << "Gyro not responding, resetting..." << endl;
+            delay(1000);
+            authFlightController();
+            start = 0;
+            repeat = false;
+        }
+        delay(50);
+    }
 
-    // cout << "Calibration complete. Arm quadcopter." << endl;
-    // cout << "To bypass controller, type 'yes': ";
-    // string input = "";
-    // while (gyroRoll == 4) {
-    //     getline(cin, input);
-    //     if (input == "yes" || input == "Yes") {
-    //         break;
-    //     }
-    // }
+    cout << "Calibration complete. Arm quadcopter." << endl;
+    cout << "To bypass controller, type 'yes': ";
+    string input = "";
+    while (gyroRoll == 4) {
+        getline(cin, input);
+        if (input == "yes" || input == "Yes") {
+            break;
+        }
+    }
 
     mainLoop();
 }
