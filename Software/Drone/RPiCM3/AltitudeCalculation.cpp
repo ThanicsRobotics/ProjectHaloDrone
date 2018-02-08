@@ -80,7 +80,7 @@ int start_time = 0;
 int pulse_time = 0;
 //struct timespec gettime_now;
 bool pulseComplete = false;
-int lastUltrasonicPulse = 0;
+unsigned int lastUltrasonicPulse = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
@@ -313,7 +313,7 @@ int getUltrasonicData(int sensor, int iterations, int delay) {
     int loops = 0;
     //Takes average of x distance measurements
     while(loops < iterations) {
-        while (millis() - lastUltrasonicPulse < delay);
+        while (millis() - lastUltrasonicPulse < delay) delay(1);
 
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
@@ -451,7 +451,7 @@ void sendThrottle() {
 
 
 void mainLoop() {
-    while(!serialConfigured || !spiConfigured || !authenticated);
+    while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
     while(1) {
         calculateAbsoluteAltitude();
         calculatePID();
