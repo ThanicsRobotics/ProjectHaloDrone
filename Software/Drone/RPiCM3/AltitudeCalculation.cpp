@@ -442,8 +442,8 @@ void sendThrottle() {
 
 void mainLoop() {
     while(1) {
-        //calculateAbsoluteAltitude();
-        //calculatePID();
+        calculateAbsoluteAltitude();
+        calculatePID();
         sendThrottle();
     }
 }
