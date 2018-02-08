@@ -484,27 +484,27 @@ int main() {
     int start = millis();
     bool repeat = true;
     //int currentGyroRoll = gyroRoll;
-    while (gyroRoll != 4 && repeat == true) {
-        repeat = true;
-        if (millis() - start > 30000) {
-            cout << "Gyro not responding, resetting..." << endl;
-            delay(1000);
-            authFlightController();
-            start = 0;
-            repeat = false;
-        }
-        delay(50);
-    }
+    // while (gyroRoll != 4 && repeat == true) {
+    //     repeat = true;
+    //     if (millis() - start > 30000) {
+    //         cout << "Gyro not responding, resetting..." << endl;
+    //         delay(1000);
+    //         authFlightController();
+    //         start = 0;
+    //         repeat = false;
+    //     }
+    //     delay(50);
+    // }
 
-    cout << "Calibration complete. Arm quadcopter." << endl;
-    cout << "To bypass controller, type 'yes': ";
-    string input = "";
-    while (gyroRoll == 4) {
-        getline(cin, input);
-        if (input == "yes" || input == "Yes") {
-            break;
-        }
-    }
+    // cout << "Calibration complete. Arm quadcopter." << endl;
+    // cout << "To bypass controller, type 'yes': ";
+    // string input = "";
+    // while (gyroRoll == 4) {
+    //     getline(cin, input);
+    //     if (input == "yes" || input == "Yes") {
+    //         break;
+    //     }
+    // }
 
     mainLoop();
 }
