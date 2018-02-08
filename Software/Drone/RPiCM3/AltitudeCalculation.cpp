@@ -441,7 +441,11 @@ void sendThrottle() {
     //cout << " | Clock: " << clockspeed << endl;
 }
 
+bool serialConfigured = false;
+bool spiConfigured = false;
+
 void mainLoop() {
+    while(!serialConfigured || !spiConfigured);
     while(1) {
         calculateAbsoluteAltitude();
         calculatePID();
@@ -457,7 +461,7 @@ void *gyroLoop(void *void_ptr) {
     }
     authFlightController();
 
-    while(run == true) {
+    while(run) {
         getGyroValues();
     }
     return NULL;
@@ -466,7 +470,7 @@ void *gyroLoop(void *void_ptr) {
 void *serialLoop(void *void_ptr) {
     setupSerial();
     serialFlush(serialFd);
-    while(run == true) {
+    while(run) {
         handleSerialInterrupt();
         //delay(1);
     }
@@ -481,10 +485,6 @@ int main() {
     setupIOExpander();
     signal(SIGINT, signal_callback_handler);
 
-    
-
-    
-    
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
