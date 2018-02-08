@@ -433,7 +433,7 @@ void sendThrottle() {
 
     buffer[1] = (newThrottle - 1000) & 0xFF;
     buffer[0] = ((newThrottle - 1000) & 0xFF00) >> 8;
-    wiringPiSPIDataRW(SPI_CS, buffer, 2);
+    //wiringPiSPIDataRW(SPI_CS, buffer, 2);
 
     //CLOCK SPEED TEST
     //unsigned long int clockspeed = buffer[1];
@@ -481,8 +481,8 @@ int main() {
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     cout << "Waiting for gyro calibration..." << endl;
-    int start = millis();
-    bool repeat = true;
+    //int start = millis();
+    //bool repeat = true;
     //int currentGyroRoll = gyroRoll;
     // while (gyroRoll != 4 && repeat == true) {
     //     repeat = true;
