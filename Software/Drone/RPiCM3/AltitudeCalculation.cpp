@@ -196,6 +196,7 @@ void handleSerialInterrupt() {
     readline();
     //serialFlush(serialFd);
     //cout << "1" << endl;
+    delay(1);
     if (wordEnd == true) {                                                  //If we have finished a message
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
         //cout << "2" << endl;
