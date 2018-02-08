@@ -485,8 +485,7 @@ int main() {
     bool repeat = true;
     //int currentGyroRoll = gyroRoll;
     while (gyroRoll != 4 && repeat == true) {
-        
-        repeat = false;
+        repeat = true;
         if (millis() - start > 30000) {
             cout << "Gyro not responding, resetting..." << endl;
             delay(1000);
@@ -496,11 +495,11 @@ int main() {
         }
         delay(50);
     }
-    repeat = false;
+
     cout << "Calibration complete. Arm quadcopter." << endl;
     cout << "To bypass controller, type 'yes': ";
     string input = "";
-    while (gyroRoll == 4 && repeat == false) {
+    while (gyroRoll == 4) {
         getline(cin, input);
         if (input == "yes" || input == "Yes") {
             break;
