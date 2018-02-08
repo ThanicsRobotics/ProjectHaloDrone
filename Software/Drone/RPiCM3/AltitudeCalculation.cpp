@@ -69,8 +69,8 @@ int altitude;
 int lastAltitude;
 
 //Gyro angle variables
-signed char gyroPitch;
-signed char gyroRoll;
+signed int gyroPitch;
+signed int gyroRoll;
 
 //Pulse timing variables
 int start_time = 0;
