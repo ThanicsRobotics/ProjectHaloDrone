@@ -418,8 +418,13 @@ void calculatePID() {
 void sendThrottle() {
     unsigned char buffer[100];
 
-    cout << " | input: " << throttleInput;
-    int newThrottle = throttleInput + pid_output;
+    pthread_mutex_lock(&serial_mutex);
+    int input = throttleInput;
+    pthread_mutex_unlock(&serial_mutex);
+    cout << " | input: " << input;
+    int newThrottle = input + pid_output;
+    
+
     if (newThrottle > 1900) newThrottle = 1900;
     //if (newThrottle < 1000) newThrottle = 1000;
 
@@ -477,7 +482,9 @@ int main() {
     cout << "Waiting for gyro calibration..." << endl;
     int start = millis();
     bool repeat = true;
+    //int currentGyroRoll = gyroRoll;
     while (gyroRoll != 4 && repeat == true) {
+        
         repeat = false;
         if (millis() - start > 30000) {
             cout << "Gyro not responding, resetting..." << endl;
