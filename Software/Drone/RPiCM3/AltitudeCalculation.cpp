@@ -97,11 +97,11 @@ void getGyroValues() {
     //Gyro pitch and roll are stored in two incoming bytes
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
     
-    //pthread_mutex_lock(&gyro_mutex);
+    pthread_mutex_lock(&gyro_mutex);
     gyroPitch = (signed char)buffer[0];
     gyroRoll = (signed char)buffer[1];
     //gyroRoll = buffer[0] << 8 | buffer[1];
-    //pthread_mutex_unlock(&gyro_mutex);
+    pthread_mutex_unlock(&gyro_mutex);
 
     delay(1);
     //cout << gyroRoll << endl;
