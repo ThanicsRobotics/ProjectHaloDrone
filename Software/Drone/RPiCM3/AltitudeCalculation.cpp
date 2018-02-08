@@ -512,12 +512,14 @@ int main() {
 
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
+    cout << "Closing Threads and Ports..." << endl;
+
 	serialClose(serialFd);
     
     pthread_mutex_lock(&run_mutex);
     run = false;
     pthread_mutex_unlock(&run_mutex);
-    
+
     pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
 
