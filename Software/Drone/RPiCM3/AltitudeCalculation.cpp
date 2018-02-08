@@ -163,7 +163,7 @@ void readline() {
         
         char thisChar = serialGetchar(serialFd);
         
-        //cout << thisChar << endl;
+        cout << thisChar << endl;
         
         //Check if this character is the end of message
         if (thisChar == '\n') {
@@ -193,10 +193,11 @@ void readline() {
 
 void handleSerialInterrupt() {
     //cout << endl << "INT" << endl;
+    delay(1);
     readline();
     //serialFlush(serialFd);
     //cout << "1" << endl;
-    delay(1);
+    
     if (wordEnd == true) {                                                  //If we have finished a message
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
         //cout << "2" << endl;
