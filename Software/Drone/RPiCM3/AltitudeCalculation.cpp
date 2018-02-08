@@ -360,6 +360,7 @@ void authFlightController() {
     int start = millis();
     while(authKey != 0x00F9) {
         //Write to Authentication register
+        buffer[0] = 0x00;
         buffer[1] = 0x01;
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
 
