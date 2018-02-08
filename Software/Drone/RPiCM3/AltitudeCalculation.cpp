@@ -36,7 +36,7 @@
 using namespace std;
 
 //Thread mutex and gyro thread function
-//pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
 //pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
 //pthread_mutex_t run_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t gyroThread, serialThread;
