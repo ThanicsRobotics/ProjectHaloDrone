@@ -56,6 +56,7 @@ bool coFlag = false;
 //int uart0_filestream = -1;
 bool serialConfigured = false;
 bool spiConfigured = false;
+bool authenticated = false;
 
 //CS0 is barometer, CS1 is STM32 flight controller
 int SPI_CS = 0;
@@ -353,6 +354,7 @@ void authFlightController() {
     //Reset flight controller using OpenOCD
     system("sudo openocd");
 
+    authenticated = false;
     unsigned char buffer[100];
     unsigned int authKey = 0;
     cout << "Authenticating..." << endl;
@@ -378,6 +380,7 @@ void authFlightController() {
         }
     }
     cout << "Authenticated" << endl;
+    authenticated = true;
 }
 
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
@@ -448,7 +451,7 @@ void sendThrottle() {
 
 
 void mainLoop() {
-    while(!serialConfigured || !spiConfigured);
+    while(!serialConfigured || !spiConfigured || !authenticated);
     while(1) {
         calculateAbsoluteAltitude();
         calculatePID();
