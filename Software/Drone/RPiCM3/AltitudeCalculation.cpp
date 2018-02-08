@@ -163,7 +163,7 @@ void readline() {
         
         char thisChar = serialGetchar(serialFd);
         
-        cout << thisChar << endl;
+        //cout << thisChar << endl;
         
         //Check if this character is the end of message
         if (thisChar == '\n') {
@@ -438,7 +438,7 @@ void mainLoop() {
     while(1) {
         //calculateAbsoluteAltitude();
         //calculatePID();
-        //sendThrottle();
+        sendThrottle();
     }
 }
 
@@ -474,30 +474,30 @@ int main() {
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
-    // cout << "Waiting for gyro calibration..." << endl;
-    // int start = millis();
-    // bool repeat = true;
-    // while (gyroRoll != 4 && repeat == true) {
-    //     repeat = false;
-    //     if (millis() - start > 30000) {
-    //         cout << "Gyro not responding, resetting..." << endl;
-    //         delay(1000);
-    //         authFlightController();
-    //         start = 0;
-    //         repeat = false;
-    //     }
-    //     delay(50);
-    // }
-    // repeat = false;
-    // cout << "Calibration complete. Arm quadcopter." << endl;
-    // cout << "To bypass controller, type 'yes': ";
-    // string input = "";
-    // while (gyroRoll == 4 && repeat == false) {
-    //     getline(cin, input);
-    //     if (input == "yes" || input == "Yes") {
-    //         break;
-    //     }
-    // }
+    cout << "Waiting for gyro calibration..." << endl;
+    int start = millis();
+    bool repeat = true;
+    while (gyroRoll != 4 && repeat == true) {
+        repeat = false;
+        if (millis() - start > 30000) {
+            cout << "Gyro not responding, resetting..." << endl;
+            delay(1000);
+            authFlightController();
+            start = 0;
+            repeat = false;
+        }
+        delay(50);
+    }
+    repeat = false;
+    cout << "Calibration complete. Arm quadcopter." << endl;
+    cout << "To bypass controller, type 'yes': ";
+    string input = "";
+    while (gyroRoll == 4 && repeat == false) {
+        getline(cin, input);
+        if (input == "yes" || input == "Yes") {
+            break;
+        }
+    }
 
     mainLoop();
 }
