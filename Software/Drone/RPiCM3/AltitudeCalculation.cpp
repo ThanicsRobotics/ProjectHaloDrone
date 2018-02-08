@@ -366,7 +366,7 @@ void authFlightController() {
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         delay(1);
         time = millis() - start;
-        if (time > 2000) {
+        if (time > 8000) {
             start = millis();
             cout << "Auth Timeout" << endl;
             system("sudo openocd");
