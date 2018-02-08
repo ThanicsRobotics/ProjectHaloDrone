@@ -54,6 +54,8 @@ char serialBuffer[100];
 bool wordEnd = false;
 bool coFlag = false;
 //int uart0_filestream = -1;
+bool serialConfigured = false;
+bool spiConfigured = false;
 
 //CS0 is barometer, CS1 is STM32 flight controller
 int SPI_CS = 0;
@@ -246,8 +248,10 @@ void digitalIOWrite(int pin, int state) {
 
 void setupSerial() {
     if ((serialFd = serialOpen("/dev/serial0", 9600)) < 0) {
-        cout << "Unable to open serial interface" << endl;
+        cout << "Unable to open serial interface: " << strerror(errno) << endl;
+        fflush(stdout);
     }
+    else serialConfigured = true;
 
     // uart0_filestream = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY);		//Open in non blocking read/write mode
 	// if (uart0_filestream == -1)
@@ -441,8 +445,7 @@ void sendThrottle() {
     //cout << " | Clock: " << clockspeed << endl;
 }
 
-bool serialConfigured = false;
-bool spiConfigured = false;
+
 
 void mainLoop() {
     while(!serialConfigured || !spiConfigured);
@@ -458,11 +461,14 @@ void *gyroLoop(void *void_ptr) {
     SPI_CS = 1;
     if (wiringPiSPISetup(SPI_CS, 1500000) < 0) {
         cout << "SPI Setup Failed: " << strerror(errno) << endl;
+        fflush(stdout);
     }
-    authFlightController();
-
-    while(run) {
-        getGyroValues();
+    else {
+        spiConfigured = true;
+        authFlightController();
+        while(run) {
+            getGyroValues();
+        }
     }
     return NULL;
 }
