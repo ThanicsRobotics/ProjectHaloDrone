@@ -36,7 +36,7 @@
 using namespace std;
 
 //Thread mutex and gyro thread function
-pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
 //pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
 //pthread_mutex_t run_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t gyroThread, serialThread;
@@ -97,11 +97,11 @@ void getGyroValues() {
     //Gyro pitch and roll are stored in two incoming bytes
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
     
-    pthread_mutex_lock(&gyro_mutex);
+    //pthread_mutex_lock(&gyro_mutex);
     gyroPitch = (signed char)buffer[0];
     gyroRoll = (signed char)buffer[1];
     //gyroRoll = buffer[0] << 8 | buffer[1];
-    pthread_mutex_unlock(&gyro_mutex);
+    //pthread_mutex_unlock(&gyro_mutex);
 
     delay(1);
     //cout << gyroRoll << endl;
@@ -450,6 +450,13 @@ void mainLoop() {
 }
 
 void *gyroLoop(void *void_ptr) {
+    //Switch to flight controller, setup SPI @ 1.5MHz
+    SPI_CS = 1;
+    if (wiringPiSPISetup(SPI_CS, 1500000) < 0) {
+        cout << "SPI Setup Failed: " << strerror(errno) << endl;
+    }
+    authFlightController();
+
     while(run == true) {
         getGyroValues();
     }
@@ -457,11 +464,13 @@ void *gyroLoop(void *void_ptr) {
 }
 
 void *serialLoop(void *void_ptr) {
+    setupSerial();
     serialFlush(serialFd);
     while(run == true) {
         handleSerialInterrupt();
         //delay(1);
     }
+    serialClose(serialFd);
     return NULL;
 }
 
@@ -472,12 +481,9 @@ int main() {
     setupIOExpander();
     signal(SIGINT, signal_callback_handler);
 
-    //Switch to flight controller, setup SPI @ 1.5MHz
-    SPI_CS = 1;
-    wiringPiSPISetup(SPI_CS, 1500000);
-    authFlightController();
+    
 
-    setupSerial();
+    
     
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
@@ -514,8 +520,6 @@ int main() {
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
     cout << "Closing Threads and Ports..." << endl;
-
-	serialClose(serialFd);
     
     //pthread_mutex_lock(&run_mutex);
     run = false;
