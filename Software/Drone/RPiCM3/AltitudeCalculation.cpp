@@ -291,7 +291,7 @@ void setupIOExpander() {
 }
 
 //Gets distance value (in centimeters) from downward facing sensor
-int getUltrasonicData(int sensor, int iterations, int delay) {
+int getUltrasonicData(int sensor, int iterations, int pulseDelay) {
     int pin;
 
     //Toggles between downward facing sensor 1 and 2
@@ -313,7 +313,7 @@ int getUltrasonicData(int sensor, int iterations, int delay) {
     int loops = 0;
     //Takes average of x distance measurements
     while(loops < iterations) {
-        while (millis() - lastUltrasonicPulse < delay) delay(1);
+        while (millis() - lastUltrasonicPulse < pulseDelay) delay(1);
 
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
