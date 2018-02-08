@@ -36,9 +36,9 @@
 using namespace std;
 
 //Thread mutex and gyro thread function
-pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t run_mutex = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t run_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t gyroThread, serialThread;
 void *gyroLoop(void *void_ptr);
 void *serialLoop(void *void_ptr);
@@ -97,11 +97,11 @@ void getGyroValues() {
     //Gyro pitch and roll are stored in two incoming bytes
     wiringPiSPIDataRW(SPI_CS, buffer, 2);
     
-    pthread_mutex_lock(&gyro_mutex);
+    //pthread_mutex_lock(&gyro_mutex);
     gyroPitch = (signed char)buffer[0];
     gyroRoll = (signed char)buffer[1];
     //gyroRoll = buffer[0] << 8 | buffer[1];
-    pthread_mutex_unlock(&gyro_mutex);
+    //pthread_mutex_unlock(&gyro_mutex);
 
     delay(1);
     //cout << gyroRoll << endl;
@@ -204,9 +204,9 @@ void handleSerialInterrupt() {
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
         //cout << "2" << endl;
         if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
-            pthread_mutex_lock(&serial_mutex);
+            //pthread_mutex_lock(&serial_mutex);
             throttleInput = data;                                            //Set throttle input
-            pthread_mutex_unlock(&serial_mutex);
+            //pthread_mutex_unlock(&serial_mutex);
             coFlag = false;
             //cout << throttleInput << endl;
             //fflush(stdout);
@@ -515,9 +515,9 @@ void signal_callback_handler(int signum) {
 
 	serialClose(serialFd);
     
-    pthread_mutex_lock(&run_mutex);
+    //pthread_mutex_lock(&run_mutex);
     run = false;
-    pthread_mutex_unlock(&run_mutex);
+    //pthread_mutex_unlock(&run_mutex);
 
     pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
