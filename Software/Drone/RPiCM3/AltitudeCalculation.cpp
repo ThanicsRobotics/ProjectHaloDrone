@@ -503,10 +503,10 @@ int main(int argc, char *argv[]) {
             controllerConnected = true;
         else if (string(argv[1]) == "-nc" || string(argv[1]) == "--no-controller") 
             controllerConnected = false;
-        else {
-            showUsage(argv[0]);
-            return 1;
-        }
+    }
+    else {
+        showUsage(argv[0]);
+        return 1;
     }
 
     //Setup function calls
