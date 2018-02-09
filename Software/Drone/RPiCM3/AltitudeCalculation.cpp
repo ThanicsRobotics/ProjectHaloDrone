@@ -175,11 +175,13 @@ void readline() {
         //while(serialDataAvail(serialFd) == 0);
         
         unsigned char buffer[1];
-        if(read(serialFd, &buffer, sizeof(buffer)) == -1) {
+        ssize_t length = read(serialFd, &buffer, sizeof(buffer))
+        if (length == -1) {
             cout << strerror(errno) << endl;
         }
         else {
-            cout << buffer[0] << endl;
+            buffer[length] = '\0'
+            cout << str(buffer) << endl;
         }
         
         // char thisChar = serialGetchar(serialFd);
@@ -256,7 +258,7 @@ void digitalIOWrite(int pin, int state) {
 }
 
 void setupSerial() {
-    if ((serialFd = serialOpen("/dev/serial0", 115200)) < 0) {
+    if ((serialFd = serialOpen("/dev/serial0", 9600)) < 0) {
         cout << "Unable to open serial interface: " << strerror(errno) << endl;
         fflush(stdout);
     }
