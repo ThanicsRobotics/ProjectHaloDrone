@@ -365,7 +365,6 @@ void authFlightController() {
     unsigned char buffer[100];
     unsigned int authKey = 0;
     cout << "Authenticating..." << endl;
-    int time = 0;
     int start = millis();
     while(authKey != 0x00F9) {
         //Write to Authentication register
@@ -380,11 +379,8 @@ void authFlightController() {
         cout << "Key: " << authKey << endl;
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         delay(50);
-        time = millis() - start;
-        if (time > 8000) {
-            start = millis();
-            cout << "Auth Timeout" << endl;
-            system("sudo openocd");
+        if (millis() - start > 8000) {
+            return;
         }
     }
     cout << "Authenticated" << endl;
