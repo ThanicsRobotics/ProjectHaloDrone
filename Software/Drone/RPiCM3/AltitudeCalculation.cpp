@@ -521,7 +521,6 @@ int main(int argc, char *argv[]) {
     fflush(stdout);
     int start = millis();
     bool repeat = true;
-    int currentGyroRoll = gyroRoll;
     while (gyroRoll != 4 && repeat) {
         repeat = true;
         if (millis() - start > 10000) {
@@ -547,12 +546,6 @@ int main(int argc, char *argv[]) {
             repeat = false;
         }
     }
-
-    getline(cin, input);
-        if (input == "yes" || input == "Yes") {
-            break;
-        }
-        else
 
     mainLoop();
 }
