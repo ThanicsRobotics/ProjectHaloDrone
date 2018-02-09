@@ -487,8 +487,28 @@ void *serialLoop(void *void_ptr) {
     return NULL;
 }
 
+void showUsage(string name) {
+    cerr << "Usage: " << name << " <option(s)> SOURCES"
+        << "Options:\n"
+        << "\t-h,--help\t\tShow this help message\n"
+        << "\t-d,--destination DESTINATION\tSpecify the destination path"
+        << endl;
+}
+
 //Main Program loop
-int main() {
+int main(int argc, char *argv[]) {
+    bool controllerConnected = false;
+    if (argc > 1) {
+        if (string(argv[1]) == "-c" || string(argv[1]) == "--controller-enabled") 
+            controllerConnected = true;
+        else if (string(argv[1]) == "-nc" || string(argv[1]) == "--no-controller") 
+            controllerConnected = false;
+        else {
+            showUsage(argv[0]);
+            return 1;
+        }
+    }
+
     //Setup function calls
     wiringPiSetupGpio();
     setupIOExpander();
@@ -498,6 +518,7 @@ int main() {
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     cout << "Waiting for gyro calibration..." << endl;
+    fflush(stdout);
     int start = millis();
     bool repeat = true;
     int currentGyroRoll = gyroRoll;
@@ -514,14 +535,24 @@ int main() {
     }
 
     cout << "Calibration complete. Arm quadcopter." << endl;
-    cout << "To bypass controller, type 'yes': ";
+    cout << "To bypass controller, type 'yes' or 'no': ";
     string input = "";
+    start = millis();
     while (gyroRoll == 4) {
-        getline(cin, input);
+        if (millis() - start > 10000) {
+            cout << "Gyro not responding, resetting..." << endl;
+            delay(1000);
+            authFlightController();
+            start = 0;
+            repeat = false;
+        }
+    }
+
+    getline(cin, input);
         if (input == "yes" || input == "Yes") {
             break;
         }
-    }
+        else
 
     mainLoop();
 }
