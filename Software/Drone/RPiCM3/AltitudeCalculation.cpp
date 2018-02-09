@@ -174,12 +174,12 @@ void readline() {
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
         
-        unsigned char buffer[4];
+        unsigned char buffer[1];
         if(read(serialFd, &buffer, sizeof(buffer)) == -1) {
             cout << strerror(errno) << endl;
         }
-        else if ((int)buffer[0] != 0) {
-            cout << (int)buffer[0] << endl;
+        else {
+            cout << buffer[0] << endl;
         }
         
         // char thisChar = serialGetchar(serialFd);
