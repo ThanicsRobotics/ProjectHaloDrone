@@ -496,7 +496,7 @@ void *gyroLoop(void *void_ptr) {
 
 void *serialLoop(void *void_ptr) {
     setupSerial();
-    serialFlush(serialFd);
+    //serialFlush(serialFd);
     while(run) {
         handleSerialInterrupt();
         //delay(1);
