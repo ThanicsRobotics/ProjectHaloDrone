@@ -468,6 +468,7 @@ void mainLoop() {
 
     while(1) {
         cout << throttleInput << endl;
+        fflush(stdout);
         //calculateAbsoluteAltitude();
         //calculatePID();
         //sendThrottle();
@@ -501,7 +502,7 @@ void *serialLoop(void *void_ptr) {
     serialFlush(serialFd);
     while(run) {
         handleSerialInterrupt();
-        delay(0.5);
+        //delay(0.5);
         
     }
     serialClose(serialFd);
