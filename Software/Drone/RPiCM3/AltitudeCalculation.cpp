@@ -168,7 +168,7 @@ void handleEcho() {
 // }
 
 void readline() {
-    //while (serialDataAvail(serialFd)) {
+    if (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
@@ -200,7 +200,7 @@ void readline() {
             return;
         }
         //cout << "1.3" << endl;
-    //}
+    }
 }
 
 void handleSerialInterrupt() {
@@ -544,42 +544,42 @@ int main(int argc, char *argv[]) {
     delay(200);
     cout << "Waiting for gyro calibration..." << endl;
     fflush(stdout);
-    int start = millis();
-    int repeat = 1;
-    while (gyroRoll != 4) {
-        repeat = 1;
-        if (millis() - start > 15000) {
-            cout << "Gyro not responding, resetting..." << endl;
-            delay(1000);
-            authFlightController();
-            start = 0;
-            repeat++;
-        }
-        else if (repeat > 1) {
-            shutdown();
-            return 1;
-        }
-        delay(50);
-    }
+    // int start = millis();
+    // int repeat = 1;
+    // while (gyroRoll != 4) {
+    //     repeat = 1;
+    //     if (millis() - start > 15000) {
+    //         cout << "Gyro not responding, resetting..." << endl;
+    //         delay(1000);
+    //         authFlightController();
+    //         start = 0;
+    //         repeat++;
+    //     }
+    //     else if (repeat > 1) {
+    //         shutdown();
+    //         return 1;
+    //     }
+    //     delay(50);
+    // }
 
-    if (controllerConnected) {
-        cout << "Calibration complete. Arm quadcopter." << endl;
-        start = millis();
-        repeat = 1;
-        while (gyroRoll == 4) {
-            if (millis() - start > 45000) {
-                cout << "Gyro not responding, resetting..." << endl;
-                delay(1000);
-                authFlightController();
-                start = 0;
-                repeat++;
-            }
-            if (repeat > 1) {
-                shutdown();
-                return 1;
-            }
-        }
-    }
+    // if (controllerConnected) {
+    //     cout << "Calibration complete. Arm quadcopter." << endl;
+    //     start = millis();
+    //     repeat = 1;
+    //     while (gyroRoll == 4) {
+    //         if (millis() - start > 45000) {
+    //             cout << "Gyro not responding, resetting..." << endl;
+    //             delay(1000);
+    //             authFlightController();
+    //             start = 0;
+    //             repeat++;
+    //         }
+    //         if (repeat > 1) {
+    //             shutdown();
+    //             return 1;
+    //         }
+    //     }
+    // }
     // else {
     //     cout << "Calibration complete. Quadcopter self-arming." << endl;
     // }
