@@ -174,60 +174,57 @@ void readline() {
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
         
-        char thisChar = serialGetchar(serialFd);
-        
-        //cout << thisChar << endl;
-        
-        //Check if this character is the end of message
-        if (thisChar == '\n') {
-            wordEnd = true;
-            serialBuffer[charCount] = '\0';
-            charCount = 0;
-            return;
-        }
-        
-        //If we just finished a message, start a new one in the buffer
-        else if (wordEnd == true) {
-            serialBuffer[charCount] = thisChar;
-            charCount += 1;
-            wordEnd = false;
-            return;
-        }
+        unsigned char buffer[4];
+        read(serialFd, &buffer, sizeof(buffer));
 
-        //Assign the next character to the current buffer
-        else {
-            serialBuffer[charCount] = thisChar;
-            charCount += 1;
-            return;
-        }
+        
+        // char thisChar = serialGetchar(serialFd);
+        
+        cout << buffer << endl;
+        
+        // //Check if this character is the end of message
+        // if (thisChar == '\n') {
+        //     wordEnd = true;
+        //     serialBuffer[charCount] = '\0';
+        //     charCount = 0;
+        //     return;
+        // }
+        
+        // //If we just finished a message, start a new one in the buffer
+        // else if (wordEnd == true) {
+        //     serialBuffer[charCount] = thisChar;
+        //     charCount += 1;
+        //     wordEnd = false;
+        //     return;
+        // }
+
+        // //Assign the next character to the current buffer
+        // else {
+        //     serialBuffer[charCount] = thisChar;
+        //     charCount += 1;
+        //     return;
+        // }
         //cout << "1.3" << endl;
     //}
 }
 
 void handleSerialInterrupt() {
-    //cout << endl << "INT" << endl;
-    //delay(1);
     readline();
-    //serialFlush(serialFd);
-    //cout << "1" << endl;
-    
-    if (wordEnd == true) {                                                  //If we have finished a message
-        int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
-        //cout << "2" << endl;
-        if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
-            //pthread_mutex_lock(&serial_mutex);
-            throttleInput = data;                                            //Set throttle input
-            //pthread_mutex_unlock(&serial_mutex);
-            coFlag = false;
-            //cout << throttleInput << endl;
-            //fflush(stdout);
-        }
-        //cout << "3" << endl;
-        else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
-        memset(serialBuffer,0,sizeof(serialBuffer));
-    }
-    else return;
-    //cout << "4" << endl;
+
+    // if (wordEnd == true) {                                                  //If we have finished a message
+    //     int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
+    //     if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
+    //         //pthread_mutex_lock(&serial_mutex);
+    //         throttleInput = data;                                            //Set throttle input
+    //         //pthread_mutex_unlock(&serial_mutex);
+    //         coFlag = false;
+    //         //cout << throttleInput << endl;
+    //         //fflush(stdout);
+    //     }
+    //     else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
+    //     memset(serialBuffer,0,sizeof(serialBuffer));
+    // }
+    // else return;
 }
 
 //Utility function for setting individual pin on IO Expander
