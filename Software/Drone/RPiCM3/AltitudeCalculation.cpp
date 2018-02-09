@@ -175,12 +175,16 @@ void readline() {
         //while(serialDataAvail(serialFd) == 0);
         
         unsigned char buffer[4];
-        read(serialFd, &buffer, sizeof(buffer));
-
+        if(read(serialFd, &buffer, sizeof(buffer)) == -1) {
+            cout << strerror(errno) << endl;
+        }
+        else {
+            cout << buffer << endl;
+        }
         
         // char thisChar = serialGetchar(serialFd);
         
-        cout << buffer << endl;
+        
         
         // //Check if this character is the end of message
         // if (thisChar == '\n') {
