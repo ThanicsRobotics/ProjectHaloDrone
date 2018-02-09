@@ -488,11 +488,11 @@ void *serialLoop(void *void_ptr) {
 }
 
 void showUsage(string name) {
-    cerr << "Usage: " << name << " <option(s)>\n"
-        << "\tOptions:\n"
-        << "\t-h,--help\t\tShow this help message\n"
+    cerr << "Usage: " << name << " <option(s)>\n\n"
+        << "Options:\n"
+        << "\t-h,--help\t\t\tShow this help message\n"
         << "\t-c,--controller-enabled \tRun program to connect with controller\n"
-        << "\t-nc,--no-controller \tRun program without connecting to controller"
+        << "\t-nc,--no-controller \t\tRun program without connecting to controller"
         << endl;
 }
 
@@ -537,21 +537,20 @@ int main(int argc, char *argv[]) {
         }
         delay(50);
     }
-
-    cout << "Calibration complete. Arm quadcopter." << endl;
-    cout << "To bypass controller, type 'yes' or 'no': ";
-    string input = "";
-    start = millis();
-    while (gyroRoll == 4) {
-        if (millis() - start > 10000) {
-            cout << "Gyro not responding, resetting..." << endl;
-            delay(1000);
-            authFlightController();
-            start = 0;
-            repeat = false;
+    if (controllerConnected) {
+        cout << "Calibration complete. Arm quadcopter." << endl;
+        start = millis();
+        while (gyroRoll == 4) {
+            if (millis() - start > 10000) {
+                cout << "Gyro not responding, resetting..." << endl;
+                delay(1000);
+                authFlightController();
+                start = 0;
+                repeat = false;
+            }
         }
     }
-
+    
     mainLoop();
 }
 
