@@ -543,7 +543,7 @@ int main(int argc, char *argv[]) {
     bool repeat = true;
     while (gyroRoll != 4 && repeat) {
         repeat = true;
-        if (millis() - start > 15000) {
+        if (millis() - start > 30000) {
             cout << "Gyro not responding, resetting..." << endl;
             delay(1000);
             authFlightController();
@@ -556,7 +556,7 @@ int main(int argc, char *argv[]) {
         cout << "Calibration complete. Arm quadcopter." << endl;
         start = millis();
         while (gyroRoll == 4) {
-            if (millis() - start > 10000) {
+            if (millis() - start > 30000) {
                 cout << "Gyro not responding, resetting..." << endl;
                 delay(1000);
                 authFlightController();

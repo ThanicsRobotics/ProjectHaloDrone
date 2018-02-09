@@ -355,6 +355,7 @@ int main() {
         spi.reply(0x2222);
       }
     }
+    wait(500);
     //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
     motors_on();                                                              //Set motor PWM signals high
     wait(.001);                                                               //Wait 1000us
