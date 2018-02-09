@@ -181,7 +181,7 @@ void readline() {
         }
         else {
             buffer[length] = '\0';
-            cout << str(buffer) << endl;
+            cout << string(buffer) << endl;
         }
         
         // char thisChar = serialGetchar(serialFd);
