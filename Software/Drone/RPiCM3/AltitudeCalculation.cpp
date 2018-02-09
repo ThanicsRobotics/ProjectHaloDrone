@@ -365,13 +365,14 @@ void authFlightController() {
         buffer[0] = 0x00;
         buffer[1] = 0x01;
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
-
+        delay(5);
+        
         //Get Auth Key and send it back
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         authKey = buffer[0] << 8 | buffer[1];
         cout << "Key: " << authKey << endl;
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
-        delay(1);
+        delay(50);
         time = millis() - start;
         if (time > 8000) {
             start = millis();
