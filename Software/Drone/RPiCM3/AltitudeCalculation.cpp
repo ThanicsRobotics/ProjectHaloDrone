@@ -468,8 +468,8 @@ void mainLoop() {
     // }
 
     while(1) {
-        cout << throttleInput << endl;
-        fflush(stdout);
+        // cout << throttleInput << endl;
+        // fflush(stdout);
         //calculateAbsoluteAltitude();
         //calculatePID();
         //sendThrottle();
