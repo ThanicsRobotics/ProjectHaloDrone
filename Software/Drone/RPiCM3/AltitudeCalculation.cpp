@@ -174,7 +174,7 @@ void readline() {
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
         
-        unsigned char buffer[10];
+        unsigned char buffer[100];
         ssize_t length = read(serialFd, &buffer, sizeof(buffer));
         if (length == -1) {
             cout << strerror(errno) << endl;
