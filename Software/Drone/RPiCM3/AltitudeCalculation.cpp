@@ -470,6 +470,15 @@ void *gyroLoop(void *void_ptr) {
     else {
         spiConfigured = true;
         authFlightController();
+        int response = 0;
+        while (respone != 0x2222) {
+            unsigned char buffer[5];
+            buffer[0] = 0xF9;
+            buffer[1] = 0xFF;
+            wiringPiSPIDataRW(SPI_CS, buffer, 2);
+            response = buffer[0] << 8 | buffer[1];
+        }
+
         while(run) {
             getGyroValues();
         }
@@ -556,8 +565,10 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    else cout << "Calibration complete. Quadcopter waiting to arm." << endl;
-    
+    else {
+        cout << "Calibration complete. Quadcopter self-arming." << endl;
+        
+    }
     mainLoop();
 }
 

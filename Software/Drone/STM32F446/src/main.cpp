@@ -344,9 +344,17 @@ int main() {
 
   //Wait until the receiver is active and the throttle is set to the lower position.
   //pc.printf("Waiting for arming...\r\n");
-  while(receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) {
+  bool armed = false;
+  while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) && !armed) {
     //start ++;                                                                 //While waiting increment start whith every loop.
     
+    if (spi.receive()) {
+      int data = spi.read();
+      if (data == 0xF9FF) {
+        armed == true;
+        spi.reply(0x2222);
+      }
+    }
     //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
     motors_on();                                                              //Set motor PWM signals high
     wait(.001);                                                               //Wait 1000us
