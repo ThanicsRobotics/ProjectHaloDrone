@@ -522,6 +522,7 @@ int main(int argc, char *argv[]) {
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
+    while(!authenticated);
     cout << "Waiting for gyro calibration..." << endl;
     fflush(stdout);
     int start = millis();
