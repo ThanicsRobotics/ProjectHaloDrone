@@ -256,7 +256,7 @@ void digitalIOWrite(int pin, int state) {
 }
 
 void setupSerial() {
-    if ((serialFd = serialOpen("/dev/serial0", 9600)) < 0) {
+    if ((serialFd = serialOpen("/dev/serial0", 115200)) < 0) {
         cout << "Unable to open serial interface: " << strerror(errno) << endl;
         fflush(stdout);
     }
