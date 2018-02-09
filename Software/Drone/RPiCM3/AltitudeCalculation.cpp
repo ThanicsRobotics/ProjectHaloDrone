@@ -396,22 +396,22 @@ void calculateAbsoluteAltitude() {
     cout << " | Altitude: " << altitude;
 }
 
-void testSensor() {
-    for (int it = 1; it < 12; it += 2) {
-        for (int s = 30; s < 250; s += 30) {
-            int distances[50];
-            for (int i = 0; i < 50; i++) {
-                int rawDistance = getUltrasonicData(1, it, s);
-                distances[i] = rawDistance;
-                cout << ".";
-                fflush(stdout);
-            }
-            sort(distances, distances + 50);
-            cout << endl << "Average for " << it << " iterations and " << s << " seconds: " 
-            << distances[25] << endl;
-        }
-    }
-}
+// void testSensor() {
+//     for (int it = 1; it < 12; it += 2) {
+//         for (int s = 30; s < 250; s += 30) {
+//             int distances[50];
+//             for (int i = 0; i < 50; i++) {
+//                 int rawDistance = getUltrasonicData(1, it, s);
+//                 distances[i] = rawDistance;
+//                 cout << ".";
+//                 fflush(stdout);
+//             }
+//             sort(distances, distances + 50);
+//             cout << endl << "Average for " << it << " iterations and " << s << " seconds: " 
+//             << distances[25] << endl;
+//         }
+//     }
+// }
 
 //Calculate throttle factor for altitude management through PID loop
 void calculatePID() {
@@ -541,6 +541,7 @@ int main(int argc, char *argv[]) {
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     while(!authenticated);
+    delay(200);
     cout << "Waiting for gyro calibration..." << endl;
     fflush(stdout);
     int start = millis();
