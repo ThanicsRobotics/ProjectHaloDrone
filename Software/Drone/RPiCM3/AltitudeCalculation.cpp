@@ -168,7 +168,7 @@ void handleEcho() {
 // }
 
 void readline() {
-    if (serialDataAvail(serialFd)) {
+    //if (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
@@ -200,7 +200,7 @@ void readline() {
             return;
         }
         //cout << "1.3" << endl;
-    }
+    //}
 }
 
 void handleSerialInterrupt() {
