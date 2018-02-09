@@ -488,10 +488,11 @@ void *serialLoop(void *void_ptr) {
 }
 
 void showUsage(string name) {
-    cerr << "Usage: " << name << " <option(s)> SOURCES"
-        << "Options:\n"
+    cerr << "Usage: " << name << " <option(s)>\n"
+        << "\tOptions:\n"
         << "\t-h,--help\t\tShow this help message\n"
-        << "\t-d,--destination DESTINATION\tSpecify the destination path"
+        << "\t-c,--controller-enabled \tRun program to connect with controller\n"
+        << "\t-nc,--no-controller \tRun program without connecting to controller"
         << endl;
 }
 
@@ -503,6 +504,10 @@ int main(int argc, char *argv[]) {
             controllerConnected = true;
         else if (string(argv[1]) == "-nc" || string(argv[1]) == "--no-controller") 
             controllerConnected = false;
+        else if (string(argv[1]) == "-h" || string(argv[1]) == "--help") {
+            showUsage(argv[0]);
+            return 1;
+        }
     }
     else {
         showUsage(argv[0]);
