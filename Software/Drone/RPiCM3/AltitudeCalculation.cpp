@@ -93,6 +93,13 @@ int pid_error_temp;
 int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 int throttleInput = 0;
 
+void shutdown() {
+    cout << "Closing Threads and Ports..." << endl;
+    run = false;
+    pthread_join(serialThread, NULL);
+    pthread_join(gyroThread, NULL);
+}
+
 //Request gyro angles from STM32F446 flight controller
 void getGyroValues() {
     unsigned char buffer[100];
@@ -453,6 +460,15 @@ void sendThrottle() {
 
 void mainLoop() {
     while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
+    int response = 0;
+    // while (response != 0x2222) {
+    //     unsigned char buffer[5];
+    //     buffer[0] = 0xF9;
+    //     buffer[1] = 0xFF;
+    //     wiringPiSPIDataRW(SPI_CS, buffer, 2);
+    //     response = buffer[0] << 8 | buffer[1];
+    // }
+
     while(1) {
         calculateAbsoluteAltitude();
         calculatePID();
@@ -470,14 +486,6 @@ void *gyroLoop(void *void_ptr) {
     else {
         spiConfigured = true;
         authFlightController();
-        int response = 0;
-        while (response != 0x2222) {
-            unsigned char buffer[5];
-            buffer[0] = 0xF9;
-            buffer[1] = 0xFF;
-            wiringPiSPIDataRW(SPI_CS, buffer, 2);
-            response = buffer[0] << 8 | buffer[1];
-        }
 
         while(run) {
             getGyroValues();
@@ -540,50 +548,50 @@ int main(int argc, char *argv[]) {
     cout << "Waiting for gyro calibration..." << endl;
     fflush(stdout);
     int start = millis();
-    bool repeat = true;
-    while (gyroRoll != 4 && repeat) {
-        repeat = true;
-        if (millis() - start > 30000) {
+    int repeat = 1;
+    while (gyroRoll != 4) {
+        repeat = 1;
+        if (millis() - start > 15000) {
             cout << "Gyro not responding, resetting..." << endl;
             delay(1000);
             authFlightController();
             start = 0;
-            repeat = false;
+            repeat++;
+        }
+        else if (repeat > 1) {
+            shutdown();
+            return 1;
         }
         delay(50);
     }
+
     if (controllerConnected) {
         cout << "Calibration complete. Arm quadcopter." << endl;
         start = millis();
+        repeat = 1;
         while (gyroRoll == 4) {
-            if (millis() - start > 30000) {
+            if (millis() - start > 15000) {
                 cout << "Gyro not responding, resetting..." << endl;
                 delay(1000);
                 authFlightController();
                 start = 0;
-                repeat = false;
+                repeat++;
+            }
+            else if (repeat > 1) {
+                shutdown();
+                return 1;
             }
         }
     }
-    else {
-        cout << "Calibration complete. Quadcopter self-arming." << endl;
-        
-    }
+    // else {
+    //     cout << "Calibration complete. Quadcopter self-arming." << endl;
+    // }
     mainLoop();
 }
 
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
-    cout << "Closing Threads and Ports..." << endl;
-    
-    
-    
-    //pthread_mutex_lock(&run_mutex);
-    run = false;
-    //pthread_mutex_unlock(&run_mutex);
-
-    pthread_join(serialThread, NULL);
-    pthread_join(gyroThread, NULL);
+    shutdown();
 
     delay(1000);
     //close(uart0_filestream);
