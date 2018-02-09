@@ -96,6 +96,7 @@ int throttleInput = 0;
 void shutdown() {
     cout << "Closing Threads and Ports..." << endl;
     run = false;
+    delay(1000);
     pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
 }
@@ -466,9 +467,10 @@ void mainLoop() {
     // }
 
     while(1) {
-        calculateAbsoluteAltitude();
-        calculatePID();
-        sendThrottle();
+        cout << throttleInput << endl;
+        //calculateAbsoluteAltitude();
+        //calculatePID();
+        //sendThrottle();
     }
 }
 
@@ -496,7 +498,7 @@ void *gyroLoop(void *void_ptr) {
 
 void *serialLoop(void *void_ptr) {
     setupSerial();
-    //serialFlush(serialFd);
+    serialFlush(serialFd);
     while(run) {
         handleSerialInterrupt();
         //delay(1);
@@ -538,7 +540,7 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, signal_callback_handler);
 
     pthread_create(&serialThread, NULL, serialLoop, NULL);
-    pthread_create(&gyroThread, NULL, gyroLoop, NULL);
+    //pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
     delay(200);
