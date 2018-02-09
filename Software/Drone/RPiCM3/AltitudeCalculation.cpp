@@ -178,8 +178,8 @@ void readline() {
         if(read(serialFd, &buffer, sizeof(buffer)) == -1) {
             cout << strerror(errno) << endl;
         }
-        else {
-            cout << buffer << endl;
+        else if ((int)buffer[0] != 0) {
+            cout << (int)buffer[0] << endl;
         }
         
         // char thisChar = serialGetchar(serialFd);
