@@ -456,7 +456,7 @@ void sendThrottle() {
 
 
 void mainLoop() {
-    while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
+    //while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
     // int response = 0;
     // while (response != 0x2222) {
     //     unsigned char buffer[5];
