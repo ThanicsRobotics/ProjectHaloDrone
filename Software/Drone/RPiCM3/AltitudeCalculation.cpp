@@ -550,6 +550,7 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    else cout << "Calibration complete. Quadcopter waiting to arm." << endl;
     
     mainLoop();
 }
