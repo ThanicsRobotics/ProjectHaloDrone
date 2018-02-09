@@ -472,6 +472,10 @@ void *gyroLoop(void *void_ptr) {
         while(run) {
             getGyroValues();
         }
+        unsigned char buffer[5];
+        buffer[0] = 0xFF;
+        buffer[1] = 0xF7;
+        wiringPiSPIDataRW(SPI_CS, buffer, 2);
     }
     return NULL;
 }
@@ -529,7 +533,7 @@ int main(int argc, char *argv[]) {
     bool repeat = true;
     while (gyroRoll != 4 && repeat) {
         repeat = true;
-        if (millis() - start > 10000) {
+        if (millis() - start > 15000) {
             cout << "Gyro not responding, resetting..." << endl;
             delay(1000);
             authFlightController();
@@ -559,6 +563,8 @@ int main(int argc, char *argv[]) {
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
     cout << "Closing Threads and Ports..." << endl;
+    
+    
     
     //pthread_mutex_lock(&run_mutex);
     run = false;

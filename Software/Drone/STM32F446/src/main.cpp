@@ -527,13 +527,13 @@ int main() {
     //spi.reply(SystemCoreClock/1000000);
 
     // //Getting throttle value from Raspberry Pi CM3
-    // if (spi.receive()) {
-    //   authenticated = true;
-    //   int data = spi.read();
-    //   if (data >= 0 && data <= 900) {
-    //     mod_receiver_input_throttle = data + 1000;
-    //   }
-    // }
+    if (spi.receive()) {
+      int data = spi.read();
+      if (data >= 0 && data <= 900) {
+        mod_receiver_input_throttle = data + 1000;
+      }
+      else if (data == 0xFFF7) return 0;
+    }
     // else authenticated = false;
     
     //FALLING EDGES of PWM motor pulses
