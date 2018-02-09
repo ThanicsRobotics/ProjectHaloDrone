@@ -540,7 +540,7 @@ int main(int argc, char *argv[]) {
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
-    while(!authenticated);
+    while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
     delay(200);
     cout << "Waiting for gyro calibration..." << endl;
     fflush(stdout);
