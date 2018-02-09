@@ -59,7 +59,7 @@ bool spiConfigured = false;
 bool authenticated = false;
 
 //CS0 is barometer, CS1 is STM32 flight controller
-int SPI_CS = 0;
+int SPI_CS = 1;
 int i2cFd;
 
 //Pressure Altitude variables
@@ -106,7 +106,7 @@ void getGyroValues() {
     //gyroRoll = buffer[0] << 8 | buffer[1];
     //pthread_mutex_unlock(&gyro_mutex);
 
-    //delay(0.3);
+    delayMicroseconds(200);
     //cout << gyroRoll << endl;
 }
 
@@ -366,7 +366,7 @@ void authFlightController() {
         buffer[1] = 0x01;
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         delay(5);
-        
+
         //Get Auth Key and send it back
         wiringPiSPIDataRW(SPI_CS, buffer, 2);
         authKey = buffer[0] << 8 | buffer[1];
