@@ -460,7 +460,7 @@ void sendThrottle() {
 
 void mainLoop() {
     while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
-    int response = 0;
+    // int response = 0;
     // while (response != 0x2222) {
     //     unsigned char buffer[5];
     //     buffer[0] = 0xF9;
@@ -570,14 +570,14 @@ int main(int argc, char *argv[]) {
         start = millis();
         repeat = 1;
         while (gyroRoll == 4) {
-            if (millis() - start > 15000) {
+            if (millis() - start > 45000) {
                 cout << "Gyro not responding, resetting..." << endl;
                 delay(1000);
                 authFlightController();
                 start = 0;
                 repeat++;
             }
-            else if (repeat > 1) {
+            if (repeat > 1) {
                 shutdown();
                 return 1;
             }
