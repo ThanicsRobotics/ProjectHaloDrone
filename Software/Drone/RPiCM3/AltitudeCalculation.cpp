@@ -471,7 +471,7 @@ void *gyroLoop(void *void_ptr) {
         spiConfigured = true;
         authFlightController();
         int response = 0;
-        while (respone != 0x2222) {
+        while (response != 0x2222) {
             unsigned char buffer[5];
             buffer[0] = 0xF9;
             buffer[1] = 0xFF;
