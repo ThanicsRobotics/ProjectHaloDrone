@@ -182,28 +182,28 @@ char *readline() {
             cout << strerror(errno) << endl;
         }
         else {
-            //buffer[length] = '\0';
-            bool wordStart = false;
-            for (int i = 0; i < sizeof(buffer); i++) {
-                if (buffer[i] == '\n' && !wordStart) {
-                    wordStart = true;
-                    continue;
-                }
-                else if (buffer[i] == '\n' && wordStart) {
-                    word[count] = '\0';
-                    wordStart = false;
-                    return word;
-                }
-                else if (wordStart) {
-                    word[count] = buffer[i];
-                    count += 1;
-                    continue;
-                }
-                else {
-                    continue;
-                }
-            }
-            //cout << buffer << endl;
+            // bool wordStart = false;
+            // for (int i = 0; i < sizeof(buffer); i++) {
+            //     if (buffer[i] == '\n' && !wordStart) {
+            //         wordStart = true;
+            //         continue;
+            //     }
+            //     else if (buffer[i] == '\n' && wordStart) {
+            //         word[count] = '\0';
+            //         wordStart = false;
+            //         return word;
+            //     }
+            //     else if (wordStart) {
+            //         word[count] = buffer[i];
+            //         count += 1;
+            //         continue;
+            //     }
+            //     else {
+            //         continue;
+            //     }
+            // }
+            cout << buffer << endl;
+            cout << "-----------" << endl;
         }
 
         return "0";
