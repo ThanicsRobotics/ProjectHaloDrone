@@ -509,7 +509,7 @@ int main() {
       //do stuff thats not flight
       
       //Load gyro angle data into SPI buffer
-      spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
+      spi.reply((signed char)angle_pitch_acc << 8 | (signed char)angle_roll_acc);
       
     }
                             
@@ -529,8 +529,6 @@ int main() {
     //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
     gyro_signalen();
 
-    
-    
     //spi.reply((int)receiver_input_pitch);
     //CLOCK SPEED TEST
     //spi.reply(SystemCoreClock/1000000);
