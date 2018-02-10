@@ -121,124 +121,49 @@ void getGyroValues() {
 //Handles IO Expander interrupt (measures ultrasonic sensor echo pulse)
 void handleEcho() {
     //Get current time
-    //clock_gettime(CLOCK_REALTIME, &gettime_now);
-	//start_time = gettime_now.tv_nsec;
     start_time = micros();
 
     //Get time when pulse is HIGH
     while(digitalRead(INT_PIN) == HIGH) {
-        //clock_gettime(CLOCK_REALTIME, &gettime_now);
         //Stop if HIGH for 10ms (timeout)
-	    // if ((gettime_now.tv_nsec - start_time) > 10000000) {
-        //     pulse_time = 0;
-        //     break;
-        // }
         if ((micros() - start_time) > 100000) {
             pulse_time = 0;
             break;
         }
     }
-
     //Pulse time is the time difference before and after HIGH pulse
-    //clock_gettime(CLOCK_REALTIME, &gettime_now);
-	//pulse_time = gettime_now.tv_nsec - start_time;
     pulse_time = micros() - start_time;
     pulseComplete = true;
 }
 
-// void getChar() {
-//     int rx_length = 0;
-//     //while(rx_length < 1) {
-//         if (uart0_filestream != -1) {
-//             // Read up to 255 characters from the port if they are there
-//             unsigned char rx_buffer[256];
-//             rx_length = read(uart0_filestream, (void*)rx_buffer, 255);		//Filestream, buffer to store in, number of bytes to read (max)
-//             if (rx_length < 0) {
-//                 cout << strerror(errno) << endl;
-//             }
-//             else if (rx_length == 0) {
-//                 cout << "No chars" << endl;
-//             }
-//             else {
-//                 //Bytes received
-//                 cout << rx_buffer << endl;
-//                 //return rx_buffer[0];
-//             }
-//         }
-//     //}
-// }
-
 void readline() {
-    //if (serialDataAvail(serialFd)) {
-        //Read character incoming on serial bus
-        //cout << "Waiting for data..." << endl;
-        //while(serialDataAvail(serialFd) == 0);
-        
-        // char buffer[20];
-        // static char word[10];
-        // int count = 0;
-        // ssize_t length = read(serialFd, &buffer, sizeof(buffer));
-        // if (length == -1) {
-        //     cout << strerror(errno) << endl;
-        // }
-        // else {
-        //     // bool wordStart = false;
-        //     // for (int i = 0; i < sizeof(buffer); i++) {
-        //     //     if (buffer[i] == '\n' && !wordStart) {
-        //     //         wordStart = true;
-        //     //         continue;
-        //     //     }
-        //     //     else if (buffer[i] == '\n' && wordStart) {
-        //     //         word[count] = '\0';
-        //     //         wordStart = false;
-        //     //         return word;
-        //     //     }
-        //     //     else if (wordStart) {
-        //     //         word[count] = buffer[i];
-        //     //         count += 1;
-        //     //         continue;
-        //     //     }
-        //     //     else {
-        //     //         continue;
-        //     //     }
-        //     // }
-        //     cout << buffer << endl;
-        //     cout << "-----------" << endl;
-        // }
+    char thisChar = serialGetchar(serialFd);
+    
+    //Check if this character is the end of message
+    if (thisChar == '\n') {
+        wordEnd = true;
+        serialBuffer[charCount] = '\0';
+        charCount = 0;
+        return;
+    }
+    
+    //If we just finished a message, start a new one in the buffer
+    else if (wordEnd == true) {
+        serialBuffer[charCount] = thisChar;
+        charCount += 1;
+        wordEnd = false;
+        return;
+    }
 
-        // return "0";
-        char thisChar = serialGetchar(serialFd);
-        
-        
-        
-        //Check if this character is the end of message
-        if (thisChar == '\n') {
-            wordEnd = true;
-            serialBuffer[charCount] = '\0';
-            charCount = 0;
-            return;
-        }
-        
-        //If we just finished a message, start a new one in the buffer
-        else if (wordEnd == true) {
-            serialBuffer[charCount] = thisChar;
-            charCount += 1;
-            wordEnd = false;
-            return;
-        }
-
-        //Assign the next character to the current buffer
-        else {
-            serialBuffer[charCount] = thisChar;
-            charCount += 1;
-            return;
-        }
-        //cout << "1.3" << endl;
-    //}
+    //Assign the next character to the current buffer
+    else {
+        serialBuffer[charCount] = thisChar;
+        charCount += 1;
+        return;
+    }
 }
 
 void handleSerialInterrupt() {
-    //cout << (int)strtol(readline(), NULL, 10) << endl;
     readline();
     if (wordEnd == true) {                                                  //If we have finished a message
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
@@ -286,22 +211,6 @@ void setupSerial() {
         fflush(stdout);
     }
     else serialConfigured = true;
-
-    // uart0_filestream = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY);		//Open in non blocking read/write mode
-	// if (uart0_filestream == -1)
-	// {
-	// 	//ERROR - CAN'T OPEN SERIAL PORT
-	// 	printf("Error - Unable to open UART. Ensure it is not in use by another application\n");
-	// }
-
-    // struct termios options;
-	// tcgetattr(uart0_filestream, &options);
-	// options.c_cflag = B9600 | CS8 | CLOCAL | CREAD;		//<Set baud rate
-	// options.c_iflag = IGNPAR;
-	// options.c_oflag = 0;
-	// options.c_lflag = 0;
-	// tcflush(uart0_filestream, TCIFLUSH);
-	// tcsetattr(uart0_filestream, TCSANOW, &options);
 
     //wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
 }
@@ -461,7 +370,7 @@ void sendThrottle() {
 
     //pthread_mutex_lock(&serial_mutex);
     int input = throttleInput;
-   // pthread_mutex_unlock(&serial_mutex);
+    // pthread_mutex_unlock(&serial_mutex);
     cout << " | input: " << input;
     int newThrottle = input + pid_output;
     
@@ -568,7 +477,7 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, signal_callback_handler);
 
     pthread_create(&serialThread, NULL, serialLoop, NULL);
-    //pthread_create(&gyroThread, NULL, gyroLoop, NULL);
+    pthread_create(&gyroThread, NULL, gyroLoop, NULL);
 
     // while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
     // delay(200);
@@ -621,6 +530,5 @@ void signal_callback_handler(int signum) {
     shutdown();
 
     delay(1000);
-    //close(uart0_filestream);
 	exit(signum);
 }
