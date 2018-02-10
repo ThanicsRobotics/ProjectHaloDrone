@@ -13,7 +13,7 @@ extern bool serialConfigured;
 extern int throttleInput;
 
 void setupSerial();
-void readline();
-void handleSerialInterrupt();
+void readChar();
+void readLine();
 
 #endif

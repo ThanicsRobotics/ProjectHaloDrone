@@ -229,7 +229,7 @@ void *serialLoop(void *void_ptr) {
     setupSerial();
     serialFlush(serialFd);
     while(run) {
-        handleSerialInterrupt();
+        readLine();
         //delay(0.5);
     }
     serialClose(serialFd);

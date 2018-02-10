@@ -9,6 +9,8 @@
 
 using namespace std;
 
+int i2cFd;
+
 //Pulse timing variables
 int start_time = 0;
 int pulse_time = 0;
