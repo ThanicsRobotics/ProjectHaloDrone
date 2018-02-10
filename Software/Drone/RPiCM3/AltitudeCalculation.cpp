@@ -99,7 +99,7 @@ int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 int throttleInput = 0;
 
 void shutdown() {
-    endl << cout << "Closing Threads and Ports..." << endl;
+    cout << endl << "Closing Threads and Ports..." << endl;
     run = false;
     delay(1000);
     pthread_join(serialThread, NULL);
