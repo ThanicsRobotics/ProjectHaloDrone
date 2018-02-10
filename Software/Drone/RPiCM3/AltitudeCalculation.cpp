@@ -228,7 +228,7 @@ void setupSPI() {
         exit(1);
     }
     signal(SIGINT, signal_callback_handler);
-    if ((spiFd = spiOpen(SPI_CS, 1500000, 0)) < 0) {
+    if ((spiFd = spiOpen(SPI_CS, 3000000, 0)) < 0) {
         cout << "SPI failed: " << strerror(errno) << endl;
         exit(1);
     }

@@ -306,7 +306,7 @@ int main() {
   
   //Setup the spi for 16 bit data, mode 0 and 1.5MHz clock rate
   spi.format(16,0);
-  spi.frequency(1500000);
+  spi.frequency(3000000);
   
   authRasPiCM3();
 
