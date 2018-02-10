@@ -88,8 +88,9 @@ void getGyroValues() {
     //Gyro pitch and roll are stored in two incoming bytes
     //wiringPiSPIDataRW(SPI_CS, gyroBuffer, 2);
     spiXfer(spiFd, gyroBuffer, gyroBuffer, 2);
-    gyroPitch = (signed char)gyroBuffer[0];
-    gyroRoll = (signed char)gyroBuffer[1];
+    //gyroPitch = (signed char)gyroBuffer[0];
+    //gyroRoll = (signed char)gyroBuffer[1];
+    cout << (int)(gyroBuffer[0] << 8 | gyroBuffer[1]) << endl;
 }
 
 void setupSPI() {
@@ -253,7 +254,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
     signal(SIGINT, signal_callback_handler);
-    
+
     setupIOExpander();
 
     pthread_create(&serialThread, NULL, serialLoop, NULL);
