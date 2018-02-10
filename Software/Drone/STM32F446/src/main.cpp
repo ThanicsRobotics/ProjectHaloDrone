@@ -304,9 +304,9 @@ int main() {
   radio.baud(9600);                                                           //Serial Radio baud rate at 9600bps
   radio.attach(&rxInterrupt);
   
-  //Setup the spi for 8 bit data, mode 0 and 1MHz clock rate
+  //Setup the spi for 16 bit data, mode 0 and 1.5MHz clock rate
   spi.format(16,0);
-  spi.frequency(2000000);
+  spi.frequency(1500000);
   
   authRasPiCM3();
 

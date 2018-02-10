@@ -104,6 +104,9 @@ void shutdown() {
     delay(1000);
     pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
+
+    spiClose(spiFd);
+    gpioTerminate();
 }
 
 //Request gyro angles from STM32F446 flight controller
@@ -224,7 +227,7 @@ void setupSPI() {
         cout << "pigpio Library failed: " << strerror(errno) << endl;
         exit(1);
     }
-    if ((spiFd = spiOpen(SPI_CS, 2000000, 0)) < 0) {
+    if ((spiFd = spiOpen(SPI_CS, 1500000, 0)) < 0) {
         cout << "SPI failed: " << strerror(errno) << endl;
         exit(1);
     }
@@ -452,9 +455,6 @@ void *gyroLoop(void *void_ptr) {
     // buffer[0] = 0xFF;
     // buffer[1] = 0xF7;
     // wiringPiSPIDataRW(SPI_CS, buffer, 2);
-    
-    spiClose(spiFd);
-    gpioTerminate();
     return NULL;
 }
 
