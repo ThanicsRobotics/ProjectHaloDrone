@@ -19,6 +19,10 @@ int pulse_time = 0;
 bool pulseComplete = false;
 unsigned int lastUltrasonicPulse = 0;
 
+//Gyro angle variables
+signed int gyroPitch;
+signed int gyroRoll;
+
 void setupIOExpander();
 void handleEcho();
 void digitalIOWrite(int pin, int state);

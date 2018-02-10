@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
-#include <algorithm>
 
 //POSIX Thread Library
 #include <pthread.h>
@@ -56,10 +55,6 @@ char baroCoefficients[17];
 int altitude;
 int lastAltitude;
 
-//Gyro angle variables
-signed int gyroPitch;
-signed int gyroRoll;
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +64,7 @@ int pid_d_gain = 0;                   //Gain setting for the roll D-controller
 int pid_max = 400;                      //Maximum output of the PID-controller (+/-)
 int pid_error_temp;
 int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
-int throttleInput = 0;
+
 
 void shutdown() {
     cout << endl << "Closing Threads and Ports..." << endl;

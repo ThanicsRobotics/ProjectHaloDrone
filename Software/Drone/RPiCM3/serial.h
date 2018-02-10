@@ -10,6 +10,8 @@ bool wordEnd = false;
 bool coFlag = false;
 bool serialConfigured = false;
 
+int throttleInput = 0;
+
 void setupSerial();
 void readline();
 void handleSerialInterrupt();
