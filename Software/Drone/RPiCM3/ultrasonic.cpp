@@ -28,7 +28,7 @@ signed int gyroRoll;
 
 //Configures inputs and outputs of IO Expander
 void setupIOExpander() {
-    if ((i2cFd = i2cOpen(1, ADDR, 0) < 0) {
+    if ((i2cFd = i2cOpen(1, ADDR, 0)) < 0) {
         cout << "I2C Failed: " << strerror(errno) << endl;
         exit(1);
     }
