@@ -168,22 +168,44 @@ void handleEcho() {
 //     //}
 // }
 
-void readline() {
+string readline() {
     //if (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
         
-        unsigned char buffer[10];
+        char buffer[10];
+        char word[10];
+        int count = 0;
         ssize_t length = read(serialFd, &buffer, sizeof(buffer));
         if (length == -1) {
             cout << strerror(errno) << endl;
         }
         else {
             //buffer[length] = '\0';
-            cout << buffer << endl;
+            bool wordStart = false;
+            for (int i = 0; i < sizeof(buffer); i++) {
+                if (buffer[i] = '\n' && !wordStart) {
+                    wordStart = true;
+                    continue;
+                }
+                else if (buffer[i] = '\n' && wordStart) {
+                    word[count] = '\0';
+                    return word;
+                }
+                else if (wordStart) {
+                    word[count] = buffer[i];
+                    count += 1;
+                    continue;
+                }
+                else {
+                    continue;
+                }
+            }
+            //cout << buffer << endl;
         }
-        
+
+        return "0";
         // char thisChar = serialGetchar(serialFd);
         
         
@@ -215,7 +237,7 @@ void readline() {
 }
 
 void handleSerialInterrupt() {
-    readline();
+    cout << (int)strtol(readline(), NULL, 10) << endl;
 
     // if (wordEnd == true) {                                                  //If we have finished a message
     //     int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
