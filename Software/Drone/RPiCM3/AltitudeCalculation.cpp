@@ -98,12 +98,15 @@ int pid_error_temp;
 int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 int throttleInput = 0;
 
-void shutdown() {
+void shutdown(int signum) {
     cout << "Closing Threads and Ports..." << endl;
     run = false;
     delay(1000);
     pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
+
+    delay(1000);
+	exit(signum);
 }
 
 //Request gyro angles from STM32F446 flight controller
@@ -111,8 +114,8 @@ void getGyroValues() {
     
 
     //Gyro pitch and roll are stored in two incoming bytes
-    wiringPiSPIDataRW(SPI_CS, gyroBuffer, 2);
-    
+    //wiringPiSPIDataRW(SPI_CS, gyroBuffer, 2);
+    spiRead(spiFd, gyroBuffer, 2);
     //pthread_mutex_lock(&gyro_mutex);
     gyroPitch = (signed char)gyroBuffer[0];
     gyroRoll = (signed char)gyroBuffer[1];
@@ -221,14 +224,15 @@ void setupSerial() {
 }
 
 void setupSPI() {
-    if (gpioInitialize() < 0) {
+    if (gpioInitialise() < 0) {
         cout << "pigpio Library failed: " << strerror(errno) << endl;
-        return 1;
+        shutdown(1);
     }
-    if (spiFd = spiOpen(SPI_CS, 2000000, 0) < 0) {
+    if ((spiFd = spiOpen(SPI_CS, 2000000, 0)) < 0) {
         cout << "SPI failed: " << strerror(errno) << endl;
-        return 1;
+        shutdown(1);
     }
+    else spiConfigured = true;
 }
 
 //Configures inputs and outputs of IO Expander
@@ -444,8 +448,8 @@ void *gyroLoop(void *void_ptr) {
     //     fflush(stdout);
     // }
     setupSPI();
-    else {
-        spiConfigured = true;
+    
+        
         authFlightController();
 
         while(run) {
@@ -455,7 +459,7 @@ void *gyroLoop(void *void_ptr) {
         // buffer[0] = 0xFF;
         // buffer[1] = 0xF7;
         // wiringPiSPIDataRW(SPI_CS, buffer, 2);
-    }
+    
     spiClose(spiFd);
     return NULL;
 }
@@ -557,8 +561,5 @@ int main(int argc, char *argv[]) {
 
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
-    shutdown();
-
-    delay(1000);
-	exit(signum);
+    shutdown(signum);
 }
