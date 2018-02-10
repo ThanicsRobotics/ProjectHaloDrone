@@ -1,11 +1,16 @@
 #include "ultrasonic.h"
 
 //WiringPi Libraries
-#include <wiringPiI2C.h>
 #include <wiringPi.h>
+
+//pigpio Library
+#include <pigpio.h>
+
 #include <iostream>
 #include <math.h>
 #include <algorithm>
+#include <stdio.h>
+#include <string.h>
 
 using namespace std;
 
@@ -23,17 +28,24 @@ signed int gyroRoll;
 
 //Configures inputs and outputs of IO Expander
 void setupIOExpander() {
-    i2cFd = wiringPiI2CSetup(ADDR);
+    if ((i2cFd = i2cOpen(1, ADDR, 0) < 0) {
+        cout << "I2C Failed: " << strerror(errno) << endl;
+        exit(1);
+    }
+    //i2cFd = wiringPiI2CSetup(ADDR);
 
     //Configuration bytes (Inputs are 1's, Outputs 0's)
     //Port 0: 01010101
-    wiringPiI2CWriteReg8(i2cFd, 0x0C, 0x55);
-
+    //wiringPiI2CWriteReg8(i2cFd, 0x0C, 0x55);
+    i2cWriteByteData(i2cFd, 0x0C, 0x55);
+    
     //Port 1: 01010101
-    wiringPiI2CWriteReg8(i2cFd, 0x0D, 0x55);
+    //wiringPiI2CWriteReg8(i2cFd, 0x0D, 0x55);
+    i2cWriteByteData(i2cFd, 0x0D, 0x55);
 
     //Port 2: 11000000
-    wiringPiI2CWriteReg8(i2cFd, 0x0E, 0xC0);
+    //wiringPiI2CWriteReg8(i2cFd, 0x0E, 0xC0);
+    i2cWriteByteData(i2cFd, 0x0E, 0xC0);
 
     //Initialization of IO Expander interrupts
     wiringPiISR(INT_PIN, INT_EDGE_RISING, handleEcho);
@@ -69,13 +81,13 @@ void digitalIOWrite(int pin, int state) {
     //Change output depending on port and pin number
     switch (port) {
         case 0:
-            wiringPiI2CWriteReg8(i2cFd, 0x04, state << pin);
+            i2cWriteByteData(i2cFd, 0x04, state << pin);
             break;
         case 1:
-            wiringPiI2CWriteReg8(i2cFd, 0x05, state << (pin - 10));
+            i2cWriteByteData(i2cFd, 0x05, state << (pin - 10));
             break;
         case 2:
-            wiringPiI2CWriteReg8(i2cFd, 0x06, state << (pin - 20));
+            i2cWriteByteData(i2cFd, 0x06, state << (pin - 20));
             break;
         default:
             break;
@@ -100,7 +112,8 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
 
     int distances[iterations];
     int loops = 0;
-    //Takes average of x distance measurements
+
+    //Takes median of x distance measurements
     while(loops < iterations) {
         while (millis() - lastUltrasonicPulse < pulseDelay) delay(1);
 
@@ -114,8 +127,8 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
         //Wait until pulse is complete (when handleEcho is complete)
         int start = millis();
         while(!pulseComplete) {
-            if (millis() - start > 1000) {
-                cout << "Pulse Fail" << endl;
+            if (millis() - start > 2000) {
+                cout << endl << "Pulse Fail" << endl;
                 pulse_time = 0;
                 break;
             }

@@ -74,6 +74,7 @@ void shutdown() {
     pthread_join(gyroThread, NULL);
 
     spiClose(spiFd);
+    i2cClose(i2cFd);
     gpioTerminate();
 
     cout << endl << "Halting Flight Controller..." << endl << endl;
