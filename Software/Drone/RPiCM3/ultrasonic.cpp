@@ -46,10 +46,11 @@ void handleEcho() {
 
     //Get time when pulse is HIGH
     while(digitalRead(INT_PIN) == HIGH) {
-        //Stop if HIGH for 10ms (timeout)
+        //Stop if HIGH for 100ms (timeout)
         if ((micros() - start_time) > 100000) {
             pulse_time = 0;
-            break;
+            pulseComplete = true;
+            return;
         }
     }
     //Pulse time is the time difference before and after HIGH pulse
@@ -97,9 +98,6 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
             break;
     }
 
-    //int totalDistance = 0;
-    //int invalids = 0;
-
     int distances[iterations];
     int loops = 0;
     //Takes average of x distance measurements
@@ -129,7 +127,7 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
         lastUltrasonicPulse = millis();
 
         //factor out invalid results
-        if (distance >= 0 && distance < 600) {
+        if (distance > 0 && distance < 600) {
             distances[loops] = distance;
             loops++;
         }

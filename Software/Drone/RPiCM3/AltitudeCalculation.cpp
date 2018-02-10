@@ -218,10 +218,6 @@ void *gyroLoop(void *void_ptr) {
     while(run) {
         getGyroValues();
     }
-    // unsigned char buffer[5];
-    // buffer[0] = 0xFF;
-    // buffer[1] = 0xF7;
-    // wiringPiSPIDataRW(SPI_CS, buffer, 2);
     return NULL;
 }
 
@@ -266,7 +262,6 @@ int main(int argc, char *argv[]) {
     //Setup function calls
     wiringPiSetupGpio();
     setupIOExpander();
-    
 
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
