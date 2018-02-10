@@ -3,6 +3,7 @@
 
 //WiringPi Library
 #include <wiringPi.h>
+#include <wiringSerial.h>
 
 //Standard Libraries
 #include <unistd.h>
