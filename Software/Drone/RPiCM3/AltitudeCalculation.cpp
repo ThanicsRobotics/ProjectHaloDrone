@@ -93,11 +93,6 @@ void getGyroValues() {
 }
 
 void setupSPI() {
-    if (gpioInitialise() < 0) {
-        cout << "pigpio Library failed: " << strerror(errno) << endl;
-        exit(1);
-    }
-    signal(SIGINT, signal_callback_handler);
     if ((spiFd = spiOpen(SPI_CS, 3000000, 0)) < 0) {
         cout << "SPI failed: " << strerror(errno) << endl;
         exit(1);
@@ -189,15 +184,6 @@ void sendThrottle() {
 
 void mainLoop() {
     while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
-    // int response = 0;
-    // while (response != 0x2222) {
-    //     unsigned char buffer[5];
-    //     buffer[0] = 0xF9;
-    //     buffer[1] = 0xFF;
-    //     wiringPiSPIDataRW(SPI_CS, buffer, 2);
-    //     response = buffer[0] << 8 | buffer[1];
-    // }
-
     while(run) {
         // cout << throttleInput << endl;
         // fflush(stdout);
@@ -262,6 +248,12 @@ int main(int argc, char *argv[]) {
 
     //Setup function calls
     wiringPiSetupGpio();
+    if (gpioInitialise() < 0) {
+        cout << "pigpio Library failed: " << strerror(errno) << endl;
+        exit(1);
+    }
+    signal(SIGINT, signal_callback_handler);
+    
     setupIOExpander();
 
     pthread_create(&serialThread, NULL, serialLoop, NULL);
