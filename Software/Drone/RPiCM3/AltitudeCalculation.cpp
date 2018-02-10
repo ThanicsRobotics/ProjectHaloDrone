@@ -168,14 +168,14 @@ void handleEcho() {
 //     //}
 // }
 
-string readline() {
+char *readline() {
     //if (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
         
         char buffer[10];
-        char word[10];
+        static char word[10];
         int count = 0;
         ssize_t length = read(serialFd, &buffer, sizeof(buffer));
         if (length == -1) {
@@ -185,11 +185,11 @@ string readline() {
             //buffer[length] = '\0';
             bool wordStart = false;
             for (int i = 0; i < sizeof(buffer); i++) {
-                if (buffer[i] = '\n' && !wordStart) {
+                if (buffer[i] == '\n' && !wordStart) {
                     wordStart = true;
                     continue;
                 }
-                else if (buffer[i] = '\n' && wordStart) {
+                else if (buffer[i] == '\n' && wordStart) {
                     word[count] = '\0';
                     return word;
                 }
