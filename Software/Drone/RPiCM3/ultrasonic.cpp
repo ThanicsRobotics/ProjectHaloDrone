@@ -9,6 +9,16 @@
 
 using namespace std;
 
+//Pulse timing variables
+int start_time = 0;
+int pulse_time = 0;
+bool pulseComplete = false;
+unsigned int lastUltrasonicPulse = 0;
+
+//Gyro angle variables
+signed int gyroPitch;
+signed int gyroRoll;
+
 //Configures inputs and outputs of IO Expander
 void setupIOExpander() {
     i2cFd = wiringPiI2CSetup(ADDR);

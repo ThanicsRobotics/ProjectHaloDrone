@@ -6,6 +6,16 @@
 
 using namespace std;
 
+int serialFd;
+
+int charCount = 0;
+char serialBuffer[100];
+bool wordEnd = false;
+bool coFlag = false;
+bool serialConfigured = false;
+
+int throttleInput = 0;
+
 void setupSerial() {
     if ((serialFd = serialOpen("/dev/serial0", 9600)) < 0) {
         cout << "Unable to open serial interface: " << strerror(errno) << endl;

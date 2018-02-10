@@ -14,10 +14,10 @@
 extern int i2cFd;
 
 //Pulse timing variables
-extern int start_time = 0;
-extern int pulse_time = 0;
-extern bool pulseComplete = false;
-extern unsigned int lastUltrasonicPulse = 0;
+extern int start_time;
+extern int pulse_time;
+extern bool pulseComplete;
+extern unsigned int lastUltrasonicPulse;
 
 //Gyro angle variables
 extern signed int gyroPitch;
