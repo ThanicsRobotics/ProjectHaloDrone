@@ -505,7 +505,7 @@ int main() {
     }
     
     //We wait until 4000us are passed.
-    while (onTime.read_us() - loop_timer < 6000) {
+    while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
       
       //Load gyro angle data into SPI buffer
