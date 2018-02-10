@@ -505,7 +505,7 @@ int main() {
     }
     
     //We wait until 4000us are passed.
-    while (onTime.read_us() - loop_timer < 4000) {
+    while (onTime.read_us() - loop_timer < 6000) {
       //do stuff thats not flight
       
       //Load gyro angle data into SPI buffer
@@ -519,7 +519,7 @@ int main() {
 
     //RISING EDGE of PWM motor pulses (start of loop)
     motors_on();
-        
+    
     timer_channel_1 = esc_1 + loop_timer;                                     //Calculate the time of the falling edge of the esc-1 pulse.
     timer_channel_2 = esc_2 + loop_timer;                                     //Calculate the time of the falling edge of the esc-2 pulse.
     timer_channel_3 = esc_3 + loop_timer;                                     //Calculate the time of the falling edge of the esc-3 pulse.
