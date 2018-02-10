@@ -107,6 +107,8 @@ void shutdown() {
 
     spiClose(spiFd);
     gpioTerminate();
+
+    system("sudo openocd -f halt.cfg");
 }
 
 //Request gyro angles from STM32F446 flight controller
@@ -322,7 +324,7 @@ int angleCorrection(int rawDistance) {
 //Making sure the STM32F446 is listening...
 void authFlightController() {
     //Reset flight controller using OpenOCD
-    system("sudo openocd");
+    system("sudo openocd -f reset.cfg");
 
     authenticated = false;
     char buffer[100];
