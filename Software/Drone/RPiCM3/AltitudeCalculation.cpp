@@ -174,7 +174,7 @@ char *readline() {
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
         
-        char buffer[10];
+        char buffer[20];
         static char word[10];
         int count = 0;
         ssize_t length = read(serialFd, &buffer, sizeof(buffer));
@@ -191,6 +191,7 @@ char *readline() {
                 }
                 else if (buffer[i] == '\n' && wordStart) {
                     word[count] = '\0';
+                    wordStart = false;
                     return word;
                 }
                 else if (wordStart) {
