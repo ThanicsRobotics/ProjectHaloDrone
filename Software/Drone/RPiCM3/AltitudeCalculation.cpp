@@ -227,6 +227,7 @@ void setupSPI() {
         cout << "pigpio Library failed: " << strerror(errno) << endl;
         exit(1);
     }
+    signal(SIGINT, signal_callback_handler);
     if ((spiFd = spiOpen(SPI_CS, 1500000, 0)) < 0) {
         cout << "SPI failed: " << strerror(errno) << endl;
         exit(1);
@@ -500,7 +501,7 @@ int main(int argc, char *argv[]) {
     //Setup function calls
     wiringPiSetupGpio();
     setupIOExpander();
-    signal(SIGINT, signal_callback_handler);
+    
 
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
