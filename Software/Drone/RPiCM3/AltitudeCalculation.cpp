@@ -172,8 +172,8 @@ void handleSerialInterrupt() {
             throttleInput = data;                                            //Set throttle input
             //pthread_mutex_unlock(&serial_mutex);
             coFlag = false;
-            cout << throttleInput << endl;
-            fflush(stdout);
+            //cout << throttleInput << endl;
+            //fflush(stdout);
         }
         else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
         memset(serialBuffer,0,sizeof(serialBuffer));
@@ -391,7 +391,7 @@ void sendThrottle() {
 
 
 void mainLoop() {
-    //while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
+    while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
     // int response = 0;
     // while (response != 0x2222) {
     //     unsigned char buffer[5];
@@ -401,12 +401,12 @@ void mainLoop() {
     //     response = buffer[0] << 8 | buffer[1];
     // }
 
-    while(1) {
+    while(run) {
         // cout << throttleInput << endl;
         // fflush(stdout);
-        //calculateAbsoluteAltitude();
-        //calculatePID();
-        //sendThrottle();
+        calculateAbsoluteAltitude();
+        calculatePID();
+        sendThrottle();
     }
 }
 
@@ -523,6 +523,8 @@ int main(int argc, char *argv[]) {
     //     cout << "Calibration complete. Quadcopter self-arming." << endl;
     // }
     mainLoop();
+    delay(2000);
+    return 0;
 }
 
 void signal_callback_handler(int signum) {
