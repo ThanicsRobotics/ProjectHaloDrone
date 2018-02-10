@@ -1,8 +1,11 @@
 //WiringPi Libraries
-#include <wiringPiSPI.h>
+//#include <wiringPiSPI.h>
 #include <wiringPiI2C.h>
 #include <wiringSerial.h>
 #include <wiringPi.h>
+
+//pigpio Library
+#include <pigpio.h>
 
 //Standard Libraries
 #include <unistd.h>
@@ -51,6 +54,7 @@ void signal_callback_handler(int);
 int serialFd;
 int charCount = 0;
 char serialBuffer[100];
+char gyroBuffer[100];
 bool wordEnd = false;
 bool coFlag = false;
 //int uart0_filestream = -1;
@@ -61,6 +65,7 @@ bool authenticated = false;
 //CS0 is barometer, CS1 is STM32 flight controller
 int SPI_CS = 1;
 int i2cFd;
+int spiFd;
 
 //Pressure Altitude variables
 char baroData[9];
@@ -103,14 +108,14 @@ void shutdown() {
 
 //Request gyro angles from STM32F446 flight controller
 void getGyroValues() {
-    unsigned char buffer[100];
+    
 
     //Gyro pitch and roll are stored in two incoming bytes
-    wiringPiSPIDataRW(SPI_CS, buffer, 2);
+    wiringPiSPIDataRW(SPI_CS, gyroBuffer, 2);
     
     //pthread_mutex_lock(&gyro_mutex);
-    gyroPitch = (signed char)buffer[0];
-    gyroRoll = (signed char)buffer[1];
+    gyroPitch = (signed char)gyroBuffer[0];
+    gyroRoll = (signed char)gyroBuffer[1];
     //gyroRoll = buffer[0] << 8 | buffer[1];
     //pthread_mutex_unlock(&gyro_mutex);
 
@@ -215,6 +220,17 @@ void setupSerial() {
     //wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
 }
 
+void setupSPI() {
+    if (gpioInitialize() < 0) {
+        cout << "pigpio Library failed: " << strerror(errno) << endl;
+        return 1;
+    }
+    if (spiFd = spiOpen(SPI_CS, 2000000, 0) < 0) {
+        cout << "SPI failed: " << strerror(errno) << endl;
+        return 1;
+    }
+}
+
 //Configures inputs and outputs of IO Expander
 void setupIOExpander() {
     i2cFd = wiringPiI2CSetup(ADDR);
@@ -305,7 +321,7 @@ void authFlightController() {
     system("sudo openocd");
 
     authenticated = false;
-    unsigned char buffer[100];
+    char buffer[100];
     unsigned int authKey = 0;
     cout << "Authenticating..." << endl;
     int start = millis();
@@ -313,14 +329,17 @@ void authFlightController() {
         //Write to Authentication register
         buffer[0] = 0x00;
         buffer[1] = 0x01;
-        wiringPiSPIDataRW(SPI_CS, buffer, 2);
+        //wiringPiSPIDataRW(SPI_CS, buffer, 2);
+        spiWrite(spiFd, buffer, 2);
         delay(5);
 
         //Get Auth Key and send it back
-        wiringPiSPIDataRW(SPI_CS, buffer, 2);
+        //wiringPiSPIDataRW(SPI_CS, buffer, 2);
+        spiXfer(spiFd, buffer, buffer, 2);
         authKey = buffer[0] << 8 | buffer[1];
         cout << "Key: " << authKey << endl;
-        wiringPiSPIDataRW(SPI_CS, buffer, 2);
+        //wiringPiSPIDataRW(SPI_CS, buffer, 2);
+        //spiWrite(spiFd, buffer, 2);
         delay(50);
         if (millis() - start > 8000) {
             return;
@@ -420,22 +439,24 @@ void mainLoop() {
 void *gyroLoop(void *void_ptr) {
     //Switch to flight controller, setup SPI @ 1.5MHz
     SPI_CS = 1;
-    if (wiringPiSPISetup(SPI_CS, 1500000) < 0) {
-        cout << "SPI Setup Failed: " << strerror(errno) << endl;
-        fflush(stdout);
-    }
+    // if (wiringPiSPISetup(SPI_CS, 1500000) < 0) {
+    //     cout << "SPI Setup Failed: " << strerror(errno) << endl;
+    //     fflush(stdout);
+    // }
+    setupSPI();
     else {
         spiConfigured = true;
         authFlightController();
 
         while(run) {
-            getGyroValues();
+            //getGyroValues();
         }
-        unsigned char buffer[5];
-        buffer[0] = 0xFF;
-        buffer[1] = 0xF7;
-        wiringPiSPIDataRW(SPI_CS, buffer, 2);
+        // unsigned char buffer[5];
+        // buffer[0] = 0xFF;
+        // buffer[1] = 0xF7;
+        // wiringPiSPIDataRW(SPI_CS, buffer, 2);
     }
+    spiClose(spiFd);
     return NULL;
 }
 

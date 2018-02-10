@@ -384,7 +384,7 @@ int main() {
     gyro_yaw_input = (gyro_yaw_input * 0.7) + ((gyro_yaw / 65.5) * 0.3);      //Gyro pid input is deg/sec.
     
     //Gyro angle calculations
-    //0.0000611 = 1 / (250Hz / 65.5)
+    //0.0000611 = (0.004 / 65.5)
     angle_pitch += gyro_pitch * 0.0000611;                                    //Calculate the traveled pitch angle and add this to the angle_pitch variable.
     angle_roll += gyro_roll * 0.0000611;                                      //Calculate the traveled roll angle and add this to the angle_roll variable.
   
