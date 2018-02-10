@@ -285,9 +285,6 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
             distances[loops] = distance;
             loops++;
         }
-        else {
-            loops--;
-        }
     }
     sort(distances, distances + iterations);
     return distances[iterations/2];
