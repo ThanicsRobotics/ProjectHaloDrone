@@ -98,15 +98,12 @@ int pid_error_temp;
 int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 int throttleInput = 0;
 
-void shutdown(int signum) {
+void shutdown() {
     cout << "Closing Threads and Ports..." << endl;
     run = false;
     delay(1000);
     pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
-
-    delay(1000);
-	exit(signum);
 }
 
 //Request gyro angles from STM32F446 flight controller
@@ -226,11 +223,11 @@ void setupSerial() {
 void setupSPI() {
     if (gpioInitialise() < 0) {
         cout << "pigpio Library failed: " << strerror(errno) << endl;
-        shutdown(1);
+        exit(1);
     }
     if ((spiFd = spiOpen(SPI_CS, 2000000, 0)) < 0) {
         cout << "SPI failed: " << strerror(errno) << endl;
-        shutdown(1);
+        exit(1);
     }
     else spiConfigured = true;
 }
@@ -453,7 +450,7 @@ void *gyroLoop(void *void_ptr) {
         authFlightController();
 
         while(run) {
-            //getGyroValues();
+            getGyroValues();
         }
         // unsigned char buffer[5];
         // buffer[0] = 0xFF;
@@ -561,5 +558,8 @@ int main(int argc, char *argv[]) {
 
 void signal_callback_handler(int signum) {
 	cout << endl << "Caught signal: " << signum << endl;
-    shutdown(signum);
+    shutdown();
+
+    delay(1000);
+	exit(signum);
 }
