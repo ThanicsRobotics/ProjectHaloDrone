@@ -3,6 +3,10 @@
 //WiringPi Libraries
 #include <wiringPiI2C.h>
 #include <wiringPi.h>
+#include <iostream>
+#include <math.h>
+
+using namespace std;
 
 //Configures inputs and outputs of IO Expander
 void setupIOExpander() {

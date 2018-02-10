@@ -1,5 +1,8 @@
 #include "serial.h"
 #include <wiringSerial.h>
+#include <iostream>
+
+using namespace std;
 
 void setupSerial() {
     if ((serialFd = serialOpen("/dev/serial0", 9600)) < 0) {

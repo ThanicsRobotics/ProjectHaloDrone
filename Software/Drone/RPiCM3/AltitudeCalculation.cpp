@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
-#include <math.h>
 #include <bits/stdc++.h>
 #include <iostream>
 #include <errno.h>
