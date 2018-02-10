@@ -266,7 +266,14 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
         digitalIOWrite(pin, LOW);
 
         //Wait until pulse is complete (when handleEcho is complete)
-        while(pulseComplete == false);
+        int start = millis();
+        while(!pulseComplete) {
+            if (millis() - start > 1000) {
+                cout << "Pulse Fail" << endl;
+                pulse_time = 0;
+                break;
+            }
+        }
 
         //Calculate distance based on speed of sound and travel time
         int distance = pulse_time * 340 / 10000 / 2;
@@ -277,6 +284,9 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
         if (distance >= 0 && distance < 600) {
             distances[loops] = distance;
             loops++;
+        }
+        else {
+            loops--;
         }
     }
     sort(distances, distances + iterations);
