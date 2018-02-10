@@ -99,7 +99,7 @@ int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 int throttleInput = 0;
 
 void shutdown() {
-    cout << "Closing Threads and Ports..." << endl;
+    endl << cout << "Closing Threads and Ports..." << endl;
     run = false;
     delay(1000);
     pthread_join(serialThread, NULL);
@@ -114,7 +114,7 @@ void getGyroValues() {
 
     //Gyro pitch and roll are stored in two incoming bytes
     //wiringPiSPIDataRW(SPI_CS, gyroBuffer, 2);
-    spiRead(spiFd, gyroBuffer, 2);
+    spiXfer(spiFd, gyroBuffer, gyroBuffer, 2);
     //pthread_mutex_lock(&gyro_mutex);
     gyroPitch = (signed char)gyroBuffer[0];
     gyroRoll = (signed char)gyroBuffer[1];
