@@ -108,7 +108,6 @@ void shutdown() {
 
 //Request gyro angles from STM32F446 flight controller
 void getGyroValues() {
-    
 
     //Gyro pitch and roll are stored in two incoming bytes
     //wiringPiSPIDataRW(SPI_CS, gyroBuffer, 2);
