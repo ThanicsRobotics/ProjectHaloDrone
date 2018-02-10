@@ -2,15 +2,15 @@
 #define SERIAL_H
 
 //Serial UART port file descriptor
-int serialFd;
+extern int serialFd;
 
-int charCount = 0;
-char serialBuffer[100];
-bool wordEnd = false;
-bool coFlag = false;
-bool serialConfigured = false;
+extern int charCount = 0;
+extern char serialBuffer[100];
+extern bool wordEnd = false;
+extern bool coFlag = false;
+extern bool serialConfigured = false;
 
-int throttleInput = 0;
+extern int throttleInput = 0;
 
 void setupSerial();
 void readline();

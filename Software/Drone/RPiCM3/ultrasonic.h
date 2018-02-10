@@ -11,17 +11,17 @@
 #define HIGH 1
 #define EDGE_RISING 1
 
-int i2cFd;
+extern int i2cFd;
 
 //Pulse timing variables
-int start_time = 0;
-int pulse_time = 0;
-bool pulseComplete = false;
-unsigned int lastUltrasonicPulse = 0;
+extern int start_time = 0;
+extern int pulse_time = 0;
+extern bool pulseComplete = false;
+extern unsigned int lastUltrasonicPulse = 0;
 
 //Gyro angle variables
-signed int gyroPitch;
-signed int gyroRoll;
+extern signed int gyroPitch;
+extern signed int gyroRoll;
 
 void setupIOExpander();
 void handleEcho();
