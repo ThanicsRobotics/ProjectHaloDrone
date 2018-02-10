@@ -1,6 +1,9 @@
 //pigpio Library
 #include <pigpio.h>
 
+//WiringPi Library
+#include <wiringPi.h>
+
 //Standard Libraries
 #include <unistd.h>
 #include <time.h>
@@ -42,7 +45,6 @@ bool authenticated = false;
 
 //CS0 is barometer, CS1 is STM32 flight controller
 int SPI_CS = 1;
-int i2cFd;
 int spiFd;
 
 //Pressure Altitude variables
