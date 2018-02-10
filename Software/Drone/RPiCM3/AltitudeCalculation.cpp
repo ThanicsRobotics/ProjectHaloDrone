@@ -168,92 +168,92 @@ void handleEcho() {
 //     //}
 // }
 
-char *readline() {
+void readline() {
     //if (serialDataAvail(serialFd)) {
         //Read character incoming on serial bus
         //cout << "Waiting for data..." << endl;
         //while(serialDataAvail(serialFd) == 0);
         
-        char buffer[20];
-        static char word[10];
-        int count = 0;
-        ssize_t length = read(serialFd, &buffer, sizeof(buffer));
-        if (length == -1) {
-            cout << strerror(errno) << endl;
-        }
-        else {
-            // bool wordStart = false;
-            // for (int i = 0; i < sizeof(buffer); i++) {
-            //     if (buffer[i] == '\n' && !wordStart) {
-            //         wordStart = true;
-            //         continue;
-            //     }
-            //     else if (buffer[i] == '\n' && wordStart) {
-            //         word[count] = '\0';
-            //         wordStart = false;
-            //         return word;
-            //     }
-            //     else if (wordStart) {
-            //         word[count] = buffer[i];
-            //         count += 1;
-            //         continue;
-            //     }
-            //     else {
-            //         continue;
-            //     }
-            // }
-            cout << buffer << endl;
-            cout << "-----------" << endl;
-        }
-
-        return "0";
-        // char thisChar = serialGetchar(serialFd);
-        
-        
-        
-        // //Check if this character is the end of message
-        // if (thisChar == '\n') {
-        //     wordEnd = true;
-        //     serialBuffer[charCount] = '\0';
-        //     charCount = 0;
-        //     return;
+        // char buffer[20];
+        // static char word[10];
+        // int count = 0;
+        // ssize_t length = read(serialFd, &buffer, sizeof(buffer));
+        // if (length == -1) {
+        //     cout << strerror(errno) << endl;
         // }
-        
-        // //If we just finished a message, start a new one in the buffer
-        // else if (wordEnd == true) {
-        //     serialBuffer[charCount] = thisChar;
-        //     charCount += 1;
-        //     wordEnd = false;
-        //     return;
-        // }
-
-        // //Assign the next character to the current buffer
         // else {
-        //     serialBuffer[charCount] = thisChar;
-        //     charCount += 1;
-        //     return;
+        //     // bool wordStart = false;
+        //     // for (int i = 0; i < sizeof(buffer); i++) {
+        //     //     if (buffer[i] == '\n' && !wordStart) {
+        //     //         wordStart = true;
+        //     //         continue;
+        //     //     }
+        //     //     else if (buffer[i] == '\n' && wordStart) {
+        //     //         word[count] = '\0';
+        //     //         wordStart = false;
+        //     //         return word;
+        //     //     }
+        //     //     else if (wordStart) {
+        //     //         word[count] = buffer[i];
+        //     //         count += 1;
+        //     //         continue;
+        //     //     }
+        //     //     else {
+        //     //         continue;
+        //     //     }
+        //     // }
+        //     cout << buffer << endl;
+        //     cout << "-----------" << endl;
         // }
+
+        // return "0";
+        char thisChar = serialGetchar(serialFd);
+        
+        
+        
+        //Check if this character is the end of message
+        if (thisChar == '\n') {
+            wordEnd = true;
+            serialBuffer[charCount] = '\0';
+            charCount = 0;
+            return;
+        }
+        
+        //If we just finished a message, start a new one in the buffer
+        else if (wordEnd == true) {
+            serialBuffer[charCount] = thisChar;
+            charCount += 1;
+            wordEnd = false;
+            return;
+        }
+
+        //Assign the next character to the current buffer
+        else {
+            serialBuffer[charCount] = thisChar;
+            charCount += 1;
+            return;
+        }
         //cout << "1.3" << endl;
     //}
 }
 
 void handleSerialInterrupt() {
-    cout << (int)strtol(readline(), NULL, 10) << endl;
-
-    // if (wordEnd == true) {                                                  //If we have finished a message
-    //     int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
-    //     if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
-    //         //pthread_mutex_lock(&serial_mutex);
-    //         throttleInput = data;                                            //Set throttle input
-    //         //pthread_mutex_unlock(&serial_mutex);
-    //         coFlag = false;
-    //         //cout << throttleInput << endl;
-    //         //fflush(stdout);
-    //     }
-    //     else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
-    //     memset(serialBuffer,0,sizeof(serialBuffer));
-    // }
-    // else return;
+    //cout << (int)strtol(readline(), NULL, 10) << endl;
+    readline();
+    if (wordEnd == true) {                                                  //If we have finished a message
+        int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
+        if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
+            //pthread_mutex_lock(&serial_mutex);
+            throttleInput = data;                                            //Set throttle input
+            //pthread_mutex_unlock(&serial_mutex);
+            coFlag = false;
+            cout << throttleInput << endl;
+            fflush(stdout);
+        }
+        else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
+        memset(serialBuffer,0,sizeof(serialBuffer));
+    }
+    else return;
 }
 
 //Utility function for setting individual pin on IO Expander
