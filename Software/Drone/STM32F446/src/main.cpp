@@ -306,13 +306,10 @@ int main() {
 
   authRasPiCM3();
 
-  gyro_address = 0x69<<1;                                                     //Store the gyro address
+  gyro_address = 0x69;                                                     //Store the gyro address
   char cmd[2];
   
-  cmd[0] = 0x00;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
-  i2c.write(gyro_address, cmd, 1);
-  i2c.read(gyro_address, cmd, 1);
-  int whoami = cmd[0];
+  
   //set_gyro_registers();
 
   //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
@@ -337,7 +334,14 @@ int main() {
   loop_timer = onTime.read_us();                                              //First timer reading (starting main loop)
   
   //Infinite PID Loop
+  int whoami;
   while(1) {
+
+    cmd[0] = 0x00;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
+    i2c.write(gyro_address, cmd, 1);
+    i2c.read(gyro_address, cmd, 1);
+    whoami = cmd[0];
+
     //65.5 = 1 deg/sec in gyro scale
     gyro_roll_input = (gyro_roll_input * 0.7) + ((gyro_roll / 65.5) * 0.3);   //Gyro pid input is deg/sec.
     gyro_pitch_input = (gyro_pitch_input * 0.7) + ((gyro_pitch / 65.5) * 0.3);//Gyro pid input is deg/sec.
