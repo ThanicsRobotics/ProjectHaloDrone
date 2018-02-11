@@ -204,7 +204,7 @@ void *gyroLoop(void *void_ptr) {
     setupSPI();
     authFlightController();
     while(run) {
-        //getGyroValues();
+        getGyroValues();
     }
     return NULL;
 }

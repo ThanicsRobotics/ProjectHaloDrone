@@ -311,7 +311,7 @@ int main() {
   authRasPiCM3();
 
   //Load SPI buffer with dummy byte
-  //spi.reply(0x03);
+  spi.reply(0x03);
 
   start = 0;                                                                  //Set start back to zero
   gyro_address = 0x69<<1;                                                     //Store the gyro address
@@ -340,7 +340,7 @@ int main() {
   gyro_axis_cal[2] /= 2000;                                                   //Divide the pitch total by 2000.
   gyro_axis_cal[3] /= 2000;                                                   //Divide the yaw total by 2000.
   
-  //spi.reply(0x04);
+  spi.reply(0x04);
 
   //Wait until the receiver is active and the throttle is set to the lower position.
   //pc.printf("Waiting for arming...\r\n");
@@ -364,7 +364,7 @@ int main() {
   }
   start = 0;                                                                  //Set start back to 0.
 
-//  spi.reply(0x05);
+  spi.reply(0x05);
     
   loop_timer = onTime.read_us();                                              //First timer reading (starting main loop)
   
