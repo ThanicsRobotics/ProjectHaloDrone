@@ -306,10 +306,10 @@ int main() {
 
   authRasPiCM3();
 
-  gyro_address = 0x68<<1;                                                     //Store the gyro address
+  gyro_address = 0x60<<1;                                                     //Store the gyro address
   set_gyro_registers();
 
-    //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
+  //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
   for (cal_int = 0; cal_int < 2000 ; cal_int ++) {                            //Take 2000 readings for calibration.
     gyro_signalen();                                                          //Read the gyro output.
     gyro_axis_cal[1] += gyro_axis[1];                                         //Add roll value to gyro_roll_cal.
@@ -323,7 +323,7 @@ int main() {
     wait(.003);                                                               //Wait 3 milliseconds before the next loop
   }
 
-    //Now that we have 2000 measures, we need to divide by 2000 to get the average gyro offset.
+  //Now that we have 2000 measures, we need to divide by 2000 to get the average gyro offset.
   gyro_axis_cal[1] /= 2000;                                                   //Divide the roll total by 2000.
   gyro_axis_cal[2] /= 2000;                                                   //Divide the pitch total by 2000.
   gyro_axis_cal[3] /= 2000; 
