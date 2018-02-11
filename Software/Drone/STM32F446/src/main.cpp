@@ -323,6 +323,11 @@ int main() {
     wait(.003);                                                               //Wait 3 milliseconds before the next loop
   }
 
+    //Now that we have 2000 measures, we need to divide by 2000 to get the average gyro offset.
+  gyro_axis_cal[1] /= 2000;                                                   //Divide the roll total by 2000.
+  gyro_axis_cal[2] /= 2000;                                                   //Divide the pitch total by 2000.
+  gyro_axis_cal[3] /= 2000; 
+
   loop_timer = onTime.read_us();                                              //First timer reading (starting main loop)
   
   //Infinite PID Loop
