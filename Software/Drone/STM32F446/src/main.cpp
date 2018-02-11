@@ -306,12 +306,17 @@ int main() {
 
   authRasPiCM3();
 
-  gyro_address = 0x60<<1;                                                     //Store the gyro address
-  set_gyro_registers();
+  gyro_address = 0x69<<1;                                                     //Store the gyro address
+  char cmd[2];
+  
+  cmd[0] = 0x00;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
+  i2c.write(gyro_address, cmd, 2);
+  int whoami = cmd[0];
+  //set_gyro_registers();
 
   //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
   for (cal_int = 0; cal_int < 2000 ; cal_int ++) {                            //Take 2000 readings for calibration.
-    gyro_signalen();                                                          //Read the gyro output.
+    //gyro_signalen();                                                          //Read the gyro output.
     gyro_axis_cal[1] += gyro_axis[1];                                         //Add roll value to gyro_roll_cal.
     gyro_axis_cal[2] += gyro_axis[2];                                         //Add pitch value to gyro_pitch_cal.
     gyro_axis_cal[3] += gyro_axis[3];                                         //Add yaw value to gyro_yaw_cal.
@@ -371,11 +376,12 @@ int main() {
 //       //do stuff thats not flight
       
 //       //Load gyro angle data into SPI buffer
-      spi.reply((signed char)gyro_roll_input << 8 | (signed char)gyro_pitch_input);
+      //spi.reply((signed char)gyro_roll_input << 8 | (signed char)gyro_pitch_input);
 //       //spi.reply((int)receiver_input_throttle);
+      spi.reply(whoami);
     }
     loop_timer = onTime.read_us();
-    gyro_signalen();
+    //gyro_signalen();
   }
 }
 
