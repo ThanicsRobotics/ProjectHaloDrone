@@ -383,7 +383,7 @@ int main() {
 //       //Load gyro angle data into SPI buffer
       //spi.reply((signed char)gyro_roll_input << 8 | (signed char)gyro_pitch_input);
 //       //spi.reply((int)receiver_input_throttle);
-      spi.reply(3);
+      spi.reply(whoami);
     }
     loop_timer = onTime.read_us();
     //gyro_signalen();
