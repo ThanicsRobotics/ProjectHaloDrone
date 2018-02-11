@@ -138,10 +138,10 @@ void authFlightController() {
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
     cout << "Gyro Pitch: " << gyroPitch << " | "  << "Gyro Roll: " << gyroRoll;
-    int rawDistance = getUltrasonicData(1, 3, 30);
-    cout << " | Raw Distance: " << rawDistance;
-    altitude = angleCorrection(rawDistance);
-    cout << " | Altitude: " << altitude;
+    //int rawDistance = getUltrasonicData(1, 3, 30);
+    //cout << " | Raw Distance: " << rawDistance;
+    //altitude = angleCorrection(rawDistance);
+    //cout << " | Altitude: " << altitude;
 }
 
 //Calculate throttle factor for altitude management through PID loop
@@ -221,7 +221,8 @@ void *serialLoop(void *void_ptr) {
 }
 
 void showUsage(string name) {
-    cerr << "Usage: " << name << " <option(s)>\n\n"
+    cerr << "Usage: " << name << " <option(s)>\n"
+        << "**NOTE: Must be run with root privileges\n\n"
         << "Options:\n"
         << "\t-h,--help\t\t\tShow this help message\n"
         << "\t-c,--controller-enabled \tRun program to connect with controller\n"
@@ -303,7 +304,7 @@ int main(int argc, char *argv[]) {
     // else {
     //     cout << "Calibration complete. Quadcopter self-arming." << endl;
     // }
-    
+
     mainLoop();
     delay(2000);
     return 0;
