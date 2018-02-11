@@ -306,7 +306,7 @@ int main() {
 
   authRasPiCM3();
 
-  gyro_address = 0x69;                                                     //Store the gyro address
+  gyro_address = 0x69<<1;                                                     //Store the gyro address
   char cmd[2];
   
   
@@ -383,7 +383,7 @@ int main() {
 //       //Load gyro angle data into SPI buffer
       //spi.reply((signed char)gyro_roll_input << 8 | (signed char)gyro_pitch_input);
 //       //spi.reply((int)receiver_input_throttle);
-      spi.reply(whoami);
+      spi.reply(3);
     }
     loop_timer = onTime.read_us();
     //gyro_signalen();
