@@ -310,7 +310,8 @@ int main() {
   char cmd[2];
   
   cmd[0] = 0x00;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
-  i2c.write(gyro_address, cmd, 2);
+  i2c.write(gyro_address, cmd, 1);
+  i2c.read(gyro_address, cmd, 1);
   int whoami = cmd[0];
   //set_gyro_registers();
 
