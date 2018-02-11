@@ -371,7 +371,7 @@ int main() {
 //       //do stuff thats not flight
       
 //       //Load gyro angle data into SPI buffer
-      spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
+      spi.reply((signed char)angle_pitch_acc << 8 | (signed char)angle_roll_acc);
 //       //spi.reply((int)receiver_input_throttle);
     }
     loop_timer = onTime.read_us();
