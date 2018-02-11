@@ -594,7 +594,7 @@ int main() {
       //do stuff thats not flight
       
       //Load gyro angle data into SPI buffer
-      spi.reply((signed char)gyro_pitch_input << 8 | (signed char)gyro_roll_input);
+      spi.reply((signed char)-6.784332 << 8 | (signed char)150.79048);
       //spi.reply((int)receiver_input_throttle);
     }
                             
