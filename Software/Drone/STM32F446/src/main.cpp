@@ -299,14 +299,14 @@ void authRasPiCM3() {
 int main() {
   //Configure communications
   onTime.start();                                                             //Start loop timer
-  i2c.frequency(100000);
+  i2c.frequency(400000);
   //Setup the spi for 16 bit data, mode 0 and 1.5MHz clock rate
   spi.format(16,0);
   spi.frequency(3000000);
 
   authRasPiCM3();
 
-  gyro_address = 0x69<<1;                                                     //Store the gyro address
+  gyro_address = 0x68<<1;                                                     //Store the gyro address
   set_gyro_registers();
 
     //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
