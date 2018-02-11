@@ -314,7 +314,7 @@ int main() {
 
   //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
   for (cal_int = 0; cal_int < 2000 ; cal_int ++) {                            //Take 2000 readings for calibration.
-    //gyro_signalen();                                                          //Read the gyro output.
+    gyro_signalen();                                                          //Read the gyro output.
     gyro_axis_cal[1] += gyro_axis[1];                                         //Add roll value to gyro_roll_cal.
     gyro_axis_cal[2] += gyro_axis[2];                                         //Add pitch value to gyro_pitch_cal.
     gyro_axis_cal[3] += gyro_axis[3];                                         //Add yaw value to gyro_yaw_cal.
@@ -386,7 +386,7 @@ int main() {
       //spi.reply(whoami);
     }
     loop_timer = onTime.read_us();
-    //gyro_signalen();
+    gyro_signalen();
   }
 }
 
