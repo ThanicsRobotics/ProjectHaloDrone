@@ -311,7 +311,7 @@ int main() {
   authRasPiCM3();
 
   //Load SPI buffer with dummy byte
-  spi.reply(0x03);
+  //spi.reply(0x03);
 
   start = 0;                                                                  //Set start back to zero
   gyro_address = 0x69<<1;                                                     //Store the gyro address
@@ -340,7 +340,7 @@ int main() {
   gyro_axis_cal[2] /= 2000;                                                   //Divide the pitch total by 2000.
   gyro_axis_cal[3] /= 2000;                                                   //Divide the yaw total by 2000.
   
-  spi.reply(0x04);
+  //spi.reply(0x04);
 
   //Wait until the receiver is active and the throttle is set to the lower position.
   //pc.printf("Waiting for arming...\r\n");
@@ -363,16 +363,8 @@ int main() {
     wait(.003);                                                               //Wait 3 milliseconds before the next loop
   }
   start = 0;                                                                  //Set start back to 0.
-  //pc.printf("Ready\r\n");
-  spi.reply(0x05);
-  //Load the battery voltage to the battery_voltage variable.
-  //65 is the voltage compensation for the diode.
-  //12.6V equals ~5V @ Analog 0.
-  //12.6V equals 1023 analogRead(0).
-  //1260 / 1023 = 1.2317.
-  //The variable battery_voltage holds 1050 if the battery voltage is 10.5V.
-  //battery_voltage = (analogRead(0) + 65) * 1.2317;
-  //int battery_voltage = 1260;
+
+//  spi.reply(0x05);
     
   loop_timer = onTime.read_us();                                              //First timer reading (starting main loop)
   
