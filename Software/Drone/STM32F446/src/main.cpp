@@ -299,7 +299,7 @@ void authRasPiCM3() {
 int main() {
   //Configure communications
   onTime.start();                                                             //Start loop timer
-  i2c.frequency(400000);
+  i2c.frequency(100000);
   //Setup the spi for 16 bit data, mode 0 and 1.5MHz clock rate
   spi.format(16,0);
   spi.frequency(3000000);
