@@ -200,7 +200,44 @@ void gyro_signalen() {
   gyro_yaw = gyro_axis[3] * -1;                       
   acc_x = acc_axis[1];                           
   acc_y = acc_axis[2];                           
-  acc_z = acc_axis[3] * -1;                           
+  acc_z = acc_axis[3] * -1;
+}
+
+void calculate_angles() {
+  //65.5 = 1 deg/sec in gyro scale
+  gyro_roll_input = (gyro_roll_input * 0.7) + ((gyro_roll / 65.5) * 0.3);   //Gyro pid input is deg/sec.
+  gyro_pitch_input = (gyro_pitch_input * 0.7) + ((gyro_pitch / 65.5) * 0.3);//Gyro pid input is deg/sec.
+  gyro_yaw_input = (gyro_yaw_input * 0.7) + ((gyro_yaw / 65.5) * 0.3);      //Gyro pid input is deg/sec.
+  
+  //Gyro angle calculations
+  //0.0000611 = (0.004 / 65.5)
+  angle_pitch += gyro_pitch * 0.0000611;                                    //Calculate the traveled pitch angle and add this to the angle_pitch variable.
+  angle_roll += gyro_roll * 0.0000611;                                      //Calculate the traveled roll angle and add this to the angle_roll variable.
+
+  //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
+  angle_pitch -= angle_roll * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the roll angle to the pitch angle.
+  angle_roll += angle_pitch * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the pitch angle to the roll angle.
+
+  //Accelerometer angle calculations
+  acc_total_vector = sqrt((acc_x*acc_x)+(acc_y*acc_y)+(acc_z*acc_z));       //Calculate the total accelerometer vector.
+  
+  if (abs(acc_y) < acc_total_vector) {                                      //Prevent the asin function to produce a NaN
+    angle_pitch_acc = asin((float)acc_y/acc_total_vector)* 57.296;          //Calculate the pitch angle.
+  }
+
+  if (abs(acc_x) < acc_total_vector) {                                      //Prevent the asin function to produce a NaN
+    angle_roll_acc = asin((float)acc_x/acc_total_vector)* -57.296;          //Calculate the roll angle.
+  }
+  
+  //Place the MPU-6050 spirit level and note the values in the following two lines for calibration.
+  angle_pitch_acc -= 0.0;                                                   //Accelerometer calibration value for pitch.
+  angle_roll_acc -= 0.0;                                                    //Accelerometer calibration value for roll.
+  
+  angle_pitch = angle_pitch * 0.9996 + angle_pitch_acc * 0.0004;            //Correct the drift of the gyro pitch angle with the accelerometer pitch angle.
+  angle_roll = angle_roll * 0.9996 + angle_roll_acc * 0.0004;               //Correct the drift of the gyro roll angle with the accelerometer roll angle.
+  
+  pitch_level_adjust = angle_pitch * 12;                                    //Calculate the pitch angle correction
+  roll_level_adjust = angle_roll * 12;                                      //Calculate the roll angle correction                         
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -463,41 +500,6 @@ int main() {
   
   //Infinite PID Loop
   while(1) {
-    //65.5 = 1 deg/sec in gyro scale
-    gyro_roll_input = (gyro_roll_input * 0.7) + ((gyro_roll / 65.5) * 0.3);   //Gyro pid input is deg/sec.
-    gyro_pitch_input = (gyro_pitch_input * 0.7) + ((gyro_pitch / 65.5) * 0.3);//Gyro pid input is deg/sec.
-    gyro_yaw_input = (gyro_yaw_input * 0.7) + ((gyro_yaw / 65.5) * 0.3);      //Gyro pid input is deg/sec.
-    
-    //Gyro angle calculations
-    //0.0000611 = (0.004 / 65.5)
-    angle_pitch += gyro_pitch * 0.0000611;                                    //Calculate the traveled pitch angle and add this to the angle_pitch variable.
-    angle_roll += gyro_roll * 0.0000611;                                      //Calculate the traveled roll angle and add this to the angle_roll variable.
-  
-    //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
-    angle_pitch -= angle_roll * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the roll angle to the pitch angle.
-    angle_roll += angle_pitch * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the pitch angle to the roll angle.
-
-    //Accelerometer angle calculations
-    acc_total_vector = sqrt((acc_x*acc_x)+(acc_y*acc_y)+(acc_z*acc_z));       //Calculate the total accelerometer vector.
-    
-    if (abs(acc_y) < acc_total_vector) {                                      //Prevent the asin function to produce a NaN
-      angle_pitch_acc = asin((float)acc_y/acc_total_vector)* 57.296;          //Calculate the pitch angle.
-    }
-
-    if (abs(acc_x) < acc_total_vector) {                                      //Prevent the asin function to produce a NaN
-      angle_roll_acc = asin((float)acc_x/acc_total_vector)* -57.296;          //Calculate the roll angle.
-    }
-    
-    //Place the MPU-6050 spirit level and note the values in the following two lines for calibration.
-    angle_pitch_acc -= 0.0;                                                   //Accelerometer calibration value for pitch.
-    angle_roll_acc -= 0.0;                                                    //Accelerometer calibration value for roll.
-    
-    angle_pitch = angle_pitch * 0.9996 + angle_pitch_acc * 0.0004;            //Correct the drift of the gyro pitch angle with the accelerometer pitch angle.
-    angle_roll = angle_roll * 0.9996 + angle_roll_acc * 0.0004;               //Correct the drift of the gyro roll angle with the accelerometer roll angle.
-    
-    pitch_level_adjust = angle_pitch * 12;                                    //Calculate the pitch angle correction
-    roll_level_adjust = angle_roll * 12;                                      //Calculate the roll angle correction
-  
     //For starting the motors: throttle low and yaw left (step 1)
     if(receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) {
       start = 1;
@@ -594,16 +596,18 @@ int main() {
       //do stuff thats not flight
       
       //Load gyro angle data into SPI buffer
-      spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
+      spi.reply((signed char)angle_pitch_acc << 8 | (signed char)angle_roll);
       //spi.reply((int)receiver_input_throttle);
     }
-                            
-    loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
+    
+    
 
     //__disable_irq();
 
     //RISING EDGE of PWM motor pulses (start of loop)
     motors_on();
+
+    loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
     
     timer_channel_1 = esc_1 + loop_timer;                                     //Calculate the time of the falling edge of the esc-1 pulse.
     timer_channel_2 = esc_2 + loop_timer;                                     //Calculate the time of the falling edge of the esc-2 pulse.
@@ -613,7 +617,7 @@ int main() {
     //There is always 1000us of spare time. So let's do something useful that is very time consuming.
     //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
     gyro_signalen();
-
+    calculate_angles();
     //spi.reply((int)receiver_input_pitch);
     //CLOCK SPEED TEST
     //spi.reply(SystemCoreClock/1000000);

@@ -87,6 +87,7 @@ void getGyroValues() {
 
     //Gyro pitch and roll are stored in two incoming bytes
     //wiringPiSPIDataRW(SPI_CS, gyroBuffer, 2);
+    
     spiXfer(spiFd, gyroBuffer, gyroBuffer, 2);
     gyroPitch = (signed char)gyroBuffer[0];
     gyroRoll = (signed char)gyroBuffer[1];
