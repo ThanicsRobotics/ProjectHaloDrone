@@ -371,13 +371,13 @@ int main() {
   loop_timer = onTime.read_us();                                              //First timer reading (starting main loop)
   
   //Infinite PID Loop
-  int whoami;
+  //int whoami;
   while(1) {
 
-    cmd[0] = 0x00;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
-    i2c.write(gyro_address, cmd, 1);
-    i2c.read(gyro_address, cmd, 1);
-    whoami = cmd[0];
+    // cmd[0] = 0x00;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
+    // i2c.write(gyro_address, cmd, 1);
+    // i2c.read(gyro_address, cmd, 1);
+    // whoami = cmd[0];
 
     //65.5 = 1 deg/sec in gyro scale
     gyro_roll_input = (gyro_roll_input * 0.7) + ((gyro_roll / 65.5) * 0.3);   //Gyro pid input is deg/sec.
@@ -418,9 +418,9 @@ int main() {
 //       //do stuff thats not flight
       
 //       //Load gyro angle data into SPI buffer
-      //spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
+      spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
 //       //spi.reply((int)receiver_input_throttle);
-      spi.reply(whoami);
+      //spi.reply(whoami);
     }
     loop_timer = onTime.read_us();
     gyro_signalen();
