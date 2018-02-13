@@ -208,7 +208,8 @@ void *gyroLoop(void *void_ptr) {
     authFlightController();
     while(run) {
         getGyroValues();
-        cout << "sp:" << spiFd << endl;
+        //cout << "sp:" << spiFd << endl;
+        delay(50);
     }
     return NULL;
 }
