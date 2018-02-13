@@ -3,7 +3,7 @@
 
 //WiringPi Library
 #include <wiringPi.h>
-#include <wiringSerial.h>
+//#include <wiringSerial.h>
 
 //Standard Libraries
 #include <unistd.h>
@@ -78,7 +78,7 @@ void shutdown() {
     cout << "Closing SPI: " << spiFd << endl;
 
     spiClose(spiFd);
-    serialClose(serialFd);
+    serClose(serialFd);
     i2cClose(i2cFd);
     gpioTerminate();
 
