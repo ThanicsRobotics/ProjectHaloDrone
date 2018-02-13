@@ -65,7 +65,6 @@ int pid_max = 400;                      //Maximum output of the PID-controller (
 int pid_error_temp;
 int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 
-
 void shutdown() {
     cout << endl << "Closing Threads and Ports..." << endl << endl;
     run = false;
@@ -241,6 +240,14 @@ void showUsage(string name) {
 
 //Main Program loop
 int main(int argc, char *argv[]) {
+    //Setup function calls
+    wiringPiSetupGpio();
+    if (gpioInitialise() < 0) {
+        cout << "pigpio Library failed: " << strerror(errno) << endl;
+        exit(1);
+    }
+    signal(SIGINT, signal_callback_handler);
+
     bool controllerConnected = false;
     if (argc > 1) {
         if (string(argv[1]) == "-c" || string(argv[1]) == "--controller-enabled") 
@@ -256,14 +263,6 @@ int main(int argc, char *argv[]) {
         showUsage(argv[0]);
         return 1;
     }
-
-    //Setup function calls
-    wiringPiSetupGpio();
-    if (gpioInitialise() < 0) {
-        cout << "pigpio Library failed: " << strerror(errno) << endl;
-        exit(1);
-    }
-    signal(SIGINT, signal_callback_handler);
 
     setupIOExpander();
 
