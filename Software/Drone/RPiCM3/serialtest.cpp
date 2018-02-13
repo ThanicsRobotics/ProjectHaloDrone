@@ -20,7 +20,7 @@ using namespace std;
 
 void readChar() {
     // char thisChar = serialGetchar(serialFd);
-    char thisChar;
+    int thisChar;
     if ((thisChar = serReadByte(serialFd)) < 0 ) {
         cout << "read byte failed: " << strerror(errno) << endl;
     }
