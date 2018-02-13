@@ -16,6 +16,8 @@ char serialBuffer[100];
 bool wordEnd = false;
 int charCount = 0;
 
+using namespace std;
+
 void readChar() {
     // char thisChar = serialGetchar(serialFd);
     char thisChar = serReadByte(serialFd);
@@ -73,6 +75,6 @@ int main() {
             readChar();
         }
     }
-    serClose();
+    serClose(serialFd);
     gpioTerminate();
 }
