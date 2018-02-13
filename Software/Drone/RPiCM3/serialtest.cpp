@@ -80,7 +80,7 @@ int main() {
     }
     else {
         cout << serialFd << endl;
-        for(int i = 0; i < 10000; i++) {
+        for(int i = 0; i < 100000000; i++) {
             readChar();
         }
     }
