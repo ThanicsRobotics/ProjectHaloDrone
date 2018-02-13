@@ -14,7 +14,7 @@
 
 using namespace std;
 
-int i2cFd = 0;
+int i2cFd;
 
 //Pulse timing variables
 int start_time = 0;
