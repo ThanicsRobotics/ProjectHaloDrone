@@ -84,7 +84,7 @@ void shutdown() {
 
     cout << endl << "Halting Flight Controller..." << endl << endl;
     delay(500);
-    
+
     system("sudo openocd -f halt.cfg");
 }
 
@@ -105,7 +105,10 @@ void setupSPI() {
         cout << "SPI failed: " << strerror(errno) << endl;
         exit(1);
     }
-    else spiConfigured = true;
+    else {
+        cout << "Opening SPI: " << spiFd << endl;
+        spiConfigured = true;
+    }
 }
 
 //Making sure the STM32F446 is listening...

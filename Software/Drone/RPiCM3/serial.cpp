@@ -21,7 +21,10 @@ void setupSerial() {
         cout << "Unable to open serial interface: " << strerror(errno) << endl;
         fflush(stdout);
     }
-    else serialConfigured = true;
+    else {
+        cout << "Opening Serial: " << serialFd << endl;
+        serialConfigured = true;
+    }
 
     //wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
 }
