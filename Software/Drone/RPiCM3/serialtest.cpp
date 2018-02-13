@@ -70,7 +70,7 @@ int main() {
         cout << "pigpio Library failed: " << strerror(errno) << endl;
         exit(1);
     }
-    if ((serialFd = serOpen("/dev/serial0", 9600, 0)) < 0) {
+    if ((serialFd = serOpen("/dev/ttyAMA0", 9600, 0)) < 0) {
             cout << "Unable to open serial interface: " << strerror(errno) << endl;
             fflush(stdout);
         }
