@@ -74,6 +74,7 @@ void shutdown() {
     pthread_join(gyroThread, NULL);
 
     spiClose(spiFd);
+    serialClose(serialFd);
     i2cClose(i2cFd);
     gpioTerminate();
 
@@ -217,7 +218,6 @@ void *serialLoop(void *void_ptr) {
         readLine();
         //delay(0.5);
     }
-    serialClose(serialFd);
     return NULL;
 }
 
