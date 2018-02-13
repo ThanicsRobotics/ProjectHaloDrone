@@ -23,6 +23,7 @@ void readChar() {
     char buf[2];
     if ((serRead(serialFd, buf, 1)) < 0 ) {
         cout << "read byte failed: " << strerror(errno) << endl;
+        fflush(stdout);
     }
     char thisChar = buf[0];
     
