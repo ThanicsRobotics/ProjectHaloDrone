@@ -1,5 +1,5 @@
 #include "serial.h"
-#include <wiringSerial.h>
+#include <pigpio.h>
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
@@ -17,7 +17,12 @@ bool serialConfigured = false;
 int throttleInput = 0;
 
 void setupSerial() {
-    if ((serialFd = serialOpen("/dev/serial0", 9600)) < 0) {
+    // if ((serialFd = serialOpen("/dev/serial0", 9600)) < 0) {
+    //     cout << "Unable to open serial interface: " << strerror(errno) << endl;
+    //     fflush(stdout);
+    // }
+
+    if ((serialFd = serOpen("/dev/serial0", 9600, 0)) < 0) {
         cout << "Unable to open serial interface: " << strerror(errno) << endl;
         fflush(stdout);
     }
@@ -25,12 +30,11 @@ void setupSerial() {
         cout << "Opening Serial: " << serialFd << endl;
         serialConfigured = true;
     }
-
-    //wiringPiISR(15, INT_EDGE_FALLING, handleSerialInterrupt);
 }
 
 void readChar() {
-    char thisChar = serialGetchar(serialFd);
+    // char thisChar = serialGetchar(serialFd);
+    char thisChar = serReadByte(serialFd);
     
     //Check if this character is the end of message
     if (thisChar == '\n') {
