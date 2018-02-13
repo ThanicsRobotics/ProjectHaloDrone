@@ -193,6 +193,7 @@ void mainLoop() {
         calculateAbsoluteAltitude();
         calculatePID();
         sendThrottle();
+        cout << "i:" << i2cFd << endl;
     }
 }
 
@@ -207,6 +208,7 @@ void *gyroLoop(void *void_ptr) {
     authFlightController();
     while(run) {
         getGyroValues();
+        cout << "sp:" << spiFd << endl;
     }
     return NULL;
 }
@@ -216,6 +218,7 @@ void *serialLoop(void *void_ptr) {
     serialFlush(serialFd);
     while(run) {
         readLine();
+        cout << "se:" << serialFd << endl;
         //delay(0.5);
     }
     return NULL;
