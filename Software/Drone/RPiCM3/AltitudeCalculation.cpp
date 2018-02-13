@@ -67,11 +67,15 @@ int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 
 
 void shutdown() {
-    cout << endl << "Closing Threads and Ports..." << endl;
+    cout << endl << "Closing Threads and Ports..." << endl << endl;
     run = false;
     delay(1000);
     pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
+
+    cout << "Closing I2C: " << i2cFd << endl;
+    cout << "Closing Serial: " << serialFd << endl;
+    cout << "Closing SPI: " << spiFd << endl;
 
     spiClose(spiFd);
     serialClose(serialFd);
@@ -80,6 +84,7 @@ void shutdown() {
 
     cout << endl << "Halting Flight Controller..." << endl << endl;
     delay(500);
+    
     system("sudo openocd -f halt.cfg");
 }
 
@@ -193,7 +198,6 @@ void mainLoop() {
         calculateAbsoluteAltitude();
         calculatePID();
         sendThrottle();
-        cout << "i:" << i2cFd << endl;
     }
 }
 
@@ -208,7 +212,6 @@ void *gyroLoop(void *void_ptr) {
     authFlightController();
     while(run) {
         getGyroValues();
-        //cout << "sp:" << spiFd << endl;
         delay(50);
     }
     return NULL;
@@ -219,7 +222,6 @@ void *serialLoop(void *void_ptr) {
     serialFlush(serialFd);
     while(run) {
         readLine();
-        cout << "se:" << serialFd << endl;
         //delay(0.5);
     }
     return NULL;
