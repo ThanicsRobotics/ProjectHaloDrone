@@ -215,14 +215,13 @@ void *gyroLoop(void *void_ptr) {
     authFlightController();
     while(run) {
         getGyroValues();
-        delay(50);
     }
     return NULL;
 }
 
 void *serialLoop(void *void_ptr) {
     setupSerial();
-    serialFlush(serialFd);
+    //serialFlush(serialFd);
     while(run) {
         readLine();
         //delay(0.5);
