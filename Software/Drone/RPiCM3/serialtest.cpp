@@ -20,7 +20,9 @@ using namespace std;
 
 void readChar() {
     // char thisChar = serialGetchar(serialFd);
-    char thisChar = serReadByte(serialFd);
+    if ((char thisChar = serReadByte(serialFd)) < 0 ) {
+        cout << "read byte failed: " << strerror(errno) << endl;
+    }
     
     //Check if this character is the end of message
     if (thisChar == '\n') {
