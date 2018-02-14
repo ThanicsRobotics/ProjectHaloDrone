@@ -13,46 +13,8 @@
 #include <string.h>
 
 int serialFd;
-int i2cFd;
-char serialBuffer[100];
-bool wordEnd = false;
-int charCount = 0;
 
 using namespace std;
-
-void readChar() {
-    //char buf[2];
-    char thisChar = serReadByte(serialFd);
-    if ((int)thisChar < 0) {
-        cout << "read byte failed: " << strerror(errno) << endl;
-        fflush(stdout);
-    }
-    //char thisChar = buf[0];
-    
-    //Check if this character is the end of message
-    if (thisChar == '\n') {
-        wordEnd = true;
-        serialBuffer[charCount] = '\0';
-        charCount = 0;
-        cout << serialBuffer << endl;
-        return;
-    }
-    
-    //If we just finished a message, start a new one in the buffer
-    else if (wordEnd == true) {
-        serialBuffer[charCount] = thisChar;
-        charCount += 1;
-        wordEnd = false;
-        return;
-    }
-
-    //Assign the next character to the current buffer
-    else {
-        serialBuffer[charCount] = thisChar;
-        charCount += 1;
-        return;
-    }
-}
 
 void shutdown() {
     cout << "Closing Serial: " << serialFd << endl;
@@ -85,11 +47,7 @@ int main() {
 
     delay(1000);
     for(int i = 0; i < 100000000; i++) {
-        readChar();
-        if (wordEnd) {
-            cout << serialBuffer << endl;
-            memset(serialBuffer,0,sizeof(serialBuffer));
-        }
+        cout << serReadByte(serialFd) << endl;
     }
 }
 
