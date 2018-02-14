@@ -13,8 +13,9 @@
 #include <string.h>
 
 int serialFd;
+int i2cFd;
 int charCount = 0;
-char serialBuffer[100];
+char serialBuffer[10];
 bool wordEnd = false;
 
 using namespace std;
@@ -51,6 +52,7 @@ void shutdown() {
     cout << "Closing Serial: " << serialFd << endl;
 
     serClose(serialFd);
+    i2cClose(i2cFd);
     gpioTerminate();
 }
 
@@ -71,6 +73,11 @@ int main() {
     }
     signal(SIGINT, signal_callback_handler);
 
+    if ((i2cFd = i2cOpen(1, 0x22, 0)) < 0) {
+        cout << "I2C Failed: " << strerror(errno) << endl;
+    }
+    else cout << "Opening I2C: " << i2cFd << endl;
+
     if ((serialFd = serOpen("/dev/serial0", 9600, 0)) < 0) {
         cout << "Unable to open serial interface: " << strerror(errno) << endl;
     }
@@ -90,6 +97,10 @@ int main() {
         if (wordEnd) {
             cout << serialBuffer << endl;
             memset(serialBuffer,0,sizeof(serialBuffer));
+        }
+
+        if ((i2cWriteByteData(i2cFd, 0x0C, 0x55)) < 0) {
+            cout << "I2C write failed: " << strerror(errno) << endl;
         }
     }
 }
