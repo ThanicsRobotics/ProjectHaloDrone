@@ -13,8 +13,39 @@
 #include <string.h>
 
 int serialFd;
+int charCount = 0;
+char serialBuffer[100];
+bool wordEnd = false;
 
 using namespace std;
+
+void readChar() {
+    // char thisChar = serialGetchar(serialFd);
+    char thisChar = (char)serReadByte(serialFd);
+
+    //Check if this character is the end of message
+    if (thisChar == '\n') {
+        wordEnd = true;
+        serialBuffer[charCount] = '\0';
+        charCount = 0;
+        return;
+    }
+    
+    //If we just finished a message, start a new one in the buffer
+    else if (wordEnd == true && (int)thisChar >= 48 && (int)thisChar <= 57) {
+        serialBuffer[charCount] = thisChar;
+        charCount += 1;
+        wordEnd = false;
+        return;
+    }
+
+    //Assign the next character to the current buffer
+    else if ((int)thisChar >= 48 && (int)thisChar <= 57){
+        serialBuffer[charCount] = thisChar;
+        charCount += 1;
+        return;
+    }
+}
 
 void shutdown() {
     cout << "Closing Serial: " << serialFd << endl;
@@ -53,8 +84,13 @@ int main() {
         //     cout << "read byte failed: " << strerror(errno) << endl;
         //     fflush(stdout);
         // }
-        byte = serReadByte(serialFd);
-        cout << (char)byte << endl;
+        // byte = serReadByte(serialFd);
+        // cout << (char)byte << endl;
+        readChar();
+        if (wordEnd) {
+            cout << serialBuffer << endl;
+            memset(serialBuffer,0,sizeof(serialBuffer));
+        }
     }
 }
 
