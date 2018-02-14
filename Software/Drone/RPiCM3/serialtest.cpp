@@ -12,7 +12,7 @@
 #include <signal.h>
 #include <string.h>
 
-unsigned int serialFd;
+int serialFd;
 
 using namespace std;
 
