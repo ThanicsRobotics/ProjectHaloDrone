@@ -95,7 +95,7 @@ int main() {
         // cout << (char)byte << endl;
         readChar();
         if (wordEnd) {
-            cout << serialBuffer << endl;
+            cout << (int)strtol(serialBuffer, NULL, 10) << endl;
             memset(serialBuffer,0,sizeof(serialBuffer));
         }
 
