@@ -46,8 +46,14 @@ int main() {
     else cout << "Opening Serial: " << serialFd << endl;
 
     delay(1000);
+
+    int byte;
     for(int i = 0; i < 100000000; i++) {
-        cout << serReadByte(serialFd) << endl;
+        if ((byte = serReadByte(serialFd)) < 0) {
+            cout << "read byte failed: " << strerror(errno) << endl;
+            fflush(stdout);
+        }
+        else cout << (char)byte << endl;
     }
 }
 
