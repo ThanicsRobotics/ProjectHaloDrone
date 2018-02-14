@@ -21,12 +21,13 @@ int charCount = 0;
 using namespace std;
 
 void readChar() {
-    char buf[2];
-    if ((serRead(serialFd, buf, 1)) < 0 ) {
+    //char buf[2];
+    char thisChar = serReadByte(serialFd);
+    if ((int)thisChar < 0) {
         cout << "read byte failed: " << strerror(errno) << endl;
         fflush(stdout);
     }
-    char thisChar = buf[0];
+    //char thisChar = buf[0];
     
     //Check if this character is the end of message
     if (thisChar == '\n') {
