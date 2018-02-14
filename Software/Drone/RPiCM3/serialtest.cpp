@@ -1,4 +1,5 @@
 #include <pigpio.h>
+#include <wiringPi.h>
 
 #include <unistd.h>
 #include <time.h>
@@ -12,6 +13,7 @@
 #include <string.h>
 
 int serialFd;
+int i2cFd;
 char serialBuffer[100];
 bool wordEnd = false;
 int charCount = 0;
@@ -52,39 +54,51 @@ void readChar() {
     }
 }
 
-// void readLine() {
-//     readChar();
-//     if (wordEnd == true) {                                                  //If we have finished a message
-//         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
-//         if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
-//             //pthread_mutex_lock(&serial_mutex);
-//             throttleInput = data;                                            //Set throttle input
-//             //pthread_mutex_unlock(&serial_mutex);
-//             coFlag = false;
-//             //cout << throttleInput << endl;
-//             //fflush(stdout);
-//         }
-//         else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
-//         memset(serialBuffer,0,sizeof(serialBuffer));
-//     }
-//     else return;
-// }
+void shutdown() {
+    cout << endl << "Closing Threads and Ports..." << endl << endl;
+    delay(1000);
+
+    cout << "Closing I2C: " << i2cFd << endl;
+    cout << "Closing Serial: " << serialFd << endl;
+
+    serClose(serialFd);
+    i2cClose(i2cFd);
+    gpioTerminate();
+}
+
+void signal_callback_handler(int signum) {
+	cout << endl << "Caught signal: " << signum << endl;
+    shutdown();
+
+    cout << endl << "Program End" << endl;
+    delay(1000);
+	exit(signum);
+}
 
 int main() {
     if (gpioInitialise() < 0) {
         cout << "pigpio Library failed: " << strerror(errno) << endl;
         exit(1);
     }
+    signal(SIGINT, signal_callback_handler);
+
     if ((serialFd = serOpen("/dev/serial0", 9600, 0)) < 0) {
             cout << "Unable to open serial interface: " << strerror(errno) << endl;
             fflush(stdout);
     }
-    else {
-        cout << serialFd << endl;
-        for(int i = 0; i < 100000000; i++) {
-            readChar();
-        }
+    else cout << "Opening Serial: " << serialFd << endl;
+
+    if ((i2cFd = i2cOpen(1, 0x22, 0)) < 0) {
+        cout << "I2C Failed: " << strerror(errno) << endl;
+        exit(1);
     }
-    serClose(serialFd);
-    gpioTerminate();
+    else cout << "Opening I2C: " << i2cFd << endl;
+
+    delay(1000);
+    for(int i = 0; i < 100000000; i++) {
+        readChar();
+        i2cWriteByteData(i2cFd, 0x0C, 0x55);
+    }
 }
+
+
