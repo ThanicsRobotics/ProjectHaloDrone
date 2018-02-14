@@ -40,7 +40,7 @@ int main() {
     }
     signal(SIGINT, signal_callback_handler);
 
-    if ((serialFd = serOpen('/dev/serial0', 9600, 0)) < 0) {
+    if ((serialFd = serOpen("/dev/serial0", 9600, 0)) < 0) {
         cout << "Unable to open serial interface: " << strerror(errno) << endl;
     }
     else cout << "Opening Serial: " << serialFd << endl;
