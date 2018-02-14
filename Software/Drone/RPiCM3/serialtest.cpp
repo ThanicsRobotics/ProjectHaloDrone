@@ -76,6 +76,7 @@ void signal_callback_handler(int signum) {
 }
 
 int main() {
+    wiringPiSetup();
     if (gpioInitialise() < 0) {
         cout << "pigpio Library failed: " << strerror(errno) << endl;
         exit(1);
