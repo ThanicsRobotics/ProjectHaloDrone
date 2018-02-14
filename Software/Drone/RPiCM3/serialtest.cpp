@@ -21,7 +21,6 @@ int charCount = 0;
 using namespace std;
 
 void readChar() {
-    // char thisChar = serialGetchar(serialFd);
     char buf[2];
     if ((serRead(serialFd, buf, 1)) < 0 ) {
         cout << "read byte failed: " << strerror(errno) << endl;
@@ -55,14 +54,9 @@ void readChar() {
 }
 
 void shutdown() {
-    cout << endl << "Closing Threads and Ports..." << endl << endl;
-    delay(1000);
-
-    cout << "Closing I2C: " << i2cFd << endl;
     cout << "Closing Serial: " << serialFd << endl;
 
     serClose(serialFd);
-    i2cClose(i2cFd);
     gpioTerminate();
 }
 
@@ -84,21 +78,17 @@ int main() {
     signal(SIGINT, signal_callback_handler);
 
     if ((serialFd = serOpen("/dev/serial0", 9600, 0)) < 0) {
-            cout << "Unable to open serial interface: " << strerror(errno) << endl;
-            fflush(stdout);
+        cout << "Unable to open serial interface: " << strerror(errno) << endl;
     }
     else cout << "Opening Serial: " << serialFd << endl;
-
-    if ((i2cFd = i2cOpen(1, 0x22, 0)) < 0) {
-        cout << "I2C Failed: " << strerror(errno) << endl;
-        exit(1);
-    }
-    else cout << "Opening I2C: " << i2cFd << endl;
 
     delay(1000);
     for(int i = 0; i < 100000000; i++) {
         readChar();
-        i2cWriteByteData(i2cFd, 0x0C, 0x55);
+        if (wordEnd) {
+            cout << serialBuffer << endl;
+            memset(serialBuffer,0,sizeof(serialBuffer));
+        }
     }
 }
 
