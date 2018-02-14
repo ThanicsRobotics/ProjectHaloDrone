@@ -49,11 +49,12 @@ int main() {
 
     int byte;
     for(int i = 0; i < 100000000; i++) {
-        if ((byte = serReadByte(serialFd)) < 0) {
-            cout << "read byte failed: " << strerror(errno) << endl;
-            fflush(stdout);
-        }
-        else cout << (char)byte << endl;
+        // if ((byte = serReadByte(serialFd)) < 0) {
+        //     cout << "read byte failed: " << strerror(errno) << endl;
+        //     fflush(stdout);
+        // }
+        byte = serReadByte(serialFd);
+        cout << (char)byte << endl;
     }
 }
 
