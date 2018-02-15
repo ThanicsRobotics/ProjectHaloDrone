@@ -45,7 +45,7 @@ void readChar() {
     }
     
     //If we just finished a message, start a new one in the buffer
-    else if (wordEnd == true && (int)thisChar >= 48 && (int)thisChar <= 57 {
+    else if (wordEnd == true && (int)thisChar >= 48 && (int)thisChar <= 57) {
         serialBuffer[charCount] = thisChar;
         charCount += 1;
         wordEnd = false;
