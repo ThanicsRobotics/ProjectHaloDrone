@@ -34,7 +34,7 @@ void setupSerial() {
 
 void readChar() {
     // char thisChar = serialGetchar(serialFd);
-    char thisChar = serReadByte(serialFd);
+    char thisChar = (char)serReadByte(serialFd);
     
     //Check if this character is the end of message
     if (thisChar == '\n') {
@@ -45,7 +45,7 @@ void readChar() {
     }
     
     //If we just finished a message, start a new one in the buffer
-    else if (wordEnd == true) {
+    else if (wordEnd == true && (int)thisChar >= 48 && (int)thisChar <= 57 {
         serialBuffer[charCount] = thisChar;
         charCount += 1;
         wordEnd = false;
@@ -53,7 +53,7 @@ void readChar() {
     }
 
     //Assign the next character to the current buffer
-    else {
+    else if ((int)thisChar >= 48 && (int)thisChar <= 57) {
         serialBuffer[charCount] = thisChar;
         charCount += 1;
         return;
@@ -62,9 +62,9 @@ void readChar() {
 
 void readLine() {
     readChar();
-    if (wordEnd == true) {                                                  //If we have finished a message
+    if (wordEnd) {                                                  //If we have finished a message
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
-        if (coFlag == true && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
+        if (coFlag && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
             //pthread_mutex_lock(&serial_mutex);
             throttleInput = data;                                            //Set throttle input
             //pthread_mutex_unlock(&serial_mutex);
