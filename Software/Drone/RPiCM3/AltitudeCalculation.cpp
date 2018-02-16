@@ -91,7 +91,7 @@ void shutdown() {
     delay(500);
     
     //Halt command to STM32
-    system("sudo openocd -f ~/ProjectHalo/Software/Drone/RPiCM3/halt.cfg");
+    system("sudo openocd -f /home/pi/ProjectHalo/Software/Drone/RPiCM3/halt.cfg");
 }
 
 //Request gyro angles from STM32F446 flight controller
@@ -117,7 +117,7 @@ void setupSPI() {
 //Making sure the STM32F446 is listening...
 void authFlightController() {
     //Reset flight controller using OpenOCD
-    system("sudo openocd -f ~/ProjectHalo/Software/Drone/RPiCM3/reset.cfg");
+    system("sudo openocd -f /home/pi/ProjectHalo/Software/Drone/RPiCM3/reset.cfg");
 
     authenticated = false;
     char buffer[100];
