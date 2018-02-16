@@ -65,10 +65,15 @@ int pid_max = 400;                      //Maximum output of the PID-controller (
 int pid_error_temp;
 int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 
+//Shutting down threads and closing ports
 void shutdown() {
     cout << endl << "Closing Threads and Ports..." << endl << endl;
+    
+    //Stop threads
     run = false;
     delay(1000);
+
+    //Join Threads to main
     pthread_join(serialThread, NULL);
     pthread_join(gyroThread, NULL);
 
@@ -76,6 +81,7 @@ void shutdown() {
     cout << "Closing Serial: " << serialFd << endl;
     cout << "Closing SPI: " << spiFd << endl;
 
+    //Close ports
     spiClose(spiFd);
     serClose(serialFd);
     i2cClose(i2cFd);
@@ -83,16 +89,14 @@ void shutdown() {
 
     cout << endl << "Halting Flight Controller..." << endl << endl;
     delay(500);
-
-    system("sudo openocd -f halt.cfg");
+    
+    //Halt command to STM32
+    system("sudo openocd -f ~/ProjectHalo/Software/Drone/RPiCM3/halt.cfg");
 }
 
 //Request gyro angles from STM32F446 flight controller
 void getGyroValues() {
-
-    //Gyro pitch and roll are stored in two incoming bytes
-    //wiringPiSPIDataRW(SPI_CS, gyroBuffer, 2);
-    
+    //Gyro pitch and roll are stored in two incoming bytes    
     spiXfer(spiFd, gyroBuffer, gyroBuffer, 2);
     gyroPitch = (signed char)gyroBuffer[0];
     gyroRoll = (signed char)gyroBuffer[1];
@@ -113,7 +117,7 @@ void setupSPI() {
 //Making sure the STM32F446 is listening...
 void authFlightController() {
     //Reset flight controller using OpenOCD
-    system("sudo openocd -f reset.cfg");
+    system("sudo openocd -f ~/ProjectHalo/Software/Drone/RPiCM3/reset.cfg");
 
     authenticated = false;
     char buffer[100];
@@ -124,17 +128,14 @@ void authFlightController() {
         //Write to Authentication register
         buffer[0] = 0x00;
         buffer[1] = 0x01;
-        //wiringPiSPIDataRW(SPI_CS, buffer, 2);
         spiWrite(spiFd, buffer, 2);
         delay(5);
 
         //Get Auth Key and send it back
-        //wiringPiSPIDataRW(SPI_CS, buffer, 2);
         spiXfer(spiFd, buffer, buffer, 2);
         authKey = buffer[0] << 8 | buffer[1];
         cout << "Key: " << authKey << endl;
-        //wiringPiSPIDataRW(SPI_CS, buffer, 2);
-        //spiWrite(spiFd, buffer, 2);
+
         delay(50);
         if (millis() - start > 8000) {
             return;
@@ -169,23 +170,22 @@ void calculatePID() {
     pid_last_d_error = pid_error_temp;
 }
 
+//Send modified throttle value to STM32
 void sendThrottle() {
     unsigned char buffer[100];
 
-    //pthread_mutex_lock(&serial_mutex);
+    //PID compensated throttle calculation
     int input = throttleInput;
-    // pthread_mutex_unlock(&serial_mutex);
     cout << " | input: " << input;
     int newThrottle = input + pid_output;
     
     if (newThrottle > 1900) newThrottle = 1900;
-    //if (newThrottle < 1000) newThrottle = 1000;
+    if (newThrottle < 1000) newThrottle = 1000;
 
     cout << " | Throttle: " << newThrottle << endl;
 
     buffer[1] = (newThrottle - 1000) & 0xFF;
     buffer[0] = ((newThrottle - 1000) & 0xFF00) >> 8;
-    //wiringPiSPIDataRW(SPI_CS, buffer, 2);
 
     //CLOCK SPEED TEST
     //unsigned long int clockspeed = buffer[1];
