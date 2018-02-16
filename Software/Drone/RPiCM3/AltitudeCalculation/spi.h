@@ -10,6 +10,9 @@ extern bool authenticated;
 extern int SPI_CS;
 extern int spiFd;
 
+//Mutex for STM32 communication threading
+extern pthread_mutex_t stm32_mutex;
+
 void setupSPI();
 void authFlightController();
 void sendThrottle();

@@ -1,4 +1,6 @@
 #include "spi.h"
+#include "serial.h"
+#include "pid.h"
 
 #include <pigpio.h>
 #include <iostream>
