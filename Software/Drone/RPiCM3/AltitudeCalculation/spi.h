@@ -1,6 +1,8 @@
 #ifndef SPI_H
 #define SPI_H
 
+#include <pthread.h>
+
 extern char stm32_rx_buffer[100];
 extern char stm32_tx_buffer[100];
 extern bool spiConfigured;
