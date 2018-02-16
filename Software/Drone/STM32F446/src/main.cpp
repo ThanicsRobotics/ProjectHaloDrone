@@ -478,14 +478,6 @@ int main() {
   while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400)) {
     //start ++;                                                                 //While waiting increment start whith every loop.
     
-    // if (spi.receive()) {
-    //   int data = spi.read();
-    //   if (data == 0xF9FF) {
-    //     armed == true;
-    //     spi.reply(0x2222);
-    //   }
-    // }
-    // wait(500);
     //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
     motors_on();                                                              //Set motor PWM signals high
     wait(.001);                                                               //Wait 1000us
@@ -566,7 +558,7 @@ int main() {
     
     calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
 
-    throttle = receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
+    throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
 
     if (start == 2){                                                          //The motors are started.
       //pc.printf("hi %d\r\n", throttle);
@@ -597,6 +589,14 @@ int main() {
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
       
+      //Getting throttle value from Raspberry Pi CM3
+      if (spi.receive()) {
+        int data = spi.read();
+        if (data >= 0 && data <= 900) {
+          mod_receiver_input_throttle = data + 1000;
+        }
+      }
+
       //Load gyro angle data into SPI buffer
       spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
       //spi.reply((int)receiver_input_throttle);
@@ -618,7 +618,7 @@ int main() {
     //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
     gyro_signalen();
     calculate_angles();
-    //spi.reply((int)receiver_input_pitch);
+
     //CLOCK SPEED TEST
     //spi.reply(SystemCoreClock/1000000);
 

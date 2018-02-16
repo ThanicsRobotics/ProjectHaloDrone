@@ -3,7 +3,6 @@
 
 //WiringPi Library
 #include <wiringPi.h>
-//#include <wiringSerial.h>
 
 //Standard Libraries
 #include <unistd.h>
@@ -23,13 +22,13 @@
 //Helper libraries
 #include "ultrasonic.h"
 #include "serial.h"
+#include "spi.h"
+#include "pid.h"
 
 using namespace std;
 
 //Thread mutex and gyro thread function
-//pthread_mutex_t gyro_mutex = PTHREAD_MUTEX_INITIALIZER;
-//pthread_mutex_t serial_mutex = PTHREAD_MUTEX_INITIALIZER;
-//pthread_mutex_t run_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t gyroThread, serialThread;
 void *gyroLoop(void *void_ptr);
 void *serialLoop(void *void_ptr);
@@ -37,14 +36,6 @@ bool run = true;
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
-
-char gyroBuffer[100];
-bool spiConfigured = false;
-bool authenticated = false;
-
-//CS0 is barometer, CS1 is STM32 flight controller
-int SPI_CS = 1;
-int spiFd;
 
 //Pressure Altitude variables
 char baroData[9];
@@ -54,16 +45,6 @@ char baroCoefficients[17];
 // int temperature;
 int altitude;
 int lastAltitude;
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//PID gain and limit settings
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int pid_p_gain = 2;                    //Gain setting for the roll P-controller
-int pid_i_gain = 0;                     //Gain setting for the roll I-controller
-int pid_d_gain = 0;                   //Gain setting for the roll D-controller
-int pid_max = 400;                      //Maximum output of the PID-controller (+/-)
-int pid_error_temp;
-int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 
 //Shutting down threads and closing ports
 void shutdown() {
@@ -96,53 +77,12 @@ void shutdown() {
 
 //Request gyro angles from STM32F446 flight controller
 void getGyroValues() {
-    //Gyro pitch and roll are stored in two incoming bytes    
-    spiXfer(spiFd, gyroBuffer, gyroBuffer, 2);
-    gyroPitch = (signed char)gyroBuffer[0];
-    gyroRoll = (signed char)gyroBuffer[1];
+    //Gyro pitch and roll are stored in two incoming bytes  
+    sendThrottle();  
+    spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
+    gyroPitch = (signed char)stm32_rx_buffer[0];
+    gyroRoll = (signed char)stm32_rx_buffer[1];
     //cout << (int)(gyroBuffer[0] << 8 | gyroBuffer[1]) << endl;
-}
-
-void setupSPI() {
-    if ((spiFd = spiOpen(SPI_CS, 3000000, 0)) < 0) {
-        cout << "SPI failed: " << strerror(errno) << endl;
-        exit(1);
-    }
-    else {
-        cout << "Opening SPI: " << spiFd << endl;
-        spiConfigured = true;
-    }
-}
-
-//Making sure the STM32F446 is listening...
-void authFlightController() {
-    //Reset flight controller using OpenOCD
-    system("sudo openocd -f /home/pi/ProjectHalo/Software/Drone/RPiCM3/reset.cfg");
-
-    authenticated = false;
-    char buffer[100];
-    unsigned int authKey = 0;
-    cout << "Authenticating..." << endl;
-    int start = millis();
-    while(authKey != 0x00F9) {
-        //Write to Authentication register
-        buffer[0] = 0x00;
-        buffer[1] = 0x01;
-        spiWrite(spiFd, buffer, 2);
-        delay(5);
-
-        //Get Auth Key and send it back
-        spiXfer(spiFd, buffer, buffer, 2);
-        authKey = buffer[0] << 8 | buffer[1];
-        cout << "Key: " << authKey << endl;
-
-        delay(50);
-        if (millis() - start > 8000) {
-            return;
-        }
-    }
-    cout << "Authenticated" << endl;
-    authenticated = true;
 }
 
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
@@ -152,44 +92,6 @@ void calculateAbsoluteAltitude() {
     cout << " | Raw Distance: " << rawDistance;
     altitude = angleCorrection(rawDistance);
     cout << " | Altitude: " << altitude;
-}
-
-//Calculate throttle factor for altitude management through PID loop
-void calculatePID() {
-    if (throttleInput >= 1520 && throttleInput <= 1480) lastAltitude = altitude;
-
-    pid_error_temp = altitude - lastAltitude + (throttleInput - 1500)/10;
-    pid_i_mem += pid_i_gain * pid_error_temp;
-    if(pid_i_mem > pid_max)pid_i_mem = pid_max;
-    else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;
-
-    pid_output = pid_p_gain * pid_error_temp + pid_i_mem + pid_d_gain * (pid_error_temp - pid_last_d_error);
-    if(pid_output > pid_max)pid_output = pid_max;
-    else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
-
-    pid_last_d_error = pid_error_temp;
-}
-
-//Send modified throttle value to STM32
-void sendThrottle() {
-    unsigned char buffer[100];
-
-    //PID compensated throttle calculation
-    int input = throttleInput;
-    cout << " | input: " << input;
-    int newThrottle = input + pid_output;
-    
-    if (newThrottle > 1900) newThrottle = 1900;
-    if (newThrottle < 1000) newThrottle = 1000;
-
-    cout << " | Throttle: " << newThrottle << endl;
-
-    buffer[1] = (newThrottle - 1000) & 0xFF;
-    buffer[0] = ((newThrottle - 1000) & 0xFF00) >> 8;
-
-    //CLOCK SPEED TEST
-    //unsigned long int clockspeed = buffer[1];
-    //cout << " | Clock: " << clockspeed << endl;
 }
 
 void mainLoop() {
@@ -206,10 +108,6 @@ void mainLoop() {
 void *gyroLoop(void *void_ptr) {
     //Switch to flight controller, setup SPI @ 1.5MHz
     SPI_CS = 1;
-    // if (wiringPiSPISetup(SPI_CS, 1500000) < 0) {
-    //     cout << "SPI Setup Failed: " << strerror(errno) << endl;
-    //     fflush(stdout);
-    // }
     setupSPI();
     authFlightController();
     while(run) {
@@ -220,7 +118,6 @@ void *gyroLoop(void *void_ptr) {
 
 void *serialLoop(void *void_ptr) {
     setupSerial();
-    //serialFlush(serialFd);
     while(run) {
         readLine();
         //delay(0.5);
@@ -246,6 +143,7 @@ int main(int argc, char *argv[]) {
         cout << "pigpio Library failed: " << strerror(errno) << endl;
         exit(1);
     }
+    //Override pigpio SIGINT handling
     signal(SIGINT, signal_callback_handler);
 
     bool controllerConnected = false;
@@ -268,6 +166,7 @@ int main(int argc, char *argv[]) {
 
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&gyroThread, NULL, gyroLoop, NULL);
+
 
     // while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
     // delay(200);

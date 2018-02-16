@@ -1,4 +1,5 @@
 #include "serial.h"
+
 #include <pigpio.h>
 #include <iostream>
 #include <stdio.h>
@@ -17,11 +18,6 @@ bool serialConfigured = false;
 int throttleInput = 0;
 
 void setupSerial() {
-    // if ((serialFd = serialOpen("/dev/serial0", 9600)) < 0) {
-    //     cout << "Unable to open serial interface: " << strerror(errno) << endl;
-    //     fflush(stdout);
-    // }
-
     if ((serialFd = serOpen("/dev/serial0", 9600, 0)) < 0) {
         cout << "Unable to open serial interface: " << strerror(errno) << endl;
         fflush(stdout);
