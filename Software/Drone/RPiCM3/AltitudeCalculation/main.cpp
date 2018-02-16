@@ -72,7 +72,7 @@ void shutdown() {
     delay(500);
     
     //Halt command to STM32
-    system("sudo openocd -f /home/pi/ProjectHalo/Software/Drone/RPiCM3/halt.cfg");
+    system("sudo openocd -f /home/pi/ProjectHalo/Software/Drone/RPiCM3/AltitudeCalculation/halt.cfg");
 }
 
 //Request gyro angles from STM32F446 flight controller
