@@ -5,6 +5,9 @@
 #include <math.h>
 
 #define AUTH_KEY 0x00F9
+#define GYRO_CAL 0x0004
+#define STM32_ARM_TEST 0x009F
+#define STM32_ARM_CONF 0x000A
 
 //Communication Pins
 I2C i2c(PB_9,PB_8);                         //sda,scl
@@ -470,19 +473,26 @@ int main() {
   gyro_axis_cal[2] /= 2000;                                                   //Divide the pitch total by 2000.
   gyro_axis_cal[3] /= 2000;                                                   //Divide the yaw total by 2000.
   
-  spi.reply(0x04);
+  spi.reply(GYRO_CAL);
 
   //Wait until the receiver is active and the throttle is set to the lower position.
   //pc.printf("Waiting for arming...\r\n");
-  //bool armed = false;
-  while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400)) {
-    //start ++;                                                                 //While waiting increment start whith every loop.
-    
+  bool armed = false;
+  while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) && !armed) {
     //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
     motors_on();                                                              //Set motor PWM signals high
     wait(.001);                                                               //Wait 1000us
     motors_off();                                                             //Set motor PWM signals low
-    wait(.003);                                                               //Wait 3 milliseconds before the next loop
+    int start = onTime.read_us();
+    while (onTime.read_us() - start < 3000) {
+      if (spi.receive()) {
+        int data = spi.read();
+        if (data == STM32_ARM_TEST) {
+          armed = true;
+          spi.reply(STM32_ARM_CONF);
+        }
+      }
+    }
   }
   start = 0;                                                                  //Set start back to 0.
 

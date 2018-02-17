@@ -11,6 +11,8 @@
 #include <pthread.h>
 #include <string.h>
 
+#define AUTH_KEY 0x00F9
+
 char stm32_rx_buffer[100];
 char stm32_tx_buffer[100];
 bool spiConfigured = false;
@@ -45,7 +47,7 @@ void authFlightController() {
     unsigned int authKey = 0;
     cout << "Authenticating..." << endl;
     int start = millis();
-    while(authKey != 0x00F9) {
+    while(authKey != AUTH_KEY) {
         //Write to Authentication register
         buffer[0] = 0x00;
         buffer[1] = 0x01;
