@@ -56,10 +56,11 @@ void authFlightController() {
         spiXfer(spiFd, buffer, buffer, 2);
         authKey = buffer[0] << 8 | buffer[1];
         cout << "Key: " << authKey << endl;
-
+        spiWrite(spiFd, buffer, 2);
+        
         delay(50);
         if (millis() - start > 8000) {
-            return;
+            exit(1);
         }
     }
     cout << "Authenticated" << endl;
