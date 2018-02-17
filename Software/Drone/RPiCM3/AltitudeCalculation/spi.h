@@ -12,6 +12,8 @@ extern bool authenticated;
 extern int SPI_CS;
 extern int spiFd;
 
+extern int newThrottle;
+
 //Mutex for STM32 communication threading
 extern pthread_mutex_t stm32_mutex;
 

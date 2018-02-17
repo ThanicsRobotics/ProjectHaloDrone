@@ -16,6 +16,8 @@ char stm32_tx_buffer[100];
 bool spiConfigured = false;
 bool authenticated = false;
 
+int newThrottle = 0;
+
 //CS0 is barometer, CS1 is STM32 flight controller
 int SPI_CS = 1;
 int spiFd;
@@ -67,14 +69,12 @@ void authFlightController() {
 //Send modified throttle value to STM32
 void sendThrottle() {
     //PID compensated throttle calculation
-    int input = throttleInput;
-    cout << " | input: " << input;
-    int newThrottle = input + pid_output;
+    newThrottle = throttleInput + pid_output;
     
     if (newThrottle > 1900) newThrottle = 1900;
     if (newThrottle < 1000) newThrottle = 1000;
 
-    cout << " | Throttle: " << newThrottle << endl;
+    //cout << " | Throttle: " << newThrottle << endl;
 
     pthread_mutex_lock(&stm32_mutex);
     stm32_tx_buffer[1] = (newThrottle - 1000) & 0xFF;
