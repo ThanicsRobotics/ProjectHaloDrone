@@ -92,7 +92,7 @@ void calculateAbsoluteAltitude() {
     cout << " | Raw Distance: " << rawDistance;
     altitude = angleCorrection(rawDistance);
     cout << " | Altitude: " << altitude << " | Input: " << throttleInput
-        << " | Throttle: " << newThrottle;
+        << " | Throttle: " << newThrottle << endl;
 }
 
 void mainLoop() {
