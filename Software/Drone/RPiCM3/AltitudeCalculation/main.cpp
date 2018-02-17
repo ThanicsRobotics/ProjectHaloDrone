@@ -51,6 +51,7 @@ int altitude;
 int lastAltitude;
 
 bool armRequest = false;
+bool armed = false;
 
 //Shutting down threads and closing ports
 void shutdown() {
@@ -92,7 +93,7 @@ void calculateAbsoluteAltitude() {
 }
 
 void mainLoop() {
-    while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
+    while(!serialConfigured || !spiConfigured || !authenticated || !armed) delay(10);
     while(run) {
         calculateAbsoluteAltitude();
         calculatePID();
@@ -123,6 +124,7 @@ void *spiLoop(void *void_ptr) {
                 data = stm32_rx_buffer[1];
                 cout << "ARM Response: " << data << endl;
                 fflush(stdout);
+                armed = true;
             }
             armRequest = false;
         }
