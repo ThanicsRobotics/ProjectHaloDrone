@@ -121,7 +121,10 @@ void *spiLoop(void *void_ptr) {
             while (data != STM32_ARM_CONF) {
                 spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
                 data = stm32_rx_buffer[1];
+                cout << "ARM Response: " << data << endl;
+                fflush(stdout);
             }
+            armRequest = false;
         }
         memset(stm32_tx_buffer,0,sizeof(stm32_tx_buffer));
     }
