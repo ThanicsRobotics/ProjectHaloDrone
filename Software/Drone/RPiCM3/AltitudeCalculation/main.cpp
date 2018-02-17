@@ -78,7 +78,7 @@ void shutdown() {
 //Request gyro angles from STM32F446 flight controller
 void getGyroValues() {
     //Gyro pitch and roll are stored in two incoming bytes  
-    sendThrottle();  
+    calculateThrottle();  
     spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
     gyroPitch = (signed char)stm32_rx_buffer[0];
     gyroRoll = (signed char)stm32_rx_buffer[1];
@@ -98,11 +98,8 @@ void calculateAbsoluteAltitude() {
 void mainLoop() {
     while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
     while(run) {
-        // cout << throttleInput << endl;
-        // fflush(stdout);
         calculateAbsoluteAltitude();
         calculatePID();
-        sendThrottle();
     }
 }
 
@@ -121,7 +118,6 @@ void *serialLoop(void *void_ptr) {
     setupSerial();
     while(run) {
         readLine();
-        //delay(0.5);
     }
     return NULL;
 }

@@ -19,6 +19,6 @@ extern pthread_mutex_t stm32_mutex;
 
 void setupSPI();
 void authFlightController();
-void sendThrottle();
+void calculateThrottle();
 
 #endif
