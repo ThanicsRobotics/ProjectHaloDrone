@@ -72,8 +72,9 @@ void authFlightController() {
 //Send modified throttle value to STM32
 void calculateThrottle() {
     //PID compensated throttle calculation
+    throttleInput = 1700;
     newThrottle = throttleInput + pid_output;
-    
+
     if (newThrottle > 1900) newThrottle = 1900;
     if (newThrottle < 1000) newThrottle = 1000;
 

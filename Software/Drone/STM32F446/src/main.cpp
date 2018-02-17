@@ -336,100 +336,6 @@ void authRasPiCM3() {
   }
 }
 
-// int main() {
-//   //Configure communications
-//   onTime.start();                                                             //Start loop timer
-//   i2c.frequency(400000);
-//   //Setup the spi for 16 bit data, mode 0 and 1.5MHz clock rate
-//   spi.format(16,0);
-//   spi.frequency(3000000);
-
-//   authRasPiCM3();
-
-//   gyro_address = 0x69<<1;                                                     //Store the gyro address
-//   char cmd[2];
-  
-  
-//   set_gyro_registers();
-
-//   //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
-//   for (cal_int = 0; cal_int < 2000 ; cal_int ++) {                            //Take 2000 readings for calibration.
-//     gyro_signalen();                                                          //Read the gyro output.
-//     gyro_axis_cal[1] += gyro_axis[1];                                         //Add roll value to gyro_roll_cal.
-//     gyro_axis_cal[2] += gyro_axis[2];                                         //Add pitch value to gyro_pitch_cal.
-//     gyro_axis_cal[3] += gyro_axis[3];                                         //Add yaw value to gyro_yaw_cal.
-    
-//     //We don't want the esc's to be beeping annoyingly. So let's give them a 1000us puls while calibrating the gyro.
-//     motors_on();                                                              //Set motor PWM signals high
-//     wait(.001);                                                               //Wait 1000us
-//     motors_off();                                                             //Set motor PWM signals low
-//     wait(.003);                                                               //Wait 3 milliseconds before the next loop
-//   }
-
-//   //Now that we have 2000 measures, we need to divide by 2000 to get the average gyro offset.
-//   gyro_axis_cal[1] /= 2000;                                                   //Divide the roll total by 2000.
-//   gyro_axis_cal[2] /= 2000;                                                   //Divide the pitch total by 2000.
-//   gyro_axis_cal[3] /= 2000; 
-
-//   loop_timer = onTime.read_us();                                              //First timer reading (starting main loop)
-  
-//   //Infinite PID Loop
-//   //int whoami;
-//   while(1) {
-
-//     // cmd[0] = 0x00;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
-//     // i2c.write(gyro_address, cmd, 1);
-//     // i2c.read(gyro_address, cmd, 1);
-//     // whoami = cmd[0];
-
-//     //65.5 = 1 deg/sec in gyro scale
-//     gyro_roll_input = (gyro_roll_input * 0.7) + ((gyro_roll / 65.5) * 0.3);   //Gyro pid input is deg/sec.
-//     gyro_pitch_input = (gyro_pitch_input * 0.7) + ((gyro_pitch / 65.5) * 0.3);//Gyro pid input is deg/sec.
-//     gyro_yaw_input = (gyro_yaw_input * 0.7) + ((gyro_yaw / 65.5) * 0.3);      //Gyro pid input is deg/sec.
-    
-//     //Gyro angle calculations
-//     //0.0000611 = (0.004 / 65.5)
-//     angle_pitch += gyro_pitch * 0.0000611;                                    //Calculate the traveled pitch angle and add this to the angle_pitch variable.
-//     angle_roll += gyro_roll * 0.0000611;                                      //Calculate the traveled roll angle and add this to the angle_roll variable.
-  
-//     //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
-//     angle_pitch -= angle_roll * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the roll angle to the pitch angle.
-//     angle_roll += angle_pitch * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the pitch angle to the roll angle.
-
-//     //Accelerometer angle calculations
-//     acc_total_vector = sqrt((acc_x*acc_x)+(acc_y*acc_y)+(acc_z*acc_z));       //Calculate the total accelerometer vector.
-    
-//     if (abs(acc_y) < acc_total_vector) {                                      //Prevent the asin function to produce a NaN
-//       angle_pitch_acc = asin((float)acc_y/acc_total_vector)* 57.296;          //Calculate the pitch angle.
-//     }
-
-//     if (abs(acc_x) < acc_total_vector) {                                      //Prevent the asin function to produce a NaN
-//       angle_roll_acc = asin((float)acc_x/acc_total_vector)* -57.296;          //Calculate the roll angle.
-//     }
-    
-//     //Place the MPU-6050 spirit level and note the values in the following two lines for calibration.
-//     angle_pitch_acc -= 0.0;                                                   //Accelerometer calibration value for pitch.
-//     angle_roll_acc -= 0.0;                                                    //Accelerometer calibration value for roll.
-    
-//     angle_pitch = angle_pitch * 0.9996 + angle_pitch_acc * 0.0004;            //Correct the drift of the gyro pitch angle with the accelerometer pitch angle.
-//     angle_roll = angle_roll * 0.9996 + angle_roll_acc * 0.0004;               //Correct the drift of the gyro roll angle with the accelerometer roll angle.
-    
-//     pitch_level_adjust = angle_pitch * 12;                                    //Calculate the pitch angle correction
-//     roll_level_adjust = angle_roll * 12;
-
-//     while (onTime.read_us() - loop_timer < 4000) {
-// //       //do stuff thats not flight
-      
-// //       //Load gyro angle data into SPI buffer
-//       spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
-// //       //spi.reply((int)receiver_input_throttle);
-//       //spi.reply(whoami);
-//     }
-//     loop_timer = onTime.read_us();
-//     gyro_signalen();
-//   }
-// }
-
 int main() {
   //Configure communications
   onTime.start();                                                             //Start loop timer
@@ -608,13 +514,11 @@ int main() {
       }
 
       //Load gyro angle data into SPI buffer
-      spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
-      //spi.reply((int)receiver_input_throttle);
+      //spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
+      spi.reply((int)mod_receiver_input_throttle);
     }
     
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
-
-    //__disable_irq();
 
     //RISING EDGE of PWM motor pulses (start of loop)
     motors_on();
@@ -631,16 +535,6 @@ int main() {
 
     //CLOCK SPEED TEST
     //spi.reply(SystemCoreClock/1000000);
-
-    // //Getting throttle value from Raspberry Pi CM3
-    // if (spi.receive()) {
-    //   int data = spi.read();
-    //   if (data >= 0 && data <= 900) {
-    //     mod_receiver_input_throttle = data + 1000;
-    //   }
-    //   else if (data == 0xFFF7) return 0;
-    // }
-    // else authenticated = false;
     
     //FALLING EDGES of PWM motor pulses
     while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {        //Stay in this loop until all motor PWM signals are low
@@ -650,6 +544,5 @@ int main() {
       if(timer_channel_3 <= esc_loop_timer) motor3 = 0;                        //Set digital output 5 to low if the time is expired.
       if(timer_channel_4 <= esc_loop_timer) motor4 = 0;                        //Set digital output 4 to low if the time is expired.
     }
-    //__enable_irq();
   }
 }
