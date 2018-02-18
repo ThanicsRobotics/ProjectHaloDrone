@@ -62,6 +62,8 @@ void shutdown() {
     delay(1000);
 
     //Join Threads to main
+    int start = millis();
+    
     pthread_join(serialThread, NULL);
     pthread_join(spiThread, NULL);
 
@@ -241,5 +243,5 @@ void signal_callback_handler(int signum) {
 
     cout << endl << "Program End" << endl;
     delay(1000);
-	exit(signum);
+	exit(0);
 }
