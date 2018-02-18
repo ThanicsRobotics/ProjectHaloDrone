@@ -38,7 +38,7 @@ void *spiLoop(void *void_ptr);
 void *serialLoop(void *void_ptr);
 bool run = true;
 
-const string projectPath = "/home/pi/ProjectHalo/Software/Drone/RPiCM3/src/";
+string projectPath = "/home/pi/ProjectHalo/Software/Drone/RPiCM3/src/";
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
