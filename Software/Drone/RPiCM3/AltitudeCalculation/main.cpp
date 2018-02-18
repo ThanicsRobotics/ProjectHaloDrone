@@ -47,8 +47,8 @@ char baroCoefficients[17];
 
 // int pressure;
 // int temperature;
-int altitude;
-int lastAltitude;
+int altitude = 0;
+int lastAltitude = 0;
 
 bool armRequest = false;
 bool armed = false;

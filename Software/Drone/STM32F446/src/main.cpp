@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define AUTH_KEY 0x00F9
-#define GYRO_CAL 0x0004
-#define STM32_ARM_TEST 0x009F
-#define STM32_ARM_CONF 0x000A
+#define AUTH_KEY 0xF9
+#define GYRO_CAL 0x04
+#define STM32_ARM_TEST 0x9F
+#define STM32_ARM_CONF 0x0A
 
 //Communication Pins
 I2C i2c(PB_9,PB_8);                         //sda,scl
@@ -329,7 +329,7 @@ void authRasPiCM3() {
   //Stay in this loop until the flight controller (STM32) has made contact with the Raspberry Pi
   while (authenticated == false) {
     if (spi.receive()) {
-      unsigned short int response = spi.read();
+      int response = spi.read();
       if (response == 0x01) spi.reply(AUTH_KEY);
       if (response == AUTH_KEY) authenticated = true;
     }
