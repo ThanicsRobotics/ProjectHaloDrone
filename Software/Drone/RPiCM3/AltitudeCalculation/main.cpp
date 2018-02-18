@@ -125,6 +125,7 @@ void *spiLoop(void *void_ptr) {
                 cout << "ARM Response: " << data << endl;
                 fflush(stdout);
                 armed = true;
+                delay(50);
             }
             armRequest = false;
         }
