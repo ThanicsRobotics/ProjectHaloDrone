@@ -126,9 +126,9 @@ void *spiLoop(void *void_ptr) {
                 data = stm32_rx_buffer[1];
                 cout << "ARM Response: " << data << endl;
                 fflush(stdout);
-                armed = true;
                 delay(50);
             }
+            armed = true;
             armRequest = false;
         }
         memset(stm32_tx_buffer,0,sizeof(stm32_tx_buffer));
