@@ -84,6 +84,7 @@ int coefficient;
 int count = 0;
 bool wordStart = false;
 bool wordEnd = false;
+unsigned int loopCount = 0;
 
 //Sends all motor PWM signals LOW
 void motors_off() {
@@ -500,8 +501,7 @@ int main() {
     }
     
     //We wait until 4000us are passed.
-    unsigned int loopCount = 0;
-    while (onTime.read_us() - loop_timer < 4000) {
+    if (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
       
       //Getting throttle value from Raspberry Pi CM3
@@ -514,13 +514,13 @@ int main() {
 
       //Load gyro angle data into SPI buffer
       if (loopCount % 2 == 0) {
-        spi.reply((int)mod_receiver_input_throttle);
+        spi.reply((int)throttle);
         //spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
       }
-
       loopCount += 1;
     }
-    
+    while (onTime.read_us() - loop_timer < 4000);
+
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
     //RISING EDGE of PWM motor pulses (start of loop)
