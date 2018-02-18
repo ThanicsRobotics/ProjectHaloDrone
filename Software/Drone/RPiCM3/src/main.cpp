@@ -102,6 +102,28 @@ void mainLoop() {
     }
 }
 
+void disarm() {
+    //send disarm command
+}
+
+void arm() {
+    int data = 0;
+    while ((data != STM32_ARM_CONF) && run) {
+        stm32_tx_buffer[0] = 0x00;
+        stm32_tx_buffer[1] = STM32_ARM_TEST;
+        spiWrite(spiFd, stm32_tx_buffer, 2);
+        delay(5);
+
+        spiXfer(spiFd, stm32_tx_buffer, stm32_tx_buffer, 2);
+        data = stm32_tx_buffer[0] << 8 | stm32_tx_buffer[1];
+        cout << "ARM Response: " << data << endl;
+        spiWrite(spiFd, stm32_tx_buffer, 2);
+        
+        delay(50);
+    }
+    armed = true;
+}
+
 void *spiLoop(void *void_ptr) {
     //Switch to flight controller, setup SPI @ 1.5MHz
     SPI_CS = 1;
@@ -109,22 +131,7 @@ void *spiLoop(void *void_ptr) {
     authFlightController();
     while(run) {
         if (armRequest) {
-            //spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
-            int data = 0;
-            while ((data != STM32_ARM_CONF) && run) {
-                stm32_tx_buffer[0] = 0x00;
-                stm32_tx_buffer[1] = STM32_ARM_TEST;
-                spiWrite(spiFd, stm32_tx_buffer, 2);
-                delay(5);
-
-                spiXfer(spiFd, stm32_tx_buffer, stm32_tx_buffer, 2);
-                data = stm32_tx_buffer[0] << 8 | stm32_tx_buffer[1];
-                cout << "ARM Response: " << data << endl;
-                spiWrite(spiFd, stm32_tx_buffer, 2);
-                
-                delay(50);
-            }
-            armed = true;
+            arm();
             armRequest = false;
         }
         else {
@@ -138,6 +145,7 @@ void *spiLoop(void *void_ptr) {
             //gyroRoll = (int)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
         }
     }
+    disarm();
     return NULL;
 }
 

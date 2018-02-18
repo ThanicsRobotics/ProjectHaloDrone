@@ -410,13 +410,13 @@ int main() {
   //Infinite PID Loop
   while(1) {
     //For starting the motors: throttle low and yaw left (step 1)
-    if(receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) {
+    if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || armed) {
       start = 1;
       //pc.printf("Armed\r\n");
     }
     
     //When yaw stick is back in the center position start the motors (step 2)
-    if (start == 1 && receiver_input_throttle < 1050 && receiver_input_yaw > 1450) {
+    if ((start == 1 && receiver_input_throttle < 1050 && receiver_input_yaw > 1450) || armed) {
       start = 2;
       angle_pitch = angle_pitch_acc;                                         //Set the gyro pitch angle equal to the accelerometer pitch angle when the quadcopter is started.
       angle_roll = angle_roll_acc;                                           //Set the gyro roll angle equal to the accelerometer roll angle when the quadcopter is started.
@@ -456,8 +456,8 @@ int main() {
     //In the case of dividing by 3 the max pitch rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
     pid_pitch_setpoint = 0;
     //We need a little dead band of 16us for better results.
-    if(receiver_input_pitch > 1508)pid_pitch_setpoint = receiver_input_pitch - 1508;
-    else if(receiver_input_pitch < 1492)pid_pitch_setpoint = receiver_input_pitch - 1492;
+    if (receiver_input_pitch > 1508) pid_pitch_setpoint = receiver_input_pitch - 1508;
+    else if (receiver_input_pitch < 1492) pid_pitch_setpoint = receiver_input_pitch - 1492;
   
     pid_pitch_setpoint -= pitch_level_adjust;                                  //Subtract the angle correction from the standardized receiver pitch input value.
     pid_pitch_setpoint /= 3.0;                                                 //Divide the setpoint for the PID pitch controller by 3 to get angles in degrees.
@@ -466,9 +466,9 @@ int main() {
     //In the case of deviding by 3 the max yaw rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
     pid_yaw_setpoint = 0;
     //We need a little dead band of 16us for better results.
-    if(receiver_input_throttle > 1050){ //Do not yaw when turning off the motors.
-      if(receiver_input_yaw > 1508)pid_yaw_setpoint = (receiver_input_yaw - 1508)/3.0;
-      else if(receiver_input_yaw < 1492)pid_yaw_setpoint = (receiver_input_yaw - 1492)/3.0;
+    if (receiver_input_throttle > 1050) { //Do not yaw when turning off the motors.
+      if (receiver_input_yaw > 1508) pid_yaw_setpoint = (receiver_input_yaw - 1508)/3.0;
+      else if (receiver_input_yaw < 1492) pid_yaw_setpoint = (receiver_input_yaw - 1492)/3.0;
     }
     
     calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
