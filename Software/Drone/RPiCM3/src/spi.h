@@ -16,7 +16,7 @@ extern int spiFd;
 
 extern int newThrottle;
 
-extern string projectPath;
+extern std::string projectPath;
 
 //Mutex for STM32 communication threading
 extern pthread_mutex_t stm32_mutex;
