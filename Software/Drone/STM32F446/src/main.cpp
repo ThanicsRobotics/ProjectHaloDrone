@@ -514,8 +514,8 @@ int main() {
 
       //Load gyro angle data into SPI buffer
       if (loopCount % 2 == 0) {
-        spi.reply((int)throttle);
-        //spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
+        //spi.reply((int)throttle);
+        spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
       }
       loopCount += 1;
     }
