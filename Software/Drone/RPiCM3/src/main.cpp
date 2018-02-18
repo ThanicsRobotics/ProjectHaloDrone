@@ -81,7 +81,7 @@ void shutdown() {
     delay(500);
     
     //Halt command to STM32
-    system("sudo openocd -f " + string(projectPath) + "halt.cfg");
+    system(("sudo openocd -f " + projectPath + "halt.cfg").c_str());
 }
 
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
