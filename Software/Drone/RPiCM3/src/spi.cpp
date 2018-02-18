@@ -40,7 +40,7 @@ void setupSPI() {
 //Making sure the STM32F446 is listening...
 void authFlightController() {
     //Reset flight controller using OpenOCD
-    system("sudo openocd -f /home/pi/ProjectHalo/Software/Drone/RPiCM3/AltitudeCalculation/reset.cfg");
+    system("sudo openocd -f" + projectPath + "reset.cfg");
 
     authenticated = false;
     char buffer[100];

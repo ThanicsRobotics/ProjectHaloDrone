@@ -38,6 +38,8 @@ void *spiLoop(void *void_ptr);
 void *serialLoop(void *void_ptr);
 bool run = true;
 
+string projectPath = "/home/pi/ProjectHalo/Software/Drone/RPiCM3/src/";
+
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
 
@@ -79,7 +81,7 @@ void shutdown() {
     delay(500);
     
     //Halt command to STM32
-    system("sudo openocd -f /home/pi/ProjectHalo/Software/Drone/RPiCM3/AltitudeCalculation/halt.cfg");
+    system("sudo openocd -f " + projectPath + "halt.cfg");
 }
 
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
