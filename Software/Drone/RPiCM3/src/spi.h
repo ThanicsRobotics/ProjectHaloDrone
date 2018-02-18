@@ -2,6 +2,7 @@
 #define SPI_H
 
 #include <pthread.h>
+#include <string.h>
 
 extern char stm32_rx_buffer[100];
 extern char stm32_tx_buffer[100];
@@ -13,6 +14,8 @@ extern int SPI_CS;
 extern int spiFd;
 
 extern int newThrottle;
+
+extern string projectPath;
 
 //Mutex for STM32 communication threading
 extern pthread_mutex_t stm32_mutex;

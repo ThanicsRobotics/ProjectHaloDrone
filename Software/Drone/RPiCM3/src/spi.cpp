@@ -40,7 +40,7 @@ void setupSPI() {
 //Making sure the STM32F446 is listening...
 void authFlightController() {
     //Reset flight controller using OpenOCD
-    system("sudo openocd -f" + projectPath + "reset.cfg");
+    system("sudo openocd -f" + string(projectPath) + "reset.cfg");
 
     authenticated = false;
     char buffer[100];

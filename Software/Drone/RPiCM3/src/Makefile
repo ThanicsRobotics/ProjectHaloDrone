@@ -15,4 +15,4 @@ $(EXEC): $(OBJ)
 	$(CC) -c $(CFLAGS) $< -o $@ $(LIBS)
 
 clean:
-	rm *o $(EXEC)
+	rm *.o $(EXEC)
