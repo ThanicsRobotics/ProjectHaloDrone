@@ -67,9 +67,9 @@ void shutdown() {
     pthread_join(serialThread, NULL);
     pthread_join(spiThread, NULL);
 
-    cout << "Closing I2C: " << i2cFd << endl;
-    cout << "Closing Serial: " << serialFd << endl;
-    cout << "Closing SPI: " << spiFd << endl;
+    cout << "Closing I2C. FD: " << i2cFd << " PID: " << getpid() << endl;
+    cout << "Closing Serial. FD:  " << serialFd << " PID: " << getpid() << endl;
+    cout << "Closing SPI. FD:  " << spiFd << " PID: " << getpid() << endl;
 
     //Close ports
     spiClose(spiFd);
@@ -164,6 +164,7 @@ void showUsage(string name) {
         << "\t-h,--help\t\t\tShow this help message\n"
         << "\t-c,--controller-enabled \tRun program to connect with controller\n"
         << "\t-nc,--no-controller \t\tRun program without connecting to controller"
+        << "\t-nc,--no-controller \t\tRun program without connecting to controller"
         << endl;
 }
 
@@ -178,16 +179,21 @@ int main(int argc, char *argv[]) {
     //Override pigpio SIGINT handling
     signal(SIGINT, signal_callback_handler);
 
+    bool autoArm = false;
     bool controllerConnected = false;
     if (argc > 1) {
-        if (string(argv[1]) == "-c" || string(argv[1]) == "--controller-enabled") 
-            controllerConnected = true;
-        else if (string(argv[1]) == "-nc" || string(argv[1]) == "--no-controller") 
-            controllerConnected = false;
-        else if (string(argv[1]) == "-h" || string(argv[1]) == "--help") {
-            showUsage(argv[0]);
-            return 1;
-        }
+        for (int i = 1; i < (sizeof(argv)/sizeof(argv[0])); i++) {
+            if (string(argv[i]) == "-c" || string(argv[i]) == "--controller-enabled") 
+                controllerConnected = true;
+            else if (string(argv[i]) == "-nc" || string(argv[i]) == "--no-controller") 
+                controllerConnected = false;
+            else if (string(argv[i]) == "-aa" || string(argv[i]) == "--auto-arm")
+                autoArm = true;
+            else if (string(argv[i]) == "-h" || string(argv[i]) == "--help") {
+                showUsage(argv[0]);
+                return 1;
+            }
+        }   
     }
     else {
         showUsage(argv[0]);
@@ -220,9 +226,10 @@ int main(int argc, char *argv[]) {
         }
         delay(50);
     }
+    cout << "Calibration complete" << endl;
 
     if (controllerConnected) {
-        cout << "Calibration complete. Arm quadcopter." << endl;
+        cout << "Arm quadcopter using thumb sticks. Throttle down, yaw left." << endl;
         start = millis();
         while (gyroRoll == 4) {
             if (millis() - start > 60000) {
@@ -232,11 +239,16 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    else if (autoArm) {
+        cout << "Auto arming... CTRL-C to stop." << endl;
+        delay(100);
+        armRequest = true;
+    }
     else {
-        cout << "Calibration complete\nType 'ARM' to arm the quadcopter: ";
+        cout << "Type 'ARM' to arm the quadcopter: ";
         string input = "";
         getline(cin, input);
-        if (input == "ARM") {
+        else if (input == "ARM") {
             armRequest = true;
         }
         else {

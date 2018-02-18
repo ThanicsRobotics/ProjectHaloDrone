@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -32,7 +33,7 @@ void setupIOExpander() {
         cout << "I2C Failed: " << strerror(errno) << endl;
         exit(1);
     }
-    cout << "Opening I2C: " << i2cFd << endl;
+    cout << "Opening I2C. FD: " << i2cFd << " PID: " << getpid() << endl;
     //i2cFd = wiringPiI2CSetup(ADDR);
 
     //Configuration bytes (Inputs are 1's, Outputs 0's)

@@ -32,7 +32,7 @@ void setupSPI() {
         exit(1);
     }
     else {
-        cout << "Opening SPI: " << spiFd << endl;
+        cout << "Opening SPI. FD: " << spiFd << " PID: " << getpid() << endl;
         spiConfigured = true;
     }
 }

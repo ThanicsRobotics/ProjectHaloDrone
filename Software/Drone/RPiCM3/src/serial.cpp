@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -23,7 +24,7 @@ void setupSerial() {
         fflush(stdout);
     }
     else {
-        cout << "Opening Serial: " << serialFd << endl;
+        cout << "Opening Serial. FD: " << serialFd << " PID: " << getpid() << endl;
         serialConfigured = true;
     }
 }
