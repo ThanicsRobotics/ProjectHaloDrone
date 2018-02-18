@@ -5,10 +5,10 @@ SOURCES=main.cpp serial.cpp spi.cpp pid.cpp ultrasonic.cpp
 OBJ= $(SOURCES:.cpp=.o)
 EXEC=halo
 
-all: $(SOURCES) $(EXECUTABLE)
+all: $(SOURCES) $(EXEC)
 
-$(EXECUTABLE): $(OBJECTS) 
-    $(CC) $(OBJECTS) -o $@ $(LIBS)
+$(EXEC): $(OBJ) 
+    $(CC) $(OBJ) -o $@ $(LIBS)
 
 .cpp.o:
     $(CC) $(CFLAGS) $< -o $@ $(LIBS)
