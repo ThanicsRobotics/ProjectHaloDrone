@@ -502,6 +502,7 @@ int main() {
     }
     
     //We wait until 4000us are passed.
+    int loopCount = 0;
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
       
@@ -514,8 +515,12 @@ int main() {
       }
 
       //Load gyro angle data into SPI buffer
-      //spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
-      spi.reply((int)mod_receiver_input_throttle);
+      if (loopCount % 2 == 0) {
+        spi.reply((int)mod_receiver_input_throttle);
+        //spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
+      }
+
+      loopCount += 1;
     }
     
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.

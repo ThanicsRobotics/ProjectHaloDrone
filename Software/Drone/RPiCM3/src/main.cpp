@@ -112,9 +112,9 @@ void *spiLoop(void *void_ptr) {
             stm32_tx_buffer[1] = STM32_ARM_TEST;
             //spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
             int data = 0;
-            while (data != STM32_ARM_CONF && run) {
+            while ((data != STM32_ARM_CONF) && run) {
                 spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
-                data = stm32_rx_buffer[1];
+                data = stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1];
                 if (data != STM32_ARM_CONF) data = STM32_ARM_TEST;
                 stm32_tx_buffer[1] = data;
                 spiWrite(spiFd, stm32_tx_buffer, 2);
