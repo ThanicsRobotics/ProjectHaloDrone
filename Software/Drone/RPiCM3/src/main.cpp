@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
     bool autoArm = false;
     bool controllerConnected = false;
     if (argc > 1) {
-        for (int i = 1; i < (sizeof(argv)/sizeof(argv[0])); i++) {
+        for (int i = 1; i < argc; i++) {
             if (string(argv[i]) == "-c" || string(argv[i]) == "--controller-enabled") 
                 controllerConnected = true;
             else if (string(argv[i]) == "-nc" || string(argv[i]) == "--no-controller") 
@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
         cout << "Type 'ARM' to arm the quadcopter: ";
         string input = "";
         getline(cin, input);
-        else if (input == "ARM") {
+        if (input == "ARM") {
             armRequest = true;
         }
         else {
