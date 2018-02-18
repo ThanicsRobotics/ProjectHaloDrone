@@ -25,9 +25,9 @@
 #include "spi.h"
 #include "pid.h"
 
-#define GYRO_CAL 0x0004
-#define STM32_ARM_TEST 0x009F
-#define STM32_ARM_CONF 0x000A
+#define GYRO_CAL 0x04
+#define STM32_ARM_TEST 0x9F
+#define STM32_ARM_CONF 0x0A
 
 using namespace std;
 
@@ -61,9 +61,7 @@ void shutdown() {
     run = false;
     delay(1000);
 
-    //Join Threads to main
-    int start = millis();
-    
+    //Join Threads to main    
     pthread_join(serialThread, NULL);
     pthread_join(spiThread, NULL);
 
@@ -121,7 +119,7 @@ void *spiLoop(void *void_ptr) {
             stm32_tx_buffer[1] = STM32_ARM_TEST;
             spiWrite(spiFd, stm32_tx_buffer, 2);
             int data = 0;
-            while (data != STM32_ARM_CONF) {
+            while (data != STM32_ARM_CONF && run) {
                 spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
                 data = stm32_rx_buffer[1];
                 cout << "ARM Response: " << data << endl;

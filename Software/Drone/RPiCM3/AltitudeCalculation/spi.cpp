@@ -11,7 +11,7 @@
 #include <pthread.h>
 #include <string.h>
 
-#define AUTH_KEY 0x00F9
+#define AUTH_KEY 0xF9
 
 char stm32_rx_buffer[100];
 char stm32_tx_buffer[100];
