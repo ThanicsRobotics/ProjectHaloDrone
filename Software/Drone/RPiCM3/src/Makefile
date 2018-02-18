@@ -9,10 +9,10 @@ EXEC=halo
 all: $(EXEC)
 
 $(EXEC): $(OBJ) 
-	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LIBS)
+	$(CC) $(CFLAGS) $(OBJ) -o $@ $(LIBS)
 
 .cpp.o:
-	$(CC) $(CFLAGS) $< -o $@ $(LIBS)
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
 	rm *o $(EXEC)
