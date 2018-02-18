@@ -394,9 +394,9 @@ int main() {
       if (spi.receive()) {
         int data = spi.read();
         if (data == STM32_ARM_TEST) {
-          armed = true;
           spi.reply(STM32_ARM_CONF);
         }
+        if (data == STM32_ARM_CONF) armed = true;
       }
     }
   }

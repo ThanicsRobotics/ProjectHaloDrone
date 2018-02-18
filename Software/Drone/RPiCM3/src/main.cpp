@@ -38,7 +38,7 @@ void *spiLoop(void *void_ptr);
 void *serialLoop(void *void_ptr);
 bool run = true;
 
-string projectPath = "/home/pi/ProjectHalo/Software/Drone/RPiCM3/src/";
+const string projectPath = "/home/pi/ProjectHalo/Software/Drone/RPiCM3/src/";
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
@@ -108,22 +108,16 @@ void *spiLoop(void *void_ptr) {
     setupSPI();
     authFlightController();
     while(run) {
-        //Calculate new PID compensated throttle
-        calculateThrottle();
-        
-        //Use SPI to get gyro angles, send throttle
-        spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
-        //gyroPitch = (signed char)stm32_rx_buffer[0];
-        //gyroRoll = (signed char)stm32_rx_buffer[1];
-        gyroRoll = (int)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
-
         if (armRequest) {
             stm32_tx_buffer[1] = STM32_ARM_TEST;
-            spiWrite(spiFd, stm32_tx_buffer, 2);
+            //spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
             int data = 0;
             while (data != STM32_ARM_CONF && run) {
                 spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
                 data = stm32_rx_buffer[1];
+                if (data != STM32_ARM_CONF) data = STM32_ARM_TEST;
+                stm32_tx_buffer[1] = data;
+                spiWrite(spiFd, stm32_tx_buffer, 2);
                 cout << "ARM Response: " << data << endl;
                 fflush(stdout);
                 delay(50);
@@ -131,7 +125,16 @@ void *spiLoop(void *void_ptr) {
             armed = true;
             armRequest = false;
         }
-        memset(stm32_tx_buffer,0,sizeof(stm32_tx_buffer));
+        else {
+            //Calculate new PID compensated throttle
+            calculateThrottle();
+            
+            //Use SPI to get gyro angles, send throttle
+            spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
+            //gyroPitch = (signed char)stm32_rx_buffer[0];
+            //gyroRoll = (signed char)stm32_rx_buffer[1];
+            gyroRoll = (int)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
+        }
     }
     return NULL;
 }
