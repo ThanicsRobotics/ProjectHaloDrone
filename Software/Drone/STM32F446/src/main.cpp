@@ -393,9 +393,7 @@ int main() {
     while (onTime.read_us() - start < 3000) {
       if (spi.receive()) {
         int data = spi.read();
-        if (data == STM32_ARM_TEST) {
-          spi.reply(STM32_ARM_CONF);
-        }
+        if (data == STM32_ARM_TEST) spi.reply(STM32_ARM_CONF);
         if (data == STM32_ARM_CONF) armed = true;
       }
     }
@@ -502,7 +500,7 @@ int main() {
     }
     
     //We wait until 4000us are passed.
-    int loopCount = 0;
+    unsigned int loopCount = 0;
     while (onTime.read_us() - loop_timer < 4000) {
       //do stuff thats not flight
       

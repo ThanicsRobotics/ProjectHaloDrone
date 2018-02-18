@@ -109,17 +109,19 @@ void *spiLoop(void *void_ptr) {
     authFlightController();
     while(run) {
         if (armRequest) {
-            stm32_tx_buffer[1] = STM32_ARM_TEST;
             //spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
             int data = 0;
             while ((data != STM32_ARM_CONF) && run) {
-                spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
-                data = stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1];
-                if (data != STM32_ARM_CONF) data = STM32_ARM_TEST;
-                stm32_tx_buffer[1] = data;
+                stm32_tx_buffer[0] = 0x00;
+                stm32_tx_buffer[1] = STM32_ARM_TEST;
                 spiWrite(spiFd, stm32_tx_buffer, 2);
+                delay(5);
+
+                spiXfer(spiFd, stm32_tx_buffer, stm32_tx_buffer, 2);
+                data = stm32_tx_buffer[0] << 8 | stm32_tx_buffer[1];
                 cout << "ARM Response: " << data << endl;
-                fflush(stdout);
+                spiWrite(spiFd, stm32_tx_buffer, 2);
+                
                 delay(50);
             }
             armed = true;
