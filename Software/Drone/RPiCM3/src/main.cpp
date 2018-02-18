@@ -164,7 +164,7 @@ void showUsage(string name) {
         << "\t-h,--help\t\t\tShow this help message\n"
         << "\t-c,--controller-enabled \tRun program to connect with controller\n"
         << "\t-nc,--no-controller \t\tRun program without connecting to controller"
-        << "\t-nc,--no-controller \t\tRun program without connecting to controller"
+        << "\t-aa,--auto-arm \t\tDrone automatically ARMS after gyro calibration"
         << endl;
 }
 
