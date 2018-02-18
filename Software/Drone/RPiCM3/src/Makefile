@@ -8,10 +8,10 @@ EXEC=halo
 all: $(SOURCES) $(EXEC)
 
 $(EXEC): $(OBJ) 
-    $(CC) $(OBJ) -o $@ $(LIBS)
+\t$(CC) $(OBJ) -o $@ $(LIBS)
 
 .cpp.o:
-    $(CC) $(CFLAGS) $< -o $@ $(LIBS)
+\t$(CC) $(CFLAGS) $< -o $@ $(LIBS)
 
 clean:
-	rm *o halo
+\trm *o halo
