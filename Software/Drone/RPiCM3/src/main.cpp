@@ -98,7 +98,7 @@ void calculateAbsoluteAltitude() {
     altitude = angleCorrection(rawDistance);
     //cout << " | Altitude: " << altitude << " | Input: " << throttleInput
     //    << " | Throttle: " << newThrottle << endl;
-    cout << "Pitch: " << gyroPitch << " | Roll: " << gyroRoll
+    cout << "Pitch: " << (int)gyroPitch << " | Roll: " << (int)gyroRoll
         << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude << endl
         << "RX Input: " << throttleInput << " | Throttle: " << newThrottle 
         << " | Hz: " << loopRate << endl << endl;
