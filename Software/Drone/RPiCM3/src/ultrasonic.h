@@ -20,8 +20,8 @@ extern bool pulseComplete;
 extern unsigned int lastUltrasonicPulse;
 
 //Gyro angle variables
-extern signed int gyroPitch;
-extern signed int gyroRoll;
+extern signed char gyroPitch;
+extern signed char gyroRoll;
 
 void setupIOExpander();
 void handleEcho();
