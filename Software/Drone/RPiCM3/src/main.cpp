@@ -89,6 +89,7 @@ void shutdown() {
 
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
+    loopRate = 1.0 / ((millis() - loopStartTime) / 1000.0);
     loopStartTime = millis();
     //cout << "Gyro Pitch: " << gyroPitch << " | Gyro Roll: " << gyroRoll;
     int rawDistance = getUltrasonicData(1, 3, 30);
@@ -96,7 +97,6 @@ void calculateAbsoluteAltitude() {
     altitude = angleCorrection(rawDistance);
     //cout << " | Altitude: " << altitude << " | Input: " << throttleInput
     //    << " | Throttle: " << newThrottle << endl;
-    loopRate = 1.0 / ((millis() - loopStartTime) / 1000.0);
     cout << "Pitch: " << gyroPitch << " | Roll: " << gyroRoll
         << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude << endl
         << "RX Input: " << throttleInput << " | Throttle: " << newThrottle 
