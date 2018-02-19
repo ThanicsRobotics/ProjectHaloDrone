@@ -509,8 +509,8 @@ int main() {
       if (data >= 0 && data <= 900) {
         mod_receiver_input_throttle = data + 1000;
       }
-    }
-    if ((onTime.read_us() - loop_timer < 4000)) { //&& (loopCount % 2 == 0)) {
+    //}
+    //if ((onTime.read_us() - loop_timer < 4000)) { //&& (loopCount % 2 == 0)) {
       //Load gyro angle data into SPI buffer
       //spi.reply((int)throttle);
       spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
