@@ -24,8 +24,8 @@ bool pulseComplete = false;
 unsigned int lastUltrasonicPulse = 0;
 
 //Gyro angle variables
-signed int gyroPitch;
-signed int gyroRoll;
+signed char gyroPitch;
+signed char gyroRoll;
 
 //Configures inputs and outputs of IO Expander
 void setupIOExpander() {
