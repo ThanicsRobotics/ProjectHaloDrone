@@ -101,6 +101,7 @@ void calculateAbsoluteAltitude() {
         << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude << endl
         << "RX Input: " << throttleInput << " | Throttle: " << newThrottle 
         << " | Hz: " << loopRate << endl << endl;
+    fflush(stdout);
 }
 
 void mainLoop() {
