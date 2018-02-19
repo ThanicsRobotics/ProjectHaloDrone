@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
+#include <bitset>
 
 //POSIX Thread Library
 #include <pthread.h>
@@ -150,8 +151,11 @@ void *spiLoop(void *void_ptr) {
             
             //Use SPI to get gyro angles, send throttle
             spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
-            gyroPitch = (signed char)stm32_rx_buffer[0];
-            gyroRoll = (signed char)stm32_rx_buffer[1];
+            bitset<8> x(stm32_rx_buffer[0]);
+            bitset<8> y(stm32_rx_buffer[1]);
+            cout << x << endl << y << endl;
+            //gyroPitch = (signed char)stm32_rx_buffer[0];
+            //gyroRoll = (signed char)stm32_rx_buffer[1];
             //gyroRoll = (int)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
         }
     }
