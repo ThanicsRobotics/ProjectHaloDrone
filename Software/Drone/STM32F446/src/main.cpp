@@ -523,7 +523,7 @@ int main() {
           mod_receiver_input_throttle = data + 1000;
         }
       }
-      spi.reply(((signed char)-45.678) << 8 | (signed char)-45.678);
+      spi.reply(((signed char)-45.678 << 8) | ((signed char)-45.678 & 0xFF));
     }
 
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
