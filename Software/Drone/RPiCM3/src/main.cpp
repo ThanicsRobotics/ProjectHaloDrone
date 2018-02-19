@@ -67,9 +67,9 @@ void shutdown() {
     pthread_join(serialThread, NULL);
     pthread_join(spiThread, NULL);
 
-    cout << "Closing I2C. FD: " << i2cFd << " PID: " << getpid() << endl;
-    cout << "Closing Serial. FD:  " << serialFd << " PID: " << getpid() << endl;
-    cout << "Closing SPI. FD:  " << spiFd << " PID: " << getpid() << endl;
+    cout << "Closing I2C. FD: " << i2cFd << " PID: " << pthread_self() << endl;
+    cout << "Closing Serial. FD:  " << serialFd << " PID: " << pthread_self() << endl;
+    cout << "Closing SPI. FD:  " << spiFd << " PID: " << pthread_self() << endl;
 
     //Close ports
     spiClose(spiFd);
@@ -163,8 +163,8 @@ void showUsage(string name) {
         << "Options:\n"
         << "\t-h,--help\t\t\tShow this help message\n"
         << "\t-c,--controller-enabled \tRun program to connect with controller\n"
-        << "\t-nc,--no-controller \t\tRun program without connecting to controller"
-        << "\t-aa,--auto-arm \t\tDrone automatically ARMS after gyro calibration"
+        << "\t-nc,--no-controller \t\tRun program without connecting to controller\n"
+        << "\t-aa,--auto-arm \t\tDrone automatically ARMS after gyro calibration\n"
         << endl;
 }
 
@@ -241,7 +241,7 @@ int main(int argc, char *argv[]) {
     }
     else if (autoArm) {
         cout << "Auto arming... CTRL-C to stop." << endl;
-        delay(100);
+        delay(500);
         armRequest = true;
     }
     else {
