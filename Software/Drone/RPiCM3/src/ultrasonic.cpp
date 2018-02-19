@@ -33,7 +33,7 @@ void setupIOExpander() {
         cout << "I2C Failed: " << strerror(errno) << endl;
         exit(1);
     }
-    cout << "Opening I2C. FD: " << i2cFd << " PID: " << pthread_self() << endl;
+    cout << "Opening I2C. FD: " << i2cFd << " ID: " << pthread_self() << endl;
     //i2cFd = wiringPiI2CSetup(ADDR);
 
     //Configuration bytes (Inputs are 1's, Outputs 0's)

@@ -33,7 +33,7 @@ void setupSPI() {
         exit(1);
     }
     else {
-        cout << "Opening SPI. FD: " << spiFd << " PID: " << pthread_self() << endl;
+        cout << "Opening SPI. FD: " << spiFd << " ID: " << pthread_self() << endl;
         spiConfigured = true;
     }
 }

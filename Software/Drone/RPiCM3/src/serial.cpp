@@ -24,7 +24,7 @@ void setupSerial() {
         fflush(stdout);
     }
     else {
-        cout << "Opening Serial. FD: " << serialFd << " PID: " << pthread_self() << endl;
+        cout << "Opening Serial. FD: " << serialFd << " ID: " << pthread_self() << endl;
         serialConfigured = true;
     }
 }

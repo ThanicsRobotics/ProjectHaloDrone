@@ -67,9 +67,9 @@ void shutdown() {
     pthread_join(serialThread, NULL);
     pthread_join(spiThread, NULL);
 
-    cout << "Closing I2C. FD: " << i2cFd << " PID: " << pthread_self() << endl;
-    cout << "Closing Serial. FD:  " << serialFd << " PID: " << pthread_self() << endl;
-    cout << "Closing SPI. FD:  " << spiFd << " PID: " << pthread_self() << endl;
+    cout << "Closing I2C. FD: " << i2cFd << " ID: " << pthread_self() << endl;
+    cout << "Closing Serial. FD:  " << serialFd << " ID: " << pthread_self() << endl;
+    cout << "Closing SPI. FD:  " << spiFd << " ID: " << pthread_self() << endl;
 
     //Close ports
     spiClose(spiFd);
@@ -153,6 +153,7 @@ void *serialLoop(void *void_ptr) {
     setupSerial();
     while(run) {
         readLine();
+        delay(1);
     }
     return NULL;
 }
