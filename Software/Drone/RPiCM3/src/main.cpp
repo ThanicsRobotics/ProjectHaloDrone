@@ -55,6 +55,10 @@ int lastAltitude = 0;
 bool armRequest = false;
 bool armed = false;
 
+float loopRate = 0.0;
+int loopCount = 0;
+int programStartTime = 0;
+
 //Shutting down threads and closing ports
 void shutdown() {
     cout << endl << "Closing Threads and Ports..." << endl << endl;
@@ -86,16 +90,23 @@ void shutdown() {
 
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
 void calculateAbsoluteAltitude() {
-    cout << "Gyro Pitch: " << gyroPitch << " | Gyro Roll: " << gyroRoll;
+    //cout << "Gyro Pitch: " << gyroPitch << " | Gyro Roll: " << gyroRoll;
     int rawDistance = getUltrasonicData(1, 3, 30);
-    cout << " | Raw Distance: " << rawDistance;
+    //cout << " | Raw Distance: " << rawDistance;
     altitude = angleCorrection(rawDistance);
-    cout << " | Altitude: " << altitude << " | Input: " << throttleInput
-        << " | Throttle: " << newThrottle << endl;
+    //cout << " | Altitude: " << altitude << " | Input: " << throttleInput
+    //    << " | Throttle: " << newThrottle << endl;
+    loopRate = loopCount / (programStartTime / 1000.0);
+    cout << "Pitch: " << gyroPitch << " | Roll: " << gyroRoll
+        << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude << endl
+        << "RX Input: " << throttleInput << " | Throttle: " << newThrottle 
+        << "Hz: " << loopRate << endl << endl;
+    loopCount += 1;
 }
 
 void mainLoop() {
     while(!serialConfigured || !spiConfigured || !authenticated || !armed) delay(10);
+    programStartTime = millis();
     while(run) {
         calculateAbsoluteAltitude();
         calculatePID();
