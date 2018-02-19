@@ -501,22 +501,19 @@ int main() {
     }
     
     //We wait until 4000us are passed.
-    if (onTime.read_us() - loop_timer < 4000) {
+    if ((onTime.read_us() - loop_timer < 4000) && (spi.receive())) {
       //do stuff thats not flight
       
       //Getting throttle value from Raspberry Pi CM3
-      if (spi.receive()) {
-        int data = spi.read();
-        if (data >= 0 && data <= 900) {
-          mod_receiver_input_throttle = data + 1000;
-        }
+      int data = spi.read();
+      if (data >= 0 && data <= 900) {
+        mod_receiver_input_throttle = data + 1000;
       }
-
+    }
+    if ((onTime.read_us() - loop_timer < 4000) && (loopCount % 2 == 0)) {
       //Load gyro angle data into SPI buffer
-      if (loopCount % 2 == 0) {
-        //spi.reply((int)throttle);
-        spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
-      }
+      //spi.reply((int)throttle);
+      spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
       loopCount += 1;
     }
     while (onTime.read_us() - loop_timer < 4000);
