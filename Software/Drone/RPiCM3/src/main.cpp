@@ -100,12 +100,11 @@ void calculateAbsoluteAltitude() {
     cout << "Pitch: " << gyroPitch << " | Roll: " << gyroRoll
         << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude << endl
         << "RX Input: " << throttleInput << " | Throttle: " << newThrottle 
-        << "Hz: " << loopRate << endl << endl;
+        << " | Hz: " << loopRate << endl << endl;
 }
 
 void mainLoop() {
     while(!serialConfigured || !spiConfigured || !authenticated || !armed) delay(10);
-    programStartTime = millis();
     while(run) {
         calculateAbsoluteAltitude();
         calculatePID();
