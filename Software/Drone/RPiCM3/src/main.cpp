@@ -108,6 +108,7 @@ void calculateAbsoluteAltitude() {
 void mainLoop() {
     cout << "Waiting for configuration..." << endl;
     while(!serialConfigured || !spiConfigured || !authenticated || !armed) delay(10);
+    cout << "Starting main loop" << endl;
     while(run) {
         calculateAbsoluteAltitude();
         calculatePID();

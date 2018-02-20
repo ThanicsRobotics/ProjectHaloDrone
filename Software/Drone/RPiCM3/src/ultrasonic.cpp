@@ -100,6 +100,8 @@ void digitalIOWrite(int pin, int state) {
 int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
     int pin;
 
+    cout << "Pulsing";
+
     //Toggles between downward facing sensor 1 and 2
     switch (sensor) {
         case 1:
@@ -118,6 +120,7 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
     //Takes median of x distance measurements
     while(loops < iterations) {
         while (millis() - lastUltrasonicPulse < pulseDelay) delay(1);
+        cout << ".";
 
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
@@ -148,6 +151,7 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
         }
     }
     sort(distances, distances + iterations);
+    cout << endl;
     return distances[iterations/2];
 }
 
