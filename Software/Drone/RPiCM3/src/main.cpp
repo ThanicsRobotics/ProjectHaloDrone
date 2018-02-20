@@ -93,7 +93,7 @@ void calculateAbsoluteAltitude() {
     loopRate = 1.0 / ((millis() - loopStartTime) / 1000.0);
     loopStartTime = millis();
     //cout << "Gyro Pitch: " << gyroPitch << " | Gyro Roll: " << gyroRoll;
-    int rawDistance = getUltrasonicData(1, 3, 30);
+    int rawDistance = getUltrasonicData(1, 3, 60);
     //cout << " | Raw Distance: " << rawDistance;
     altitude = angleCorrection(rawDistance);
     //cout << " | Altitude: " << altitude << " | Input: " << throttleInput

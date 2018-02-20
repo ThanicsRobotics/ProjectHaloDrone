@@ -101,6 +101,7 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
     int pin;
 
     cout << "Pulsing";
+    fflush(stdout);
 
     //Toggles between downward facing sensor 1 and 2
     switch (sensor) {
@@ -121,6 +122,7 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
     while(loops < iterations) {
         while (millis() - lastUltrasonicPulse < pulseDelay) delay(1);
         cout << ".";
+        fflush(stdout);
 
         //Ensuring TRIG pin is LOW
         digitalIOWrite(pin, LOW);
