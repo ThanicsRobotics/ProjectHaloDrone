@@ -334,6 +334,10 @@ void authRasPiCM3() {
       if (response == 0x01) spi.reply(AUTH_KEY);
       if (response == AUTH_KEY) authenticated = true;
     }
+    motors_on();                                                              //Set motor PWM signals high
+    wait(.001);                                                               //Wait 1000us
+    motors_off();                                                             //Set motor PWM signals low
+    wait(.003);                                                               //Wait 3 milliseconds before the next loop
   }
 }
 

@@ -84,8 +84,8 @@ void shutdown() {
     cout << endl << "Halting Flight Controller..." << endl << endl;
     delay(500);
     
-    //Halt command to STM32
-    system(("sudo openocd -f " + projectPath + "halt.cfg").c_str());
+    //Reset command to STM32
+    system(("sudo openocd -f " + projectPath + "reset.cfg").c_str());
 }
 
 //Using gyro angles and raw distance, calculate absolute altitude of vehicle
@@ -93,7 +93,7 @@ void calculateAbsoluteAltitude() {
     loopRate = 1.0 / ((millis() - loopStartTime) / 1000.0);
     loopStartTime = millis();
     //cout << "Gyro Pitch: " << gyroPitch << " | Gyro Roll: " << gyroRoll;
-    int rawDistance = getUltrasonicData(1, 3, 60);
+    int rawDistance = getUltrasonicData(1, 3, 30);
     //cout << " | Raw Distance: " << rawDistance;
     altitude = angleCorrection(rawDistance);
     //cout << " | Altitude: " << altitude << " | Input: " << throttleInput
