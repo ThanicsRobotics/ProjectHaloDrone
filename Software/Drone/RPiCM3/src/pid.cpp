@@ -8,11 +8,20 @@ int pid_max = 400;                      //Maximum output of the PID-controller (
 int pid_error_temp;
 int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 
+//Target Altitude in centimeters
+float setAltitude = 50.0;
+
+float map(int x, int in_min, int in_max, int out_min, int out_max) {
+  return (float)(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 //Calculate throttle factor for altitude management through PID loop
 void calculatePID() {
-    if (throttleInput >= 1520 && throttleInput <= 1480) lastAltitude = altitude;
+    //Increase or decrease set altitude proportional to stick position
+    if (throttleInput >= 1520) setAltitude += 0.01 * map(throttleInput, 1520, 2000, 1, 5);
+    else if (throttleInput <= 1480) setAltitude -= 0.01 * map(throttleInput, 1000, 1480, 1, 5);
 
-    pid_error_temp = altitude - lastAltitude + (throttleInput - 1500)/10;
+    pid_error_temp = altitude - (int)setAltitude;
     pid_i_mem += pid_i_gain * pid_error_temp;
     if(pid_i_mem > pid_max)pid_i_mem = pid_max;
     else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;

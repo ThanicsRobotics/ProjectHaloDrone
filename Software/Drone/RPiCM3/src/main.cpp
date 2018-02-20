@@ -20,7 +20,7 @@
 //POSIX Thread Library
 #include <pthread.h>
 
-//Helper libraries
+//Project headers
 #include "ultrasonic.h"
 #include "serial.h"
 #include "spi.h"
@@ -176,7 +176,7 @@ void showUsage(string name) {
         << "\t-h,--help\t\t\tShow this help message\n"
         << "\t-c,--controller-enabled \tRun program to connect with controller\n"
         << "\t-nc,--no-controller \t\tRun program without connecting to controller\n"
-        << "\t-aa,--auto-arm \t\tDrone automatically ARMS after gyro calibration\n"
+        << "\t-aa,--auto-arm \t\t\tDrone automatically ARMS after gyro calibration\n"
         << endl;
 }
 

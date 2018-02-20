@@ -73,15 +73,15 @@ void authFlightController() {
 //Send modified throttle value to STM32
 void calculateThrottle() {
     //PID compensated throttle calculation
-    throttleInput = 1700;
-    newThrottle = throttleInput + pid_output;
+    throttleInput = 1500;
+    newThrottle = pid_output;
 
     if (newThrottle > 1900) newThrottle = 1900;
     if (newThrottle < 1000) newThrottle = 1000;
 
     pthread_mutex_lock(&stm32_mutex);
     stm32_tx_buffer[1] = (newThrottle - 1000) & 0xFF;
-    stm32_tx_buffer[0] = ((newThrottle - 1000) & 0xFF00) >> 8;
+    stm32_tx_buffer[0] = ((newThrottle - 1000) >> 8) & 0xFF;
     pthread_mutex_unlock(&stm32_mutex);
 
     //CLOCK SPEED TEST
