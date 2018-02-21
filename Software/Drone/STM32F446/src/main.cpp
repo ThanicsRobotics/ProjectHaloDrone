@@ -532,9 +532,9 @@ int main() {
     //     mod_receiver_input_throttle = data + 1000;
     //   }
     // }
-    if (onTime.read_us() - loop_timer < 4000) {
-      spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
-    }
+    // if (onTime.read_us() - loop_timer < 4000) {
+    //   spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
+    // }
 
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
