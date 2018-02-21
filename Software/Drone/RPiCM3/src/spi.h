@@ -5,8 +5,8 @@
 #include <string.h>
 #include <iostream>
 
-extern volatile char stm32_rx_buffer[100];
-extern volatile char stm32_tx_buffer[100];
+extern char stm32_rx_buffer[100];
+extern char stm32_tx_buffer[100];
 extern volatile bool spiConfigured;
 extern volatile bool authenticated;
 extern volatile bool preStart;

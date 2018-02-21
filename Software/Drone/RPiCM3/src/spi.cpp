@@ -14,8 +14,8 @@
 
 #define AUTH_KEY 0xF9
 
-volatile char stm32_rx_buffer[100];
-volatile char stm32_tx_buffer[100];
+char stm32_rx_buffer[100];
+char stm32_tx_buffer[100];
 volatile bool spiConfigured = false;
 volatile bool authenticated = false;
 

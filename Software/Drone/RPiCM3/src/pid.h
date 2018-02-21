@@ -11,8 +11,8 @@ extern int pid_max;                      //Maximum output of the PID-controller 
 extern int pid_error_temp;
 extern int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
 
-extern int lastAltitude;
-extern int altitude;
+extern volatile int lastAltitude;
+extern volatile int altitude;
 
 float map(int x, int in_min, int in_max, int out_min, int out_max);
 void calculatePID();
