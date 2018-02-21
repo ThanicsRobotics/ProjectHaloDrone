@@ -54,6 +54,7 @@ volatile int altitude = 0;
 volatile int lastAltitude = 0;
 
 volatile bool armRequest = false;
+volatile bool authRequest = false;
 volatile bool armed = false;
 volatile bool preStart = false;
 
@@ -166,6 +167,10 @@ void *spiLoop(void *void_ptr) {
             arm();
             armRequest = false;
         }
+        if (authRequest) {
+            authFlightController();
+            authRequest = false;
+        }
         else {
             //Calculate new PID compensated throttle
             calculateThrottle();
@@ -249,16 +254,16 @@ int main(int argc, char *argv[]) {
     int repeat = 1;
     while (gyroRoll != GYRO_CAL) {
         repeat = 1;
-        if (millis() - start > 30000) {
+        if (millis() - start > 20000) {
             cout << "Gyro not responding, resetting..." << endl;
             delay(1000);
-            authFlightController();
-            start = 0;
+            authRequest = true;
+            start = millis();
             repeat++;
         }
         else if (repeat > 1) {
             shutdown();
-            return 1;
+            exit(1);
         }
         delay(50);
     }
