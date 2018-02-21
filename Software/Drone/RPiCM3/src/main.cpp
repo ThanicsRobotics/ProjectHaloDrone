@@ -111,22 +111,22 @@ void mainLoop() {
     while(!serialConfigured || !spiConfigured || !authenticated || !armed) delay(10);
     cout << "Starting main loop" << endl;
     while(run) {
-        int count = 0;
-        while(preStart) {
-            calculateAbsoluteAltitude();
-            calculatePID();
-            if (count > 20) {
-                count = 0;
-                cout << endl << "Do you want to start motors? (y/n): ";
-                string input = "";
-                getline(cin, input);
-                if (input == "y") {
-                    preStart = false;
-                    break;
-                }
-            }
-            count += 1;
-        }
+        // int count = 0;
+        // while(preStart) {
+        //     calculateAbsoluteAltitude();
+        //     calculatePID();
+        //     if (count > 20) {
+        //         count = 0;
+        //         cout << endl << "Do you want to start motors? (y/n): ";
+        //         string input = "";
+        //         getline(cin, input);
+        //         if (input == "y") {
+        //             preStart = false;
+        //             break;
+        //         }
+        //     }
+        //     count += 1;
+        // }
         calculateAbsoluteAltitude();
         calculatePID();
         while(millis() - loopStartTime < 120);
