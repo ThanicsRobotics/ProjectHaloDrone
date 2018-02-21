@@ -77,13 +77,15 @@ void calculateThrottle() {
     newThrottle = 1000 + pid_output;
 
     if (newThrottle > 1900) newThrottle = 1900;
-    if (newThrottle < 1000) newThrottle = 1000;
+    else if (newThrottle < 1000) newThrottle = 1000;
 
-    pthread_mutex_lock(&stm32_mutex);
-    stm32_tx_buffer[1] = (newThrottle - 1000) & 0xFF;
-    stm32_tx_buffer[0] = ((newThrottle - 1000) >> 8) & 0xFF;
-    pthread_mutex_unlock(&stm32_mutex);
-
+    if (!preStart) {
+        pthread_mutex_lock(&stm32_mutex);
+        stm32_tx_buffer[1] = (newThrottle - 1000) & 0xFF;
+        stm32_tx_buffer[0] = ((newThrottle - 1000) >> 8) & 0xFF;
+        pthread_mutex_unlock(&stm32_mutex);
+    }
+    
     //CLOCK SPEED TEST
     //unsigned long int clockspeed = buffer[1];
     //cout << " | Clock: " << clockspeed << endl;

@@ -55,6 +55,7 @@ int lastAltitude = 0;
 
 bool armRequest = false;
 bool armed = false;
+bool preStart = false;
 
 float loopRate = 0.0;
 int loopStartTime = 0;
@@ -110,6 +111,22 @@ void mainLoop() {
     while(!serialConfigured || !spiConfigured || !authenticated || !armed) delay(10);
     cout << "Starting main loop" << endl;
     while(run) {
+        int count = 0;
+        while(preStart) {
+            calculateAbsoluteAltitude();
+            calculatePID();
+            if (count > 20) {
+                count = 0;
+                cout << endl << "Do you want to start motors? (y/n): ";
+                string input = "";
+                getline(cin, input);
+                if (input == "y") {
+                    preStart = false;
+                    break;
+                }
+            }
+            count += 1;
+        }
         calculateAbsoluteAltitude();
         calculatePID();
         while(millis() - loopStartTime < 120);
@@ -180,6 +197,7 @@ void showUsage(string name) {
         << "\t-c,--controller-enabled \tRun program to connect with controller\n"
         << "\t-nc,--no-controller \t\tRun program without connecting to controller\n"
         << "\t-aa,--auto-arm \t\t\tDrone automatically ARMS after gyro calibration\n"
+        << "\t-pre,--pre-start \t\t\tDrone gives data before starting motors\n"
         << endl;
 }
 
@@ -204,6 +222,8 @@ int main(int argc, char *argv[]) {
                 controllerConnected = false;
             else if (string(argv[i]) == "-aa" || string(argv[i]) == "--auto-arm")
                 autoArm = true;
+            else if (string(argv[i]) == "-pre" || string(argv[i]) == "--pre-start")
+                preStart = true;
             else if (string(argv[i]) == "-h" || string(argv[i]) == "--help") {
                 showUsage(argv[0]);
                 return 1;
