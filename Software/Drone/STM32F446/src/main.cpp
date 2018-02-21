@@ -368,17 +368,21 @@ int main() {
   //pc.printf("Done registers\r\n");
   
   //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
-  for (cal_int = 0; cal_int < 2000 ; cal_int ++) {                            //Take 2000 readings for calibration.
-    gyro_signalen();                                                          //Read the gyro output.
-    gyro_axis_cal[1] += gyro_axis[1];                                         //Add roll value to gyro_roll_cal.
-    gyro_axis_cal[2] += gyro_axis[2];                                         //Add pitch value to gyro_pitch_cal.
-    gyro_axis_cal[3] += gyro_axis[3];                                         //Add yaw value to gyro_yaw_cal.
-    
+  while (cal_int < 2000) {                            //Take 2000 readings for calibration.
     //We don't want the esc's to be beeping annoyingly. So let's give them a 1000us puls while calibrating the gyro.
     motors_on();                                                              //Set motor PWM signals high
     wait(.001);                                                               //Wait 1000us
     motors_off();                                                             //Set motor PWM signals low
-    wait(.003);                                                               //Wait 3 milliseconds before the next loop
+    
+    int start = onTime.read_us();
+    while (onTime.read_us() - start < 3000) {
+      gyro_signalen();                                                          //Read the gyro output.
+      gyro_axis_cal[1] += gyro_axis[1];                                         //Add roll value to gyro_roll_cal.
+      gyro_axis_cal[2] += gyro_axis[2];                                         //Add pitch value to gyro_pitch_cal.
+      gyro_axis_cal[3] += gyro_axis[3];                                         //Add yaw value to gyro_yaw_cal.
+      cal_int += 1;
+    }
+    //wait(.003);                                                               //Wait 3 milliseconds before the next loop
   }
   //Serial.println("Gyro calibrated");
 
@@ -391,7 +395,7 @@ int main() {
 
   //Wait until the receiver is active and the throttle is set to the lower position.
   //pc.printf("Waiting for arming...\r\n");
-  bool armed = true;
+  bool armed = false;
   while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) && !armed) {
     //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
     motors_on();                                                              //Set motor PWM signals high
@@ -417,34 +421,34 @@ int main() {
   //Infinite PID Loop
   while(1) {
     //For starting the motors: throttle low and yaw left (step 1)
-    if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || armed) {
-      start = 1;
-      //pc.printf("Armed\r\n");
-    }
+    // if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || armed) {
+    //   start = 1;
+    //   //pc.printf("Armed\r\n");
+    // }
     
-    //When yaw stick is back in the center position start the motors (step 2)
-    if ((start == 1 && receiver_input_throttle < 1050 && receiver_input_yaw > 1450) || armed) {
-      start = 2;
-      angle_pitch = angle_pitch_acc;                                         //Set the gyro pitch angle equal to the accelerometer pitch angle when the quadcopter is started.
-      angle_roll = angle_roll_acc;                                           //Set the gyro roll angle equal to the accelerometer roll angle when the quadcopter is started.
-      gyro_angles_set = true;                                                //Set the IMU started flag.
+    // //When yaw stick is back in the center position start the motors (step 2)
+    // if ((start == 1 && receiver_input_throttle < 1050 && receiver_input_yaw > 1450) || armed) {
+    //   start = 2;
+    //   angle_pitch = angle_pitch_acc;                                         //Set the gyro pitch angle equal to the accelerometer pitch angle when the quadcopter is started.
+    //   angle_roll = angle_roll_acc;                                           //Set the gyro roll angle equal to the accelerometer roll angle when the quadcopter is started.
+    //   gyro_angles_set = true;                                                //Set the IMU started flag.
       
-      //Reset the PID controllers for a bumpless start.
-      pid_i_mem_roll = 0;
-      pid_last_roll_d_error = 0;
-      pid_i_mem_pitch = 0;
-      pid_last_pitch_d_error = 0;
-      pid_i_mem_yaw = 0;
-      pid_last_yaw_d_error = 0;
+    //   //Reset the PID controllers for a bumpless start.
+    //   pid_i_mem_roll = 0;
+    //   pid_last_roll_d_error = 0;
+    //   pid_i_mem_pitch = 0;
+    //   pid_last_pitch_d_error = 0;
+    //   pid_i_mem_yaw = 0;
+    //   pid_last_yaw_d_error = 0;
 
-      armed = false;
-    }
+    //   armed = false;
+    // }
 
-    //Stopping the motors: throttle low and yaw right.
-    if (start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) {
-      start = 0;
-    }
-
+    // //Stopping the motors: throttle low and yaw right.
+    // if (start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) {
+    //   start = 0;
+    // }
+    start = 2;
     //The PID set point in degrees per second is determined by the roll receiver input.
     //In the case of dividing by 3 the max roll rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
     pid_roll_setpoint = 0;
