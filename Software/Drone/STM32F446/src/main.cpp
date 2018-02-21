@@ -524,7 +524,7 @@ int main() {
     // }
     // while (onTime.read_us() - loop_timer < 4000) {
       if (spi.receive()) {
-        int data = spi.read();
+        short int data = spi.read();
         if (data >= 0 && data <= 900) {
           mod_receiver_input_throttle = data + 1000;
         }

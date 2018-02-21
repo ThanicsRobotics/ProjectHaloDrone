@@ -37,7 +37,7 @@ pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t spiThread, serialThread;
 void *spiLoop(void *void_ptr);
 void *serialLoop(void *void_ptr);
-bool run = true;
+volatile bool run = true;
 
 string projectPath = "/home/pi/ProjectHalo/Software/Drone/RPiCM3/src/";
 
@@ -50,12 +50,12 @@ char baroCoefficients[17];
 
 // int pressure;
 // int temperature;
-int altitude = 0;
-int lastAltitude = 0;
+volatile int altitude = 0;
+volatile int lastAltitude = 0;
 
-bool armRequest = false;
-bool armed = false;
-bool preStart = false;
+volatile bool armRequest = false;
+volatile bool armed = false;
+volatile bool preStart = false;
 
 float loopRate = 0.0;
 int loopStartTime = 0;

@@ -8,15 +8,15 @@
 
 using namespace std;
 
-int serialFd;
+volatile int serialFd;
 
 int charCount = 0;
 char serialBuffer[100];
 bool wordEnd = false;
 bool coFlag = false;
-bool serialConfigured = false;
+volatile bool serialConfigured = false;
 
-int throttleInput = 0;
+volatile int throttleInput = 0;
 
 void setupSerial() {
     if ((serialFd = serOpen("/dev/serial0", 9600, 0)) < 0) {

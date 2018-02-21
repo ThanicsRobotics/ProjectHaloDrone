@@ -5,17 +5,17 @@
 #include <string.h>
 #include <iostream>
 
-extern char stm32_rx_buffer[100];
-extern char stm32_tx_buffer[100];
-extern bool spiConfigured;
-extern bool authenticated;
-extern bool preStart;
+extern volatile char stm32_rx_buffer[100];
+extern volatile char stm32_tx_buffer[100];
+extern volatile bool spiConfigured;
+extern volatile bool authenticated;
+extern volatile bool preStart;
 
 //CS0 is barometer, CS1 is STM32 flight controller
-extern int SPI_CS;
-extern int spiFd;
+extern volatile int SPI_CS;
+extern volatile int spiFd;
 
-extern int16_t newThrottle;
+extern volatile short int newThrottle;
 
 extern std::string projectPath;
 

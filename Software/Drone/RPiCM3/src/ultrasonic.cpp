@@ -15,17 +15,17 @@
 
 using namespace std;
 
-int i2cFd;
+volatile int i2cFd;
 
 //Pulse timing variables
 int start_time = 0;
 int pulse_time = 0;
-bool pulseComplete = false;
+volatile bool pulseComplete = false;
 unsigned int lastUltrasonicPulse = 0;
 
 //Gyro angle variables
-signed char gyroPitch;
-signed char gyroRoll;
+volatile signed char gyroPitch;
+volatile signed char gyroRoll;
 
 //Configures inputs and outputs of IO Expander
 void setupIOExpander() {

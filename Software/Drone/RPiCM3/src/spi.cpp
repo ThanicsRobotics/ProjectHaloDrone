@@ -14,16 +14,16 @@
 
 #define AUTH_KEY 0xF9
 
-char stm32_rx_buffer[100];
-char stm32_tx_buffer[100];
-bool spiConfigured = false;
-bool authenticated = false;
+volatile char stm32_rx_buffer[100];
+volatile char stm32_tx_buffer[100];
+volatile bool spiConfigured = false;
+volatile bool authenticated = false;
 
-int16_t newThrottle = 0;
+volatile short int newThrottle = 0;
 
 //CS0 is barometer, CS1 is STM32 flight controller
-int SPI_CS = 1;
-int spiFd;
+volatile int SPI_CS = 1;
+volatile int spiFd;
 
 using namespace std;
 
