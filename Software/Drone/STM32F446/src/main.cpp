@@ -391,7 +391,7 @@ int main() {
 
   //Wait until the receiver is active and the throttle is set to the lower position.
   //pc.printf("Waiting for arming...\r\n");
-  bool armed = false;
+  bool armed = true;
   while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) && !armed) {
     //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
     motors_on();                                                              //Set motor PWM signals high
@@ -437,7 +437,7 @@ int main() {
       pid_i_mem_yaw = 0;
       pid_last_yaw_d_error = 0;
 
-      //armed = false;
+      armed = false;
     }
 
     //Stopping the motors: throttle low and yaw right.
@@ -532,9 +532,9 @@ int main() {
     //     mod_receiver_input_throttle = data + 1000;
     //   }
     // }
-    if (onTime.read_us() - loop_timer < 4000) {
-      spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
-    }
+    // if (onTime.read_us() - loop_timer < 4000) {
+    //   spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
+    // }
 
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
