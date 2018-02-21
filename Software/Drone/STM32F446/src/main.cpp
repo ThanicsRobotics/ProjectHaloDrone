@@ -408,7 +408,7 @@ int main() {
   spi.reply(0x05);
 
   calculate_angles();
-  armed = false;
+  //armed = false;
   loop_timer = onTime.read_us();                                              //First timer reading (starting main loop)
   
   //Infinite PID Loop
