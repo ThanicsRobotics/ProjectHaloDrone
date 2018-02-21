@@ -167,7 +167,7 @@ void *spiLoop(void *void_ptr) {
             arm();
             armRequest = false;
         }
-        if (authRequest) {
+        else if (authRequest) {
             authFlightController();
             authRequest = false;
         }

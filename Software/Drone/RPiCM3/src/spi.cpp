@@ -74,7 +74,7 @@ void authFlightController() {
 void calculateThrottle() {
     //PID compensated throttle calculation
     throttleInput = 1500;
-    newThrottle = 1000 + pid_output;
+    newThrottle = 1500 + pid_output;
 
     if (newThrottle > 1900) newThrottle = 1900;
     else if (newThrottle < 1000) newThrottle = 1000;

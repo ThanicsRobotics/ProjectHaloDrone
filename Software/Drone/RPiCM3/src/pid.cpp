@@ -4,9 +4,10 @@
 int pid_p_gain = 20;                    //Gain setting for the roll P-controller
 int pid_i_gain = 0;                     //Gain setting for the roll I-controller
 int pid_d_gain = 0;                   //Gain setting for the roll D-controller
-int pid_max = 1000;                      //Maximum output of the PID-controller (+/-)
+int pid_max = 500;                      //Maximum output of the PID-controller (+/-)
 int pid_error_temp;
-int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
+int pid_i_mem, pid_setpoint, pid_last_d_error;
+volatile int pid_output;
 
 //Target Altitude in centimeters
 float setAltitude = 50.0;
@@ -21,7 +22,7 @@ void calculatePID() {
     if (throttleInput >= 1520) setAltitude += 0.01 * map(throttleInput, 1520, 2000, 1, 5);
     else if (throttleInput <= 1480) setAltitude -= 0.01 * map(throttleInput, 1000, 1480, 1, 5);
 
-    pid_error_temp = altitude - (int)setAltitude;
+    pid_error_temp = (int)setAltitude - altitude;
     pid_i_mem += pid_i_gain * pid_error_temp;
     if(pid_i_mem > pid_max)pid_i_mem = pid_max;
     else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;

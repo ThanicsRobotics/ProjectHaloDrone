@@ -9,7 +9,8 @@ extern int pid_i_gain;                     //Gain setting for the roll I-control
 extern int pid_d_gain;                   //Gain setting for the roll D-controller
 extern int pid_max;                      //Maximum output of the PID-controller (+/-)
 extern int pid_error_temp;
-extern int pid_i_mem, pid_setpoint, pid_output, pid_last_d_error;
+extern int pid_i_mem, pid_setpoint, pid_last_d_error;
+extern volatile int pid_output;
 
 extern volatile int lastAltitude;
 extern volatile int altitude;
