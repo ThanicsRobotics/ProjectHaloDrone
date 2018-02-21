@@ -1,7 +1,7 @@
 #include "pid.h"
 #include "serial.h"
 
-int pid_p_gain = 2;                    //Gain setting for the roll P-controller
+int pid_p_gain = 20;                    //Gain setting for the roll P-controller
 int pid_i_gain = 0;                     //Gain setting for the roll I-controller
 int pid_d_gain = 0;                   //Gain setting for the roll D-controller
 int pid_max = 1000;                      //Maximum output of the PID-controller (+/-)

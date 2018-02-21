@@ -19,7 +19,7 @@ char stm32_tx_buffer[100];
 bool spiConfigured = false;
 bool authenticated = false;
 
-int newThrottle = 0;
+int16_t newThrottle = 0;
 
 //CS0 is barometer, CS1 is STM32 flight controller
 int SPI_CS = 1;
@@ -41,7 +41,7 @@ void setupSPI() {
 //Making sure the STM32F446 is listening...
 void authFlightController() {
     //Reset flight controller using OpenOCD
-    system(("sudo openocd -f" + projectPath + "reset.cfg").c_str());
+    system(("sudo openocd -f " + projectPath + "reset.cfg").c_str());
 
     authenticated = false;
     char buffer[100];

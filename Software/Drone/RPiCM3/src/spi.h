@@ -15,7 +15,7 @@ extern bool preStart;
 extern int SPI_CS;
 extern int spiFd;
 
-extern int newThrottle;
+extern int16_t newThrottle;
 
 extern std::string projectPath;
 
