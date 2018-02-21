@@ -448,7 +448,12 @@ int main() {
     // if (start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) {
     //   start = 0;
     // }
+    
     start = 2;
+    receiver_input_roll = 1500;
+    receiver_input_pitch = 1500;
+    receiver_input_yaw = 1500;
+    receiver_input_throttle = mod_receiver_input_throttle;
     //The PID set point in degrees per second is determined by the roll receiver input.
     //In the case of dividing by 3 the max roll rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
     pid_roll_setpoint = 0;
@@ -486,8 +491,8 @@ int main() {
     
     calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
 
-    //throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
-    throttle = 1500;
+    throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
+    //throttle = 1500;
 
     if (start == 2) {                                                          //The motors are started.
       //pc.printf("hi %d\r\n", throttle);
@@ -514,7 +519,7 @@ int main() {
       esc_4 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-4.
     }
     
-    //We wait until 4000us are passed.
+    // We wait until 4000us are passed.
     // if ((onTime.read_us() - loop_timer < 4000) && (spi.receive())) {
     //   //do stuff thats not flight
       
@@ -530,15 +535,15 @@ int main() {
     //   spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
     //   //loopCount += 1;
     // }
-    // if ((onTime.read_us() - loop_timer < 4000) && spi.receive()) {
-    //   short int data = spi.read();
-    //   if (data >= 0 && data <= 900) {
-    //     mod_receiver_input_throttle = data + 1000;
-    //   }
-    // }
-    // if (onTime.read_us() - loop_timer < 4000) {
-    //   spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
-    // }
+    if ((onTime.read_us() - loop_timer < 4000) && spi.receive()) {
+      short int data = spi.read();
+      if (data >= 0 && data <= 900) {
+        mod_receiver_input_throttle = data + 1000;
+      }
+    }
+    if (onTime.read_us() - loop_timer < 4000) {
+      spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
+    }
 
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
