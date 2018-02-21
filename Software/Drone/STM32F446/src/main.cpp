@@ -433,6 +433,8 @@ int main() {
       pid_last_pitch_d_error = 0;
       pid_i_mem_yaw = 0;
       pid_last_yaw_d_error = 0;
+
+      armed = false;
     }
 
     //Stopping the motors: throttle low and yaw right.
