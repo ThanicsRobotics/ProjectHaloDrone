@@ -522,7 +522,7 @@ int main() {
     //   spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
     //   //loopCount += 1;
     // }
-    while (onTime.read_us() - loop_timer < 4000) {
+    // while (onTime.read_us() - loop_timer < 4000) {
       if (spi.receive()) {
         int data = spi.read();
         if (data >= 0 && data <= 900) {
@@ -530,8 +530,8 @@ int main() {
         }
       }
       spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
-    }
-
+    // }
+    while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
     //RISING EDGE of PWM motor pulses (start of loop)
