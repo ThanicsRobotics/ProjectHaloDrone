@@ -147,10 +147,10 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
         lastUltrasonicPulse = millis();
 
         //factor out invalid results
-        //if (distance > 0 && distance < 600) {
+        if (distance > 0 && distance < 600) {
             distances[loops] = distance;
             loops++;
-        //}
+        }
     }
     sort(distances, distances + iterations);
     cout << endl;
