@@ -152,13 +152,6 @@ void *spiLoop(void *void_ptr) {
     SPI_CS = 1;
     setupSPI();
     authFlightController();
-    if (testGyro) {
-        while(run) {
-            spiRead(spiFd, stm32_rx_buffer, 2);
-            gyroPitch = (signed char)stm32_rx_buffer[0];
-            gyroRoll = (signed char)stm32_rx_buffer[1];
-        }
-    }
     while(run) {
         if (armRequest) {
             cout << "Arming..." << endl;
@@ -169,6 +162,11 @@ void *spiLoop(void *void_ptr) {
             cout << "Authenticating..." << endl;
             authFlightController();
             authRequest = false;
+        }
+        else if (testGyro) {
+            spiRead(spiFd, stm32_rx_buffer, 2);
+            gyroPitch = (signed char)stm32_rx_buffer[0];
+            gyroRoll = (signed char)stm32_rx_buffer[1];
         }
         else {
             //Calculate new PID compensated throttle
