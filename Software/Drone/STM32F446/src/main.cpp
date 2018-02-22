@@ -536,10 +536,10 @@ int main() {
     //   //loopCount += 1;
     // }
     if ((onTime.read_us() - loop_timer < 4000)) {
-      if (loopCount % 2 == 0) {
+      if (loopCount % 10 == 0) {
         spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
       }
-      else if (spi.receive()) {
+      else if ((loopCount % 6 == 0) && spi.receive()) {
         short int data = spi.read();
         if (data >= 0 && data <= 900) {
           mod_receiver_input_throttle = data + 1000;
