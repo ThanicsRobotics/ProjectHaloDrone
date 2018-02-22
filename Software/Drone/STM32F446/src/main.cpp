@@ -421,7 +421,7 @@ int main() {
   
   //Infinite PID Loop
   while(1) {
-    calculate_angles();
+    
     //For starting the motors: throttle low and yaw left (step 1)
     if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || armed) {
       start = 1;
@@ -563,6 +563,7 @@ int main() {
     
     //There is always 1000us of spare time. So let's do something useful that is very time consuming.
     //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
+    calculate_angles();
     gyro_signalen();
     //calculate_angles();
 
