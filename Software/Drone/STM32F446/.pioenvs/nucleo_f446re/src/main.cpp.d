@@ -1,4 +1,4 @@
-.pioenvs\nucleo_f446re\src\main.o: src\main.cpp \
+.pioenvs\nucleo_f446re\src\main.cpp.o: src\main.cpp \
  C:\Users\Bill\ 2012\.platformio\packages\framework-mbed\platformio\variants\NUCLEO_F446RE/mbed_config.h \
  C:\Users\Bill\ 2012\.platformio\packages\framework-mbed/mbed.h \
  C:\Users\Bill\ 2012\.platformio\packages\framework-mbed/platform/mbed_toolchain.h \

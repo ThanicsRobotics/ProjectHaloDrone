@@ -421,6 +421,7 @@ int main() {
   
   //Infinite PID Loop
   while(1) {
+    calculate_angles();
     //For starting the motors: throttle low and yaw left (step 1)
     if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || armed) {
       start = 1;
@@ -450,7 +451,7 @@ int main() {
     //   start = 0;
     // }
     
-    start = 2;
+    //start = 2;
     // receiver_input_roll = 1500;
     // receiver_input_pitch = 1500;
     // receiver_input_yaw = 1500;
@@ -492,8 +493,8 @@ int main() {
     
     calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
 
-    throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
-    //throttle = 1500;
+    //throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
+    throttle = 1500;
 
     if (start == 2) {                                                          //The motors are started.
       //pc.printf("hi %d\r\n", throttle);
@@ -563,7 +564,7 @@ int main() {
     //There is always 1000us of spare time. So let's do something useful that is very time consuming.
     //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
     gyro_signalen();
-    calculate_angles();
+    //calculate_angles();
 
     //CLOCK SPEED TEST
     //spi.reply(SystemCoreClock/1000000);
