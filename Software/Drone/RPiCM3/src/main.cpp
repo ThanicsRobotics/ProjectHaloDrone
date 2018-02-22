@@ -164,7 +164,7 @@ void *spiLoop(void *void_ptr) {
             authRequest = false;
         }
         else if (testGyro) {
-            spiRead(spiFd, stm32_rx_buffer, 2);
+            spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
             gyroPitch = (signed char)stm32_rx_buffer[0];
             gyroRoll = (signed char)stm32_rx_buffer[1];
         }
