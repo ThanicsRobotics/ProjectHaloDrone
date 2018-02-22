@@ -9,7 +9,6 @@ extern char stm32_rx_buffer[100];
 extern char stm32_tx_buffer[100];
 extern volatile bool spiConfigured;
 extern volatile bool authenticated;
-extern volatile bool preStart;
 
 //CS0 is barometer, CS1 is STM32 flight controller
 extern volatile int SPI_CS;
