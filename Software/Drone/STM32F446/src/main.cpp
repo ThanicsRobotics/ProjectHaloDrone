@@ -568,7 +568,7 @@ int main() {
     //   }
     // }
     // loopCount += 1;
-    spi.reply(((signed char)gyro_pitch_input << 8) | ((signed char)gyro_roll_input & 0xFF));
+    spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
