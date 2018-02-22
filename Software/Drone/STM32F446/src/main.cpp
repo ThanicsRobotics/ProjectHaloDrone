@@ -454,7 +454,7 @@ int main() {
     receiver_input_roll = 1500;
     receiver_input_pitch = 1500;
     receiver_input_yaw = 1500;
-    receiver_input_throttle = mod_receiver_input_throttle;
+
     //The PID set point in degrees per second is determined by the roll receiver input.
     //In the case of dividing by 3 the max roll rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
     pid_roll_setpoint = 0;
@@ -536,18 +536,19 @@ int main() {
     //   spi.reply((signed char)angle_pitch << 8 | (signed char)angle_roll);
     //   //loopCount += 1;
     // }
-    if ((onTime.read_us() - loop_timer < 4000)) {
-      if (loopCount % 10 == 0) {
-        spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
-      }
-      else if ((loopCount % 6 == 0) && spi.receive()) {
-        short int data = spi.read();
-        if (data >= 0 && data <= 900) {
-          mod_receiver_input_throttle = data + 1000;
-        }
-      }
-    }
-    loopCount += 1;
+    // if ((onTime.read_us() - loop_timer < 4000)) {
+    //   if (loopCount % 10 == 0) {
+    //     spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
+    //   }
+    //   else if ((loopCount % 6 == 0) && spi.receive()) {
+    //     short int data = spi.read();
+    //     if (data >= 0 && data <= 900) {
+    //       mod_receiver_input_throttle = data + 1000;
+    //     }
+    //   }
+    // }
+    // loopCount += 1;
+    spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
