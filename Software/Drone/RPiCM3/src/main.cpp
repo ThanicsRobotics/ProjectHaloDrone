@@ -164,14 +164,17 @@ void *spiLoop(void *void_ptr) {
     authFlightController();
     while(run) {
         if (armRequest) {
+            cout << "Arming..." << endl;
             arm();
             armRequest = false;
         }
         else if (authRequest) {
+            cout << "Authenticating..." << endl;
             authFlightController();
             authRequest = false;
         }
         else {
+            cout << "!" << endl;
             //Calculate new PID compensated throttle
             calculateThrottle();
             
