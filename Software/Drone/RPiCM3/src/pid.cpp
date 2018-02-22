@@ -12,6 +12,8 @@ volatile int pid_output;
 //Target Altitude in centimeters
 float setAltitude = 50.0;
 
+volatile short int newThrottle = 0;
+
 float map(int x, int in_min, int in_max, int out_min, int out_max) {
   return (float)(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
@@ -32,4 +34,11 @@ void calculatePID() {
     else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
 
     pid_last_d_error = pid_error_temp;
+
+    //PID compensated throttle calculation
+    throttleInput = 1500;
+    newThrottle = 1500 + pid_output;
+
+    if (newThrottle > 1900) newThrottle = 1900;
+    else if (newThrottle < 1000) newThrottle = 1000;
 }

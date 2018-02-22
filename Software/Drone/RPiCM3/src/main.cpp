@@ -174,9 +174,8 @@ void *spiLoop(void *void_ptr) {
             authRequest = false;
         }
         else {
-            cout << "!" << endl;
             //Calculate new PID compensated throttle
-            calculateThrottle();
+            sendThrottle();
             
             //Use SPI to get gyro angles, send throttle
             spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);

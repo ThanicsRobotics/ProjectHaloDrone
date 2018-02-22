@@ -12,6 +12,7 @@ extern int pid_error_temp;
 extern int pid_i_mem, pid_setpoint, pid_last_d_error;
 extern volatile int pid_output;
 
+extern volatile short int newThrottle;
 extern volatile int lastAltitude;
 extern volatile int altitude;
 

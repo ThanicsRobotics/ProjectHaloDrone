@@ -15,8 +15,6 @@ extern volatile bool preStart;
 extern volatile int SPI_CS;
 extern volatile int spiFd;
 
-extern volatile short int newThrottle;
-
 extern std::string projectPath;
 
 //Mutex for STM32 communication threading
@@ -24,6 +22,6 @@ extern pthread_mutex_t stm32_mutex;
 
 void setupSPI();
 void authFlightController();
-void calculateThrottle();
+void sendThrottle();
 
 #endif

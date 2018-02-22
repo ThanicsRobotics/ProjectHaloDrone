@@ -19,8 +19,6 @@ char stm32_tx_buffer[100];
 volatile bool spiConfigured = false;
 volatile bool authenticated = false;
 
-volatile short int newThrottle = 0;
-
 //CS0 is barometer, CS1 is STM32 flight controller
 volatile int SPI_CS = 1;
 volatile int spiFd;
@@ -71,20 +69,12 @@ void authFlightController() {
 }
 
 //Send modified throttle value to STM32
-void calculateThrottle() {
-    //PID compensated throttle calculation
-    throttleInput = 1500;
-    newThrottle = 1500 + pid_output;
-
-    if (newThrottle > 1900) newThrottle = 1900;
-    else if (newThrottle < 1000) newThrottle = 1000;
-
-    //if (!preStart) {
-        pthread_mutex_lock(&stm32_mutex);
-        stm32_tx_buffer[1] = (newThrottle - 1000) & 0xFF;
-        stm32_tx_buffer[0] = ((newThrottle - 1000) >> 8) & 0xFF;
-        pthread_mutex_unlock(&stm32_mutex);
-   // }
+void sendThrottle() {
+    short int throttle = newThrottle;
+    //pthread_mutex_lock(&stm32_mutex);
+    stm32_tx_buffer[1] = (throttle - 1000) & 0xFF;
+    stm32_tx_buffer[0] = ((throttle - 1000) >> 8) & 0xFF;
+    //pthread_mutex_unlock(&stm32_mutex);
     
     //CLOCK SPEED TEST
     //unsigned long int clockspeed = buffer[1];
