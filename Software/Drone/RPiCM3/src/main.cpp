@@ -97,7 +97,7 @@ void calculateAbsoluteAltitude() {
     //cout << "Gyro Pitch: " << gyroPitch << " | Gyro Roll: " << gyroRoll;
     //int rawDistance = getUltrasonicData(1, 3, 30);
     //cout << " | Raw Distance: " << rawDistance;
-    int rawDistance = 25;
+    int rawDistance = 45;
     altitude = angleCorrection(rawDistance);
     //cout << " | Altitude: " << altitude << " | Input: " << throttleInput
     //    << " | Throttle: " << newThrottle << endl;
