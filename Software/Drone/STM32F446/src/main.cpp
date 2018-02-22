@@ -237,8 +237,8 @@ void calculate_angles() {
   angle_pitch_acc -= 0.0;                                                   //Accelerometer calibration value for pitch.
   angle_roll_acc -= 0.0;                                                    //Accelerometer calibration value for roll.
   
-  angle_pitch = angle_pitch * 0.9996 + angle_pitch_acc * 0.0004;            //Correct the drift of the gyro pitch angle with the accelerometer pitch angle.
-  angle_roll = angle_roll * 0.9996 + angle_roll_acc * 0.0004;               //Correct the drift of the gyro roll angle with the accelerometer roll angle.
+  //angle_pitch = angle_pitch * 0.9996 + angle_pitch_acc * 0.0004;            //Correct the drift of the gyro pitch angle with the accelerometer pitch angle.
+  //angle_roll = angle_roll * 0.9996 + angle_roll_acc * 0.0004;               //Correct the drift of the gyro roll angle with the accelerometer roll angle.
   
   pitch_level_adjust = angle_pitch * 12;                                    //Calculate the pitch angle correction
   roll_level_adjust = angle_roll * 12;                                      //Calculate the roll angle correction                         
@@ -549,7 +549,7 @@ int main() {
     //   }
     // }
     // loopCount += 1;
-    spi.reply(((signed char)angle_pitch_acc << 8) | ((signed char)angle_roll_acc & 0xFF));
+    spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
