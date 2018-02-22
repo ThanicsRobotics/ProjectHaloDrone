@@ -114,7 +114,7 @@ void mainLoop() {
     cout << "Starting main loop" << endl;
     if (testGyro) {
         while(run) {
-            cout << "Pitch: " << gyroPitch << "\t| Roll: " << gyroRoll << endl;
+            cout << "Pitch: " << (int)gyroPitch << "\t| Roll: " << (int)gyroRoll << endl;
             delay(20);
         }
     }
@@ -164,7 +164,7 @@ void *spiLoop(void *void_ptr) {
             authRequest = false;
         }
         else if (testGyro) {
-            spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
+            spiRead(spiFd, stm32_rx_buffer, 2);
             gyroPitch = (signed char)stm32_rx_buffer[0];
             gyroRoll = (signed char)stm32_rx_buffer[1];
         }
