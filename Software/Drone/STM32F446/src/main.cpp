@@ -451,9 +451,9 @@ int main() {
     // }
     
     start = 2;
-    receiver_input_roll = 1500;
-    receiver_input_pitch = 1500;
-    receiver_input_yaw = 1500;
+    // receiver_input_roll = 1500;
+    // receiver_input_pitch = 1500;
+    // receiver_input_yaw = 1500;
 
     //The PID set point in degrees per second is determined by the roll receiver input.
     //In the case of dividing by 3 the max roll rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
@@ -548,7 +548,7 @@ int main() {
     //   }
     // }
     // loopCount += 1;
-    spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
+    spi.reply(((signed char)angle_pitch_acc << 8) | ((signed char)angle_roll_acc & 0xFF));
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
