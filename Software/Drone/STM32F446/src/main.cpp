@@ -538,7 +538,7 @@ int main() {
     // }
     if ((onTime.read_us() - loop_timer < 4000)) {
       if (loopCount % 10 == 0) {
-        spi.reply(((signed char)angle_pitch << 8) | ((signed char)(cal_int-1900) & 0xFF));
+        spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
       }
       else if ((loopCount % 6 == 0) && spi.receive()) {
         short int data = spi.read();
