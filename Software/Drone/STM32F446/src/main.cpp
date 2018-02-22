@@ -295,7 +295,7 @@ void set_gyro_registers(){
   memset(cmd,0,sizeof(cmd));
 
   cmd[0] = 0x06;                                                                //We want to write to the PWR_MGMT_1 register (06 hex)
-  cmd[1] = 0x00;                                                                //Set the register bits as 00000000 to activate the gyro
+  cmd[1] = 0x01;                                                                //Set the register bits as 00000000 to activate the gyro
   i2c.write(gyro_address, cmd, 2);
   memset(cmd,0,sizeof(cmd));
 
@@ -549,7 +549,7 @@ int main() {
     //   }
     // }
     // loopCount += 1;
-    spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
+    spi.reply(((signed char)gyro_pitch_input << 8) | ((signed char)gyro_roll_input & 0xFF));
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
