@@ -368,7 +368,8 @@ int main() {
   //pc.printf("Done registers\r\n");
   
   //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
-  while (cal_int < 2000) {                            //Take 2000 readings for calibration.
+  cal_int = 1;
+  while (cal_int < 2001) {                            //Take 2000 readings for calibration.
     //We don't want the esc's to be beeping annoyingly. So let's give them a 1000us puls while calibrating the gyro.
     motors_on();                                                              //Set motor PWM signals high
     wait(.001);                                                               //Wait 1000us
