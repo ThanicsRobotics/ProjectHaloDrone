@@ -183,13 +183,13 @@ int main(int argc, char *argv[]) {
     int start = millis();
     int repeat = 1;
     while (gyroRoll != GYRO_CAL) {
-        repeat = 1;
         if (millis() - start > 20000) {
             cout << "Gyro not responding, resetting..." << endl;
             delay(1000);
             authRequest = true;
+            delay(2000);
             start = millis();
-            repeat++;
+            repeat += 1;
         }
         else if (repeat > 1) {
             shutdown();

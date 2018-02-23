@@ -366,47 +366,46 @@ int main() {
   set_gyro_registers();                                                       //Set the specific gyro registers
   
   //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
-  // cal_int = 0;
-  // while (cal_int < 2000) {                            //Take 2000 readings for calibration.
-  //   //We don't want the esc's to be beeping annoyingly. So let's give them a 1000us puls while calibrating the gyro.
-  //   motors_on();                                                              //Set motor PWM signals high
-  //   wait(.001);                                                               //Wait 1000us
-  //   motors_off();                                                             //Set motor PWM signals low
-    
-  //   int start = onTime.read_us();
-  //   while ((onTime.read_us() - start < 3000) && cal_int < 2000) {
-  //     gyro_signalen();                                                          //Read the gyro output.
-  //     gyro_axis_cal[1] += gyro_axis[1];                                         //Add roll value to gyro_roll_cal.
-  //     gyro_axis_cal[2] += gyro_axis[2];                                         //Add pitch value to gyro_pitch_cal.
-  //     gyro_axis_cal[3] += gyro_axis[3];                                         //Add yaw value to gyro_yaw_cal.
-  //     cal_int += 1;
-  //   }
-  //   //wait(.003);                                                               //Wait 3 milliseconds before the next loop
-  // }
-  // //Serial.println("Gyro calibrated");
-
-  // //Now that we have 2000 measures, we need to divide by 2000 to get the average gyro offset.
-  // gyro_axis_cal[1] /= 2000;                                                   //Divide the roll total by 2000.
-  // gyro_axis_cal[2] /= 2000;                                                   //Divide the pitch total by 2000.
-  // gyro_axis_cal[3] /= 2000;                                                   //Divide the yaw total by 2000.
-  
- //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
-  for (cal_int = 0; cal_int < 2000 ; cal_int ++){                           //Take 2000 readings for calibration.
-    gyro_signalen();                                                        //Read the gyro output.
-    gyro_axis_cal[1] += gyro_axis[1];                                       //Add roll value to gyro_roll_cal.
-    gyro_axis_cal[2] += gyro_axis[2];                                       //Add pitch value to gyro_pitch_cal.
-    gyro_axis_cal[3] += gyro_axis[3];                                       //Add yaw value to gyro_yaw_cal.
+  cal_int = 0;
+  while (cal_int < 2000) {                            //Take 2000 readings for calibration.
     //We don't want the esc's to be beeping annoyingly. So let's give them a 1000us puls while calibrating the gyro.
-    motors_on();
-    wait(.001);
-    motors_off();
-    wait(.003);
+    motors_on();                                                              //Set motor PWM signals high
+    wait(.001);                                                               //Wait 1000us
+    motors_off();                                                             //Set motor PWM signals low
+    
+    int start = onTime.read_us();
+    while ((onTime.read_us() - start < 3000) && cal_int < 2000) {
+      gyro_signalen();                                                          //Read the gyro output.
+      gyro_axis_cal[1] += gyro_axis[1];                                         //Add roll value to gyro_roll_cal.
+      gyro_axis_cal[2] += gyro_axis[2];                                         //Add pitch value to gyro_pitch_cal.
+      gyro_axis_cal[3] += gyro_axis[3];                                         //Add yaw value to gyro_yaw_cal.
+      cal_int += 1;
+    }
+    //wait(.003);                                                               //Wait 3 milliseconds before the next loop
   }
 
-  //Now that we have 2000 measures, we need to devide by 2000 to get the average gyro offset.
-  gyro_axis_cal[1] /= 2000;                                                 //Divide the roll total by 2000.
-  gyro_axis_cal[2] /= 2000;                                                 //Divide the pitch total by 2000.
-  gyro_axis_cal[3] /= 2000;                                                 //Divide the yaw total by 2000.
+  //Now that we have 2000 measures, we need to divide by 2000 to get the average gyro offset.
+  gyro_axis_cal[1] /= 2000;                                                   //Divide the roll total by 2000.
+  gyro_axis_cal[2] /= 2000;                                                   //Divide the pitch total by 2000.
+  gyro_axis_cal[3] /= 2000;                                                   //Divide the yaw total by 2000.
+  
+ //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
+  // for (cal_int = 0; cal_int < 2000 ; cal_int ++){                           //Take 2000 readings for calibration.
+  //   gyro_signalen();                                                        //Read the gyro output.
+  //   gyro_axis_cal[1] += gyro_axis[1];                                       //Add roll value to gyro_roll_cal.
+  //   gyro_axis_cal[2] += gyro_axis[2];                                       //Add pitch value to gyro_pitch_cal.
+  //   gyro_axis_cal[3] += gyro_axis[3];                                       //Add yaw value to gyro_yaw_cal.
+  //   //We don't want the esc's to be beeping annoyingly. So let's give them a 1000us puls while calibrating the gyro.
+  //   motors_on();
+  //   wait(.001);
+  //   motors_off();
+  //   wait(.003);
+  // }
+
+  // //Now that we have 2000 measures, we need to devide by 2000 to get the average gyro offset.
+  // gyro_axis_cal[1] /= 2000;                                                 //Divide the roll total by 2000.
+  // gyro_axis_cal[2] /= 2000;                                                 //Divide the pitch total by 2000.
+  // gyro_axis_cal[3] /= 2000;                                                 //Divide the yaw total by 2000.
 
   spi.reply(GYRO_CAL);
 
