@@ -35,8 +35,7 @@ using namespace std;
 //Thread mutex and gyro thread function
 pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t spiThread, serialThread;
-void *spiLoop(void *void_ptr);
-void *serialLoop(void *void_ptr);
+
 volatile bool run = true;
 
 string projectPath = "/home/pi/ProjectHalo/Software/Drone/RPiCM3/src/";
@@ -69,13 +68,13 @@ void shutdown() {
     run = false;
     delay(1000);
 
-    //Join Threads to main    
+    //Join Threads to main  
     pthread_join(serialThread, NULL);
     pthread_join(spiThread, NULL);
 
-    cout << "Closing I2C. FD: " << i2cFd << " ID: " << pthread_self() << endl;
-    cout << "Closing Serial. FD:  " << serialFd << " ID: " << pthread_self() << endl;
-    cout << "Closing SPI. FD:  " << spiFd << " ID: " << pthread_self() << endl;
+    cout << "Closing I2C. \tFD: " << i2cFd << " \tID: " << pthread_self() << endl;
+    cout << "Closing Serial. \tFD: " << serialFd << " \tID: " << pthread_self() << endl;
+    cout << "Closing SPI. \tFD: " << spiFd << " \tID: " << pthread_self() << endl;
 
     //Close ports
     spiClose(spiFd);
@@ -83,7 +82,7 @@ void shutdown() {
     i2cClose(i2cFd);
     gpioTerminate();
 
-    cout << endl << "Halting Flight Controller..." << endl << endl;
+    cout << endl << "Resetting Flight Controller..." << endl << endl;
     delay(500);
     
     //Reset command to STM32
@@ -99,8 +98,6 @@ void calculateAbsoluteAltitude() {
     //cout << " | Raw Distance: " << rawDistance;
     int rawDistance = 45;
     altitude = angleCorrection(rawDistance);
-    //cout << " | Altitude: " << altitude << " | Input: " << throttleInput
-    //    << " | Throttle: " << newThrottle << endl;
     cout << "Pitch: " << (int)gyroPitch << " | Roll: " << (int)gyroRoll
         << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude << endl
         << "RX Input: " << throttleInput << " | Throttle: " << newThrottle 
@@ -131,73 +128,6 @@ void mainLoop() {
     }
 }
 
-void disarm() {
-    //send disarm command
-}
-
-void arm() {
-    int data = 0;
-    while ((data != STM32_ARM_CONF) && run) {
-        stm32_tx_buffer[0] = 0x00;
-        stm32_tx_buffer[1] = STM32_ARM_TEST;
-        spiWrite(spiFd, stm32_tx_buffer, 2);
-        delay(5);
-
-        spiXfer(spiFd, stm32_tx_buffer, stm32_tx_buffer, 2);
-        data = stm32_tx_buffer[0] << 8 | stm32_tx_buffer[1];
-        cout << "ARM Response: " << data << endl;
-        spiWrite(spiFd, stm32_tx_buffer, 2);
-        
-        delay(50);
-    }
-    armed = true;
-}
-
-void *spiLoop(void *void_ptr) {
-    //Switch to flight controller, setup SPI @ 1.5MHz
-    SPI_CS = 1;
-    setupSPI();
-    authFlightController();
-    while(run) {
-        if (armRequest) {
-            cout << "Arming..." << endl;
-            arm();
-            armRequest = false;
-        }
-        else if (authRequest) {
-            cout << "Authenticating..." << endl;
-            authFlightController();
-            authRequest = false;
-        }
-        else if (testGyro) {
-            spiRead(spiFd, stm32_rx_buffer, 2);
-            gyroPitch = (signed char)stm32_rx_buffer[0];
-            gyroRoll = (signed char)stm32_rx_buffer[1];
-        }
-        else {
-            //Calculate new PID compensated throttle
-            sendThrottle();
-            
-            //Use SPI to get gyro angles, send throttle
-            spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
-            gyroPitch = (signed char)stm32_rx_buffer[0];
-            gyroRoll = (signed char)stm32_rx_buffer[1];
-            //gyroRoll = (int)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
-        }
-    }
-    disarm();
-    return NULL;
-}
-
-void *serialLoop(void *void_ptr) {
-    setupSerial();
-    while(run) {
-        readLine();
-        delay(1);
-    }
-    return NULL;
-}
-
 void showUsage(string name) {
     cerr << "Usage: " << name << " <option(s)>\n"
         << "**NOTE: Must be run with root privileges\n\n"
@@ -223,6 +153,8 @@ int main(int argc, char *argv[]) {
 
     bool autoArm = false;
     bool controllerConnected = false;
+
+    //Filtering command line options
     if (argc > 1) {
         for (int i = 1; i < argc; i++) {
             if (string(argv[i]) == "-c" || string(argv[i]) == "--controller-enabled") 
@@ -246,9 +178,13 @@ int main(int argc, char *argv[]) {
 
     setupIOExpander();
 
+    //Creating threads
+    //  -> spiThread
+    //  -> serialThread
     pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&spiThread, NULL, spiLoop, NULL);
 
+    //Wait for gyro calibration, reset calibration if necessary
     while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
     delay(200);
     cout << "Waiting for gyro calibration..." << endl;
@@ -272,6 +208,8 @@ int main(int argc, char *argv[]) {
     }
     cout << "Calibration complete" << endl;
 
+    //Arming process depends on program parameters
+    //If Controller is connected, arm through controller thumbsticks
     if (controllerConnected) {
         cout << "Arm quadcopter using thumb sticks. Throttle down, yaw left." << endl;
         start = millis();
@@ -283,11 +221,15 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+
+    //If Auto-ARM is enabled, drone will arm itself immediately
     else if (autoArm) {
         cout << "Auto arming... CTRL-C to stop." << endl;
         delay(500);
         armRequest = true;
     }
+
+    //Manual arming process through SSH
     else {
         cout << "Type 'ARM' to arm the quadcopter: ";
         string input = "";
@@ -301,6 +243,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    //Start main loop
     mainLoop();
     delay(2000);
     return 0;

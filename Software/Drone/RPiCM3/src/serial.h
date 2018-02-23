@@ -15,5 +15,6 @@ extern volatile int throttleInput;
 void setupSerial();
 void readChar();
 void readLine();
+void *serialLoop(void *void_ptr);
 
 #endif

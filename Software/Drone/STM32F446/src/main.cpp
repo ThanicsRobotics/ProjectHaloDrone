@@ -392,7 +392,6 @@ int main() {
   
  //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
   for (cal_int = 0; cal_int < 2000 ; cal_int ++){                           //Take 2000 readings for calibration.
-    //if(cal_int % 15 == 0)digitalWrite(12, !digitalRead(12));                //Change the led status to indicate calibration.
     gyro_signalen();                                                        //Read the gyro output.
     gyro_axis_cal[1] += gyro_axis[1];                                       //Add roll value to gyro_roll_cal.
     gyro_axis_cal[2] += gyro_axis[2];                                       //Add pitch value to gyro_pitch_cal.
@@ -403,6 +402,7 @@ int main() {
     motors_off();
     wait(.003);
   }
+
   //Now that we have 2000 measures, we need to devide by 2000 to get the average gyro offset.
   gyro_axis_cal[1] /= 2000;                                                 //Divide the roll total by 2000.
   gyro_axis_cal[2] /= 2000;                                                 //Divide the pitch total by 2000.
@@ -537,7 +537,7 @@ int main() {
     
     // We wait until 4000us are passed.
     if ((onTime.read_us() - loop_timer < 4000)) {
-      if (loopCount % 10 == 0) {
+      if (loopCount % 4 == 0) {
         spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
       }
       else if ((loopCount % 6 == 0) && spi.receive()) {

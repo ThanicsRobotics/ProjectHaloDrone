@@ -20,7 +20,10 @@ extern std::string projectPath;
 extern pthread_mutex_t stm32_mutex;
 
 void setupSPI();
+void arm();
+void disarm();
 void authFlightController();
 void sendThrottle();
+void *spiLoop(void *void_ptr);
 
 #endif

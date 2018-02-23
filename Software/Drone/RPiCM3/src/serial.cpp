@@ -74,3 +74,12 @@ void readLine() {
     }
     else return;
 }
+
+void *serialLoop(void *void_ptr) {
+    setupSerial();
+    while(run) {
+        readLine();
+        delay(1);
+    }
+    return NULL;
+}
