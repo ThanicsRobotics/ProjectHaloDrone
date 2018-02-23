@@ -36,8 +36,6 @@ using namespace std;
 pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t spiThread, serialThread;
 
-volatile bool run = true;
-
 string projectPath = "/home/pi/ProjectHalo/Software/Drone/RPiCM3/src/";
 
 //Terminal signal handler (for ending program via terminal)
@@ -51,11 +49,6 @@ char baroCoefficients[17];
 // int temperature;
 volatile int altitude = 0;
 volatile int lastAltitude = 0;
-
-volatile bool armRequest = false;
-volatile bool authRequest = false;
-volatile bool armed = false;
-volatile bool testGyro = false;
 
 float loopRate = 0.0;
 int loopStartTime = 0;

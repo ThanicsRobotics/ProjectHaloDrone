@@ -19,6 +19,13 @@ char stm32_tx_buffer[100];
 volatile bool spiConfigured = false;
 volatile bool authenticated = false;
 
+volatile bool armRequest = false;
+volatile bool authRequest = false;
+volatile bool armed = false;
+volatile bool testGyro = false;
+
+volatile bool run = true;
+
 //CS0 is barometer, CS1 is STM32 flight controller
 volatile int SPI_CS = 1;
 volatile int spiFd;

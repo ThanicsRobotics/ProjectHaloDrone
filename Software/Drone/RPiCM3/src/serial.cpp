@@ -1,6 +1,8 @@
 #include "serial.h"
+#include "spi.h"
 
 #include <pigpio.h>
+#include <wiringPi.h>
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
