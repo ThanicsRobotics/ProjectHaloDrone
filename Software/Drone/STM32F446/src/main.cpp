@@ -352,20 +352,18 @@ int main() {
   radio.attach(&rxInterrupt);
   
   //Setup the spi for 16 bit data, mode 0 and 1.5MHz clock rate
- // spi.format(16,0);
-  //spi.frequency(3000000);
+  spi.format(16,0);
+  spi.frequency(3000000);
   
-  //authRasPiCM3();
+  authRasPiCM3();
 
   //Load SPI buffer with dummy byte
-  //spi.reply(0x03);
+  spi.reply(0x03);
 
   start = 0;                                                                  //Set start back to zero
   gyro_address = 0x69<<1;                                                     //Store the gyro address
 
   set_gyro_registers();                                                       //Set the specific gyro registers
-
-  //pc.printf("Done registers\r\n");
   
   //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
   // cal_int = 0;
@@ -410,175 +408,174 @@ int main() {
   gyro_axis_cal[2] /= 2000;                                                 //Divide the pitch total by 2000.
   gyro_axis_cal[3] /= 2000;                                                 //Divide the yaw total by 2000.
 
-  //spi.reply(GYRO_CAL);
+  spi.reply(GYRO_CAL);
 
   //Wait until the receiver is active and the throttle is set to the lower position.
-  // bool armed = false;
-  // while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) && !armed) {
-  //   //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
-  //   motors_on();                                                              //Set motor PWM signals high
-  //   wait(.001);                                                               //Wait 1000us
-  //   motors_off();                                                             //Set motor PWM signals low
-  //   int start = onTime.read_us();
-  //   while (onTime.read_us() - start < 3000) {
-  //     if (spi.receive()) {
-  //       int data = spi.read();
-  //       if (data == STM32_ARM_TEST) spi.reply(STM32_ARM_CONF);
-  //       if (data == STM32_ARM_CONF) armed = true;
-  //     }
-  //   }
-  // }
+  bool armed = false;
+  while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) && !armed) {
+    //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
+    motors_on();                                                              //Set motor PWM signals high
+    wait(.001);                                                               //Wait 1000us
+    motors_off();                                                             //Set motor PWM signals low
+    int start = onTime.read_us();
+    while (onTime.read_us() - start < 3000) {
+      if (spi.receive()) {
+        int data = spi.read();
+        if (data == STM32_ARM_TEST) spi.reply(STM32_ARM_CONF);
+        if (data == STM32_ARM_CONF) armed = true;
+      }
+    }
+  }
   start = 0;                                                                  //Set start back to 0.
 
-  //spi.reply(0x05);
+  spi.reply(0x05);
 
   //calculate_angles();
-  //armed = false;
   loop_timer = onTime.read_us();                                              //First timer reading (starting main loop)
   
   //Infinite PID Loop
   while(1) {
     calculate_angles();
     //For starting the motors: throttle low and yaw left (step 1)
-    // if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || armed) {
-    //   start = 1;
-    //   //pc.printf("Armed\r\n");
-    // }
+    if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || armed) {
+      start = 1;
+      //pc.printf("Armed\r\n");
+    }
     
-    // //When yaw stick is back in the center position start the motors (step 2)
-    // if ((start == 1 && receiver_input_throttle < 1050 && receiver_input_yaw > 1450) || armed) {
-    //   start = 2;
-    //   angle_pitch = angle_pitch_acc;                                         //Set the gyro pitch angle equal to the accelerometer pitch angle when the quadcopter is started.
-    //   angle_roll = angle_roll_acc;                                           //Set the gyro roll angle equal to the accelerometer roll angle when the quadcopter is started.
-    //   gyro_angles_set = true;                                                //Set the IMU started flag.
+    //When yaw stick is back in the center position start the motors (step 2)
+    if ((start == 1 && receiver_input_throttle < 1050 && receiver_input_yaw > 1450) || armed) {
+      start = 2;
+      angle_pitch = angle_pitch_acc;                                         //Set the gyro pitch angle equal to the accelerometer pitch angle when the quadcopter is started.
+      angle_roll = angle_roll_acc;                                           //Set the gyro roll angle equal to the accelerometer roll angle when the quadcopter is started.
+      gyro_angles_set = true;                                                //Set the IMU started flag.
       
-    //   //Reset the PID controllers for a bumpless start.
-    //   pid_i_mem_roll = 0;
-    //   pid_last_roll_d_error = 0;
-    //   pid_i_mem_pitch = 0;
-    //   pid_last_pitch_d_error = 0;
-    //   pid_i_mem_yaw = 0;
-    //   pid_last_yaw_d_error = 0;
+      //Reset the PID controllers for a bumpless start.
+      pid_i_mem_roll = 0;
+      pid_last_roll_d_error = 0;
+      pid_i_mem_pitch = 0;
+      pid_last_pitch_d_error = 0;
+      pid_i_mem_yaw = 0;
+      pid_last_yaw_d_error = 0;
 
-    //   armed = false;
-    // }
+      armed = false;
+    }
 
-    // // //Stopping the motors: throttle low and yaw right.
-    // // if (start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) {
-    // //   start = 0;
-    // // }
-    
-    // //start = 2;
-    // // receiver_input_roll = 1500;
-    // // receiver_input_pitch = 1500;
-    // // receiver_input_yaw = 1500;
-
-    // //The PID set point in degrees per second is determined by the roll receiver input.
-    // //In the case of dividing by 3 the max roll rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
-    // pid_roll_setpoint = 0;
-    
-    // //We need a little dead band of 16us for better results.
-    // if (receiver_input_roll > 1508) {
-    //   pid_roll_setpoint = receiver_input_roll - 1508;
-    // }
-    // else if (receiver_input_roll < 1492) {
-    //   pid_roll_setpoint = receiver_input_roll - 1492;
-    // }
-
-    // pid_roll_setpoint -= roll_level_adjust;                                   //Subtract the angle correction from the standardized receiver roll input value.
-    // pid_roll_setpoint /= 3.0;                                                 //Divide the setpoint for the PID roll controller by 3 to get angles in degrees.
-  
-  
-    // //The PID set point in degrees per second is determined by the pitch receiver input.
-    // //In the case of dividing by 3 the max pitch rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
-    // pid_pitch_setpoint = 0;
-    // //We need a little dead band of 16us for better results.
-    // if (receiver_input_pitch > 1508) pid_pitch_setpoint = receiver_input_pitch - 1508;
-    // else if (receiver_input_pitch < 1492) pid_pitch_setpoint = receiver_input_pitch - 1492;
-  
-    // pid_pitch_setpoint -= pitch_level_adjust;                                  //Subtract the angle correction from the standardized receiver pitch input value.
-    // pid_pitch_setpoint /= 3.0;                                                 //Divide the setpoint for the PID pitch controller by 3 to get angles in degrees.
-  
-    // //The PID set point in degrees per second is determined by the yaw receiver input.
-    // //In the case of deviding by 3 the max yaw rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
-    // pid_yaw_setpoint = 0;
-    // //We need a little dead band of 16us for better results.
-    // if (receiver_input_throttle > 1050) { //Do not yaw when turning off the motors.
-    //   if (receiver_input_yaw > 1508) pid_yaw_setpoint = (receiver_input_yaw - 1508)/3.0;
-    //   else if (receiver_input_yaw < 1492) pid_yaw_setpoint = (receiver_input_yaw - 1492)/3.0;
+    // //Stopping the motors: throttle low and yaw right.
+    // if (start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) {
+    //   start = 0;
     // }
     
-    // calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
+    //start = 2;
+    // receiver_input_roll = 1500;
+    // receiver_input_pitch = 1500;
+    // receiver_input_yaw = 1500;
 
-    // //throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
-    // throttle = 1500;
+    //The PID set point in degrees per second is determined by the roll receiver input.
+    //In the case of dividing by 3 the max roll rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
+    pid_roll_setpoint = 0;
+    
+    //We need a little dead band of 16us for better results.
+    if (receiver_input_roll > 1508) {
+      pid_roll_setpoint = receiver_input_roll - 1508;
+    }
+    else if (receiver_input_roll < 1492) {
+      pid_roll_setpoint = receiver_input_roll - 1492;
+    }
 
-    // if (start == 2) {                                                          //The motors are started.
-    //   //pc.printf("hi %d\r\n", throttle);
-    //   if (throttle > 1800) throttle = 1800;                                   //We need some room to keep full control at full throttle.
-    //   esc_1 = throttle - pid_output_pitch + pid_output_roll - pid_output_yaw; //Calculate the pulse for esc 1 (front-right - CCW)
-    //   esc_2 = throttle + pid_output_pitch + pid_output_roll + pid_output_yaw; //Calculate the pulse for esc 2 (rear-right - CW)
-    //   esc_3 = throttle + pid_output_pitch - pid_output_roll - pid_output_yaw; //Calculate the pulse for esc 3 (rear-left - CCW)
-    //   esc_4 = throttle - pid_output_pitch - pid_output_roll + pid_output_yaw; //Calculate the pulse for esc 4 (front-left - CW)
+    pid_roll_setpoint -= roll_level_adjust;                                   //Subtract the angle correction from the standardized receiver roll input value.
+    pid_roll_setpoint /= 3.0;                                                 //Divide the setpoint for the PID roll controller by 3 to get angles in degrees.
   
-    //   if (esc_1 < 1100) esc_1 = 1100;                                         //Keep the motors running.
-    //   if (esc_2 < 1100) esc_2 = 1100;                                         //Keep the motors running.
-    //   if (esc_3 < 1100) esc_3 = 1100;                                         //Keep the motors running.
-    //   if (esc_4 < 1100) esc_4 = 1100;                                         //Keep the motors running.
+  
+    //The PID set point in degrees per second is determined by the pitch receiver input.
+    //In the case of dividing by 3 the max pitch rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
+    pid_pitch_setpoint = 0;
+    //We need a little dead band of 16us for better results.
+    if (receiver_input_pitch > 1508) pid_pitch_setpoint = receiver_input_pitch - 1508;
+    else if (receiver_input_pitch < 1492) pid_pitch_setpoint = receiver_input_pitch - 1492;
+  
+    pid_pitch_setpoint -= pitch_level_adjust;                                  //Subtract the angle correction from the standardized receiver pitch input value.
+    pid_pitch_setpoint /= 3.0;                                                 //Divide the setpoint for the PID pitch controller by 3 to get angles in degrees.
+  
+    //The PID set point in degrees per second is determined by the yaw receiver input.
+    //In the case of deviding by 3 the max yaw rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
+    pid_yaw_setpoint = 0;
+    //We need a little dead band of 16us for better results.
+    if (receiver_input_throttle > 1050) { //Do not yaw when turning off the motors.
+      if (receiver_input_yaw > 1508) pid_yaw_setpoint = (receiver_input_yaw - 1508)/3.0;
+      else if (receiver_input_yaw < 1492) pid_yaw_setpoint = (receiver_input_yaw - 1492)/3.0;
+    }
+    
+    calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
+
+    //throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
+    throttle = 1500;
+
+    if (start == 2) {                                                          //The motors are started.
+      //pc.printf("hi %d\r\n", throttle);
+      if (throttle > 1800) throttle = 1800;                                   //We need some room to keep full control at full throttle.
+      esc_1 = throttle - pid_output_pitch + pid_output_roll - pid_output_yaw; //Calculate the pulse for esc 1 (front-right - CCW)
+      esc_2 = throttle + pid_output_pitch + pid_output_roll + pid_output_yaw; //Calculate the pulse for esc 2 (rear-right - CW)
+      esc_3 = throttle + pid_output_pitch - pid_output_roll - pid_output_yaw; //Calculate the pulse for esc 3 (rear-left - CCW)
+      esc_4 = throttle - pid_output_pitch - pid_output_roll + pid_output_yaw; //Calculate the pulse for esc 4 (front-left - CW)
+  
+      if (esc_1 < 1100) esc_1 = 1100;                                         //Keep the motors running.
+      if (esc_2 < 1100) esc_2 = 1100;                                         //Keep the motors running.
+      if (esc_3 < 1100) esc_3 = 1100;                                         //Keep the motors running.
+      if (esc_4 < 1100) esc_4 = 1100;                                         //Keep the motors running.
       
-    //   if (esc_1 > 2000) esc_1 = 2000;                                           //Limit the esc-1 pulse to 2000us.
-    //   if (esc_2 > 2000) esc_2 = 2000;                                           //Limit the esc-2 pulse to 2000us.
-    //   if (esc_3 > 2000) esc_3 = 2000;                                           //Limit the esc-3 pulse to 2000us.
-    //   if (esc_4 > 2000) esc_4 = 2000;                                           //Limit the esc-4 pulse to 2000us.  
-    // }
-    // else {
-    //   esc_1 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-1.
-    //   esc_2 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-2.
-    //   esc_3 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-3.
-    //   esc_4 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-4.
-    // }
+      if (esc_1 > 2000) esc_1 = 2000;                                           //Limit the esc-1 pulse to 2000us.
+      if (esc_2 > 2000) esc_2 = 2000;                                           //Limit the esc-2 pulse to 2000us.
+      if (esc_3 > 2000) esc_3 = 2000;                                           //Limit the esc-3 pulse to 2000us.
+      if (esc_4 > 2000) esc_4 = 2000;                                           //Limit the esc-4 pulse to 2000us.  
+    }
+    else {
+      esc_1 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-1.
+      esc_2 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-2.
+      esc_3 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-3.
+      esc_4 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-4.
+    }
     
-    // // We wait until 4000us are passed.
-    // if ((onTime.read_us() - loop_timer < 4000)) {
-    //   if (loopCount % 10 == 0) {
-    //     spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
-    //   }
-    //   else if ((loopCount % 6 == 0) && spi.receive()) {
-    //     short int data = spi.read();
-    //     if (data >= 0 && data <= 900) {
-    //       mod_receiver_input_throttle = data + 1000;
-    //     }
-    //   }
-    // }
-    // loopCount += 1;
-    // //spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
+    // We wait until 4000us are passed.
+    if ((onTime.read_us() - loop_timer < 4000)) {
+      if (loopCount % 10 == 0) {
+        spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
+      }
+      else if ((loopCount % 6 == 0) && spi.receive()) {
+        short int data = spi.read();
+        if (data >= 0 && data <= 900) {
+          mod_receiver_input_throttle = data + 1000;
+        }
+      }
+    }
+    loopCount += 1;
+    //spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
-    // //RISING EDGE of PWM motor pulses (start of loop)
-    // motors_on();
+    //RISING EDGE of PWM motor pulses (start of loop)
+    motors_on();
     
-    // timer_channel_1 = esc_1 + loop_timer;                                     //Calculate the time of the falling edge of the esc-1 pulse.
-    // timer_channel_2 = esc_2 + loop_timer;                                     //Calculate the time of the falling edge of the esc-2 pulse.
-    // timer_channel_3 = esc_3 + loop_timer;                                     //Calculate the time of the falling edge of the esc-3 pulse.
-    // timer_channel_4 = esc_4 + loop_timer;                                     //Calculate the time of the falling edge of the esc-4 pulse.
+    timer_channel_1 = esc_1 + loop_timer;                                     //Calculate the time of the falling edge of the esc-1 pulse.
+    timer_channel_2 = esc_2 + loop_timer;                                     //Calculate the time of the falling edge of the esc-2 pulse.
+    timer_channel_3 = esc_3 + loop_timer;                                     //Calculate the time of the falling edge of the esc-3 pulse.
+    timer_channel_4 = esc_4 + loop_timer;                                     //Calculate the time of the falling edge of the esc-4 pulse.
     
-    // //There is always 1000us of spare time. So let's do something useful that is very time consuming.
-    // //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
+    //There is always 1000us of spare time. So let's do something useful that is very time consuming.
+    //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
     
     gyro_signalen();
-    // //calculate_angles();
+    //calculate_angles();
 
-    // //CLOCK SPEED TEST
-    // //spi.reply(SystemCoreClock/1000000);
+    //CLOCK SPEED TEST
+    //spi.reply(SystemCoreClock/1000000);
     
-    // //FALLING EDGES of PWM motor pulses
-    // while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {        //Stay in this loop until all motor PWM signals are low
-    //   esc_loop_timer = onTime.read_us();                                      //Read the current time.
-    //   if(timer_channel_1 <= esc_loop_timer) motor1 = 0;                        //Set digital output 7 to low if the time is expired.
-    //   if(timer_channel_2 <= esc_loop_timer) motor2 = 0;                        //Set digital output 6 to low if the time is expired.
-    //   if(timer_channel_3 <= esc_loop_timer) motor3 = 0;                        //Set digital output 5 to low if the time is expired.
-    //   if(timer_channel_4 <= esc_loop_timer) motor4 = 0;                        //Set digital output 4 to low if the time is expired.
-    // }
+    //FALLING EDGES of PWM motor pulses
+    while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {        //Stay in this loop until all motor PWM signals are low
+      esc_loop_timer = onTime.read_us();                                      //Read the current time.
+      if(timer_channel_1 <= esc_loop_timer) motor1 = 0;                        //Set digital output 7 to low if the time is expired.
+      if(timer_channel_2 <= esc_loop_timer) motor2 = 0;                        //Set digital output 6 to low if the time is expired.
+      if(timer_channel_3 <= esc_loop_timer) motor3 = 0;                        //Set digital output 5 to low if the time is expired.
+      if(timer_channel_4 <= esc_loop_timer) motor4 = 0;                        //Set digital output 4 to low if the time is expired.
+    }
   }
 }
