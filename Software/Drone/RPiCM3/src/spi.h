@@ -5,6 +5,10 @@
 #include <string.h>
 #include <iostream>
 
+#define AUTH_KEY 0xF9
+#define STM32_ARM_TEST 0x9F
+#define STM32_ARM_CONF 0x0A
+
 extern char stm32_rx_buffer[100];
 extern char stm32_tx_buffer[100];
 extern volatile bool spiConfigured;
