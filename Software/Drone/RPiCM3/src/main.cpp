@@ -118,6 +118,12 @@ void mainLoop() {
             delay(20);
         }
     }
+    if ((int)gyroPitch == 0 && (int)gyroRoll == 10) {
+        cout << "Re-arming..." << endl;
+        armed = false;
+        armRequest = true;
+        while(!armed);
+    }
     while(run) {
         calculateAbsoluteAltitude();
         calculatePID();
