@@ -10,12 +10,12 @@ extern char stm32_tx_buffer[100];
 extern volatile bool spiConfigured;
 extern volatile bool authenticated;
 
-extern volatile bool armRequest = false;
-extern volatile bool authRequest = false;
-extern volatile bool armed = false;
-extern volatile bool testGyro = false;
+extern volatile bool armRequest;
+extern volatile bool authRequest;
+extern volatile bool armed;
+extern volatile bool testGyro;
 
-extern volatile bool run = true;
+extern volatile bool run;
 
 //CS0 is barometer, CS1 is STM32 flight controller
 extern volatile int SPI_CS;

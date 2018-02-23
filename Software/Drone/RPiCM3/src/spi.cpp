@@ -1,6 +1,7 @@
 #include "spi.h"
 #include "serial.h"
 #include "pid.h"
+#include "ultrasonic.h"
 
 #include <pigpio.h>
 #include <iostream>
@@ -13,6 +14,8 @@
 #include <unistd.h>
 
 #define AUTH_KEY 0xF9
+#define STM32_ARM_TEST 0x9F
+#define STM32_ARM_CONF 0x0A
 
 char stm32_rx_buffer[100];
 char stm32_tx_buffer[100];

@@ -27,8 +27,6 @@
 #include "pid.h"
 
 #define GYRO_CAL 0x04
-#define STM32_ARM_TEST 0x9F
-#define STM32_ARM_CONF 0x0A
 
 using namespace std;
 
