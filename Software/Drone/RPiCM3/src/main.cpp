@@ -63,9 +63,9 @@ void shutdown() {
     pthread_join(serialThread, NULL);
     pthread_join(spiThread, NULL);
 
-    cout << "Closing I2C. \tFD: " << i2cFd << " \tID: " << pthread_self() << endl;
-    cout << "Closing Serial. \tFD: " << serialFd << " \tID: " << pthread_self() << endl;
-    cout << "Closing SPI. \tFD: " << spiFd << " \tID: " << pthread_self() << endl;
+    cout << "Closing I2C.\t\tFD: " << i2cFd << " \tID: " << pthread_self() << endl;
+    cout << "Closing Serial.\tFD: " << serialFd << " \tID: " << pthread_self() << endl;
+    cout << "Closing SPI.\t\tFD: " << spiFd << " \tID: " << pthread_self() << endl;
 
     //Close ports
     spiClose(spiFd);
@@ -84,10 +84,8 @@ void shutdown() {
 void calculateAbsoluteAltitude() {
     loopRate = 1.0 / ((millis() - loopStartTime) / 1000.0);
     loopStartTime = millis();
-    //cout << "Gyro Pitch: " << gyroPitch << " | Gyro Roll: " << gyroRoll;
-    //int rawDistance = getUltrasonicData(1, 3, 30);
-    //cout << " | Raw Distance: " << rawDistance;
-    int rawDistance = 45;
+    int rawDistance = getUltrasonicData(1, 3, 30);
+    //int rawDistance = 45;
     altitude = angleCorrection(rawDistance);
     cout << "Pitch: " << (int)gyroPitch << " | Roll: " << (int)gyroRoll
         << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude << endl
