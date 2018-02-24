@@ -84,7 +84,7 @@ void shutdown() {
 void calculateAbsoluteAltitude() {
     loopRate = 1.0 / ((millis() - loopStartTime) / 1000.0);
     loopStartTime = millis();
-    int rawDistance = getUltrasonicData(1, 3, 60);
+    int rawDistance = getUltrasonicData(1, 3, 15);
     //int rawDistance = 45;
     altitude = angleCorrection(rawDistance);
     cout << "Pitch: " << (int)gyroPitch << " | Roll: " << (int)gyroRoll
@@ -113,7 +113,7 @@ void mainLoop() {
     while(run) {
         calculateAbsoluteAltitude();
         calculatePID();
-        while(millis() - loopStartTime < 120);
+        while(millis() - loopStartTime < 100);
     }
 }
 
