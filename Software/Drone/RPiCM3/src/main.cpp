@@ -211,6 +211,7 @@ int main(int argc, char *argv[]) {
             cout << "RX: " << throttleInput << endl;
             delay(200);
         }
+        armed = true;
     }
 
     //If Auto-ARM is enabled, drone will arm itself immediately
