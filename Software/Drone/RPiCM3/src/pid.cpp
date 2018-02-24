@@ -36,7 +36,6 @@ void calculatePID() {
     pid_last_d_error = pid_error_temp;
 
     //PID compensated throttle calculation
-    throttleInput = 1500;
     newThrottle = 1500 + pid_output;
 
     if (newThrottle > 1900) newThrottle = 1900;
