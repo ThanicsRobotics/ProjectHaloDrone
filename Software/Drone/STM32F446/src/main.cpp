@@ -459,10 +459,10 @@ int main() {
       armed = false;
     }
 
-    // //Stopping the motors: throttle low and yaw right.
-    // if (start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) {
-    //   start = 0;
-    // }
+    //Stopping the motors: throttle low and yaw right.
+    if (start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) {
+      start = 0;
+    }
     
     //start = 2;
     // receiver_input_roll = 1500;
@@ -506,8 +506,8 @@ int main() {
     
     calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
 
-    //throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
-    throttle = 1500;
+    throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
+    //throttle = 1500;
 
     if (start == 2) {                                                          //The motors are started.
       //pc.printf("hi %d\r\n", throttle);
