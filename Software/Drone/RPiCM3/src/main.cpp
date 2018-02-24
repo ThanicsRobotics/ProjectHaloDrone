@@ -208,6 +208,8 @@ int main(int argc, char *argv[]) {
                 shutdown();
                 exit(0);
             }
+            cout << "RX: " << throttleInput << endl;
+            delay(200);
         }
     }
 
