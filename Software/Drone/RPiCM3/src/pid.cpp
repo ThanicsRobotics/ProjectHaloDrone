@@ -22,8 +22,9 @@ float map(int x, int in_min, int in_max, int out_min, int out_max) {
 void calculatePID() {
     //Increase or decrease set altitude proportional to stick position
     if (throttleInput < 1000) throttleInput = 1500;
-    if (throttleInput >= 1520) setAltitude += 0.1 * map(throttleInput, 1520, 2000, 1, 5);
-    else if (throttleInput <= 1480) setAltitude -= 0.1 * map(throttleInput, 1000, 1480, 5, 1);
+    if (throttleInput >= 1520) setAltitude += 0.2 * map(throttleInput, 1520, 2000, 1, 20);
+    else if (throttleInput <= 1480) setAltitude -= 0.2 * map(throttleInput, 1000, 1480, 20, 1);
+    if (setAltitude < 0) setAltitude = 0;
 
     pid_error_temp = (int)setAltitude - altitude;
     pid_i_mem += pid_i_gain * pid_error_temp;
