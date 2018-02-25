@@ -18,8 +18,8 @@ SPISlave spi(PA_7, PA_6, PA_5, PA_4);       //mosi, miso, sclk, ssel
 Timer onTime;
 
 //PWM Motor Pins
-DigitalOut motor1(PC_4);
-DigitalOut motor2(PC_5);
+DigitalOut motor1(PC_5);
+DigitalOut motor2(PC_4);
 DigitalOut motor3(PB_0);
 DigitalOut motor4(PB_1);
 
@@ -450,6 +450,8 @@ int main() {
         if (data == MOTOR_TEST) {
           testMotors();
           spi.reply(STM32_ARM_CONF);
+          armed = true;
+          break;
         }
       }
     }
