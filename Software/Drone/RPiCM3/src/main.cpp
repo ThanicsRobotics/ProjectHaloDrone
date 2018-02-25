@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
             if (string(argv[i]) == "-tg" || string(argv[i]) == "--test-gyro")
                 testGyro = true;
             if (string(argv[i]) == "-mt" || string(argv[i]) == "--motor-test") {
-                cout << endl << "TESTING MOTORS BEFORE ARM" << endl;
+                cout << endl << "\t\t!!!! TESTING MOTORS BEFORE ARM !!!!" << endl << endl;
                 motorTest = true;
             }
             if (string(argv[i]) == "-h" || string(argv[i]) == "--help") {

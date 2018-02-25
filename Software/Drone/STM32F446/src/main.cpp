@@ -325,12 +325,26 @@ void set_gyro_registers(){
 
 void testMotor(DigitalOut motor) {
   int start = onTime.read_ms();
+  while(onTime.read_ms() - start < 1000) {
+    motor = 1;
+    wait(.001);
+    motor = 0;
+    wait(.003);
+  }
+  start = onTime.read_ms();
   while(onTime.read_ms() - start < 5000) {
     motor = 1;
     wait(.0012);
     motor = 0;
     wait(.0028);
   }
+}
+
+void testMotors() {
+  testMotor(motor1);
+  testMotor(motor2);
+  testMotor(motor3);
+  testMotor(motor4);
 }
 
 void authRasPiCM3() {
@@ -434,10 +448,7 @@ int main() {
         if (data == STM32_ARM_TEST) spi.reply(STM32_ARM_CONF);
         if (data == STM32_ARM_CONF) armed = true;
         if (data == MOTOR_TEST) {
-          testMotor(motor1);
-          testMotor(motor2);
-          testMotor(motor3);
-          testMotor(motor4);
+          testMotors();
           spi.reply(STM32_ARM_CONF);
         }
       }
