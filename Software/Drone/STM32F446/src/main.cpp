@@ -8,6 +8,7 @@
 #define GYRO_CAL 0x04
 #define STM32_ARM_TEST 0x9F
 #define STM32_ARM_CONF 0x0A
+#define MOTOR_TEST 0x0F
 
 //Communication Pins
 I2C i2c(PB_9,PB_8);                         //sda,scl
@@ -322,6 +323,16 @@ void set_gyro_registers(){
   memset(cmd,0,sizeof(cmd));
 }
 
+void testMotor(DigitalOut motor) {
+  int start = onTime.read_ms();
+  while(onTime.read_ms() - start < 5000) {
+    motor = 1;
+    wait(.0012);
+    motor = 0;
+    wait(.0028);
+  }
+}
+
 void authRasPiCM3() {
   //Load authentication key into SPI buffer
   spi.reply(0x01);
@@ -422,6 +433,13 @@ int main() {
         int data = spi.read();
         if (data == STM32_ARM_TEST) spi.reply(STM32_ARM_CONF);
         if (data == STM32_ARM_CONF) armed = true;
+        if (data == MOTOR_TEST) {
+          testMotor(motor1);
+          testMotor(motor2);
+          testMotor(motor3);
+          testMotor(motor4);
+          spi.reply(STM32_ARM_CONF);
+        }
       }
     }
   }

@@ -150,11 +150,15 @@ int main(int argc, char *argv[]) {
                 controllerConnected = true;
             else if (string(argv[i]) == "-nc" || string(argv[i]) == "--no-controller") 
                 controllerConnected = false;
-            else if (string(argv[i]) == "-aa" || string(argv[i]) == "--auto-arm")
+            if (string(argv[i]) == "-aa" || string(argv[i]) == "--auto-arm")
                 autoArm = true;
-            else if (string(argv[i]) == "-tg" || string(argv[i]) == "--test-gyro")
+            if (string(argv[i]) == "-tg" || string(argv[i]) == "--test-gyro")
                 testGyro = true;
-            else if (string(argv[i]) == "-h" || string(argv[i]) == "--help") {
+            if (string(argv[i]) == "-mt" || string(argv[i]) == "--motor-test") {
+                cout << endl << "TESTING MOTORS BEFORE ARM" << endl;
+                motorTest = true;
+            }
+            if (string(argv[i]) == "-h" || string(argv[i]) == "--help") {
                 showUsage(argv[0]);
                 return 1;
             }

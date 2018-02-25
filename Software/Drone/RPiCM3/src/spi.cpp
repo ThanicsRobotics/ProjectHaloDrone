@@ -22,6 +22,7 @@ volatile bool armRequest = false;
 volatile bool authRequest = false;
 volatile bool armed = false;
 volatile bool testGyro = false;
+volatile bool motorTest;
 
 volatile bool run = true;
 
@@ -48,9 +49,12 @@ void disarm() {
 
 void arm() {
     int data = 0;
+    
     while ((data != STM32_ARM_CONF) && run) {
+        int armCode = STM32_ARM_TEST
+        if (motorTest) armCode = MOTOR_TEST;
         stm32_tx_buffer[0] = 0x00;
-        stm32_tx_buffer[1] = STM32_ARM_TEST;
+        stm32_tx_buffer[1] = armCode;
         spiWrite(spiFd, stm32_tx_buffer, 2);
         delay(5);
 
