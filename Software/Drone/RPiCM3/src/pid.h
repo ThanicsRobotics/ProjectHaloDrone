@@ -15,6 +15,7 @@ extern volatile int pid_output;
 extern volatile short int newThrottle;
 extern volatile int lastAltitude;
 extern volatile int altitude;
+extern float setAltitude;
 
 float map(int x, int in_min, int in_max, int out_min, int out_max);
 void calculatePID();
