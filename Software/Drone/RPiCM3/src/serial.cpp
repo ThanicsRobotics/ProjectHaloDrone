@@ -61,6 +61,7 @@ void readChar() {
 
 void readLine() {
     //while(!wordEnd) readChar();
+    readChar();
     if (wordEnd) {                                                  //If we have finished a message
         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
         if (coFlag && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid

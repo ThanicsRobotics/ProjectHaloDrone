@@ -188,12 +188,14 @@ int main(int argc, char *argv[]) {
         if (millis() - start > 20000) {
             cout << "Gyro not responding, resetting..." << endl;
             delay(1000);
+            authenticated = false;
             authRequest = true;
-            delay(2000);
+            while(!authenticated);
             start = millis();
             repeat += 1;
         }
         else if (repeat > 1) {
+            cout << "Gyro still not responding, shutting down..." << endl;
             shutdown();
             exit(1);
         }
