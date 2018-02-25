@@ -51,7 +51,7 @@ void arm() {
     int data = 0;
     
     while ((data != STM32_ARM_CONF) && run) {
-        int armCode = STM32_ARM_TEST
+        int armCode = STM32_ARM_TEST;
         if (motorTest) armCode = MOTOR_TEST;
         stm32_tx_buffer[0] = 0x00;
         stm32_tx_buffer[1] = armCode;
