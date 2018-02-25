@@ -23,7 +23,7 @@ void calculatePID() {
     //Increase or decrease set altitude proportional to stick position
     if (throttleInput < 1000) throttleInput = 1500;
     if (throttleInput >= 1520) setAltitude += 0.1 * map(throttleInput, 1520, 2000, 1, 5);
-    else if (throttleInput <= 1480) setAltitude -= 0.1 * map(throttleInput, 1000, 1480, 1, 5);
+    else if (throttleInput <= 1480) setAltitude -= 0.1 * map(throttleInput, 1000, 1480, 5, 1);
 
     pid_error_temp = (int)setAltitude - altitude;
     pid_i_mem += pid_i_gain * pid_error_temp;
