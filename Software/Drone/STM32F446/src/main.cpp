@@ -459,6 +459,7 @@ int main() {
           spi.reply(STM32_ARM_CONF);
           noMotors = true;
           armed = true;
+          break;
         }
       }
     }
