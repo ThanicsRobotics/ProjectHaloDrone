@@ -81,7 +81,7 @@ void *serialLoop(void *void_ptr) {
     setupSerial();
     while(run) {
         readLine();
-        delayMicroseconds(500);
+        //delayMicroseconds(500);
     }
     return NULL;
 }
