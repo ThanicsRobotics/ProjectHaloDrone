@@ -62,7 +62,7 @@ void handleEcho() {
     while(digitalRead(INT_PIN) == HIGH) {
         //Stop if HIGH for 100ms (timeout)
         if ((micros() - start_time) > 100000) {
-            pulse_time = 0;
+            pulse_time = -1;
             pulseComplete = true;
             return;
         }
@@ -136,7 +136,7 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
         while(!pulseComplete) {
             if (millis() - start > 2000) {
                 cout << endl << "Pulse Fail" << endl;
-                pulse_time = 0;
+                pulse_time = -1;
                 break;
             }
         }
@@ -146,8 +146,8 @@ int getUltrasonicData(int sensor, int iterations, unsigned int pulseDelay) {
         pulseComplete = false;
         lastUltrasonicPulse = millis();
 
-        //factor out invalid results
-        if (distance > 0 && distance < 600) {
+        //Only increment loops if distance is valid
+        if (distance >= 0 && distance < 600) {
             distances[loops] = distance;
             loops++;
         }
