@@ -9,6 +9,7 @@
 #define STM32_ARM_TEST 0x9F
 #define STM32_ARM_CONF 0x0A
 #define MOTOR_TEST 0x0F
+#define NO_MOTORS 0x0E
 
 extern char stm32_rx_buffer[100];
 extern char stm32_tx_buffer[100];
@@ -20,6 +21,7 @@ extern volatile bool authRequest;
 extern volatile bool armed;
 extern volatile bool testGyro;
 extern volatile bool motorTest;
+extern volatile bool noMotors;
 
 extern volatile bool run;
 

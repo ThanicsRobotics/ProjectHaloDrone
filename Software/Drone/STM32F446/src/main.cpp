@@ -9,6 +9,7 @@
 #define STM32_ARM_TEST 0x9F
 #define STM32_ARM_CONF 0x0A
 #define MOTOR_TEST 0x0F
+#define NO_MOTORS 0x0E
 
 //Communication Pins
 I2C i2c(PB_9,PB_8);                         //sda,scl
@@ -436,6 +437,7 @@ int main() {
 
   //Wait until the receiver is active and the throttle is set to the lower position.
   bool armed = false;
+  bool noMotors = false;
   while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) && !armed) {
     //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
     motors_on();                                                              //Set motor PWM signals high
@@ -452,6 +454,11 @@ int main() {
           spi.reply(STM32_ARM_CONF);
           armed = true;
           break;
+        }
+        if (data == NO_MOTORS) {
+          spi.reply(STM32_ARM_CONF);
+          noMotors = true;
+          armed = true;
         }
       }
     }
@@ -484,7 +491,7 @@ int main() {
 
       armed = false;
     }
-    
+    if (noMotors) start = 1;
     // //When yaw stick is back in the center position start the motors (step 2)
     // if ((start == 1 && receiver_input_throttle < 1050 && receiver_input_yaw > 1450) || armed) {
     //   start = 2;

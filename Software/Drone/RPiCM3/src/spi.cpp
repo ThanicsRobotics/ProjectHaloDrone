@@ -23,6 +23,7 @@ volatile bool authRequest = false;
 volatile bool armed = false;
 volatile bool testGyro = false;
 volatile bool motorTest;
+volatile bool noMotors;
 
 volatile bool run = true;
 
@@ -53,6 +54,7 @@ void arm() {
     while ((data != STM32_ARM_CONF) && run) {
         int armCode = STM32_ARM_TEST;
         if (motorTest) armCode = MOTOR_TEST;
+        else if (noMotors) armCode = NO_MOTORS;
         stm32_tx_buffer[0] = 0x00;
         stm32_tx_buffer[1] = armCode;
         spiWrite(spiFd, stm32_tx_buffer, 2);

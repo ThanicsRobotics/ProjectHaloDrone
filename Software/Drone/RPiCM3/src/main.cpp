@@ -87,8 +87,9 @@ void calculateAbsoluteAltitude() {
     int rawDistance = getUltrasonicData(1, 3, 30);
     //int rawDistance = 45;
     altitude = angleCorrection(rawDistance);
-    cout << "Pitch: " << (int)gyroPitch << " | Roll: " << (int)gyroRoll
-        << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude << endl
+    cout << "Pitch: " << (int)gyroPitch << " | Roll: " << (int)gyroRoll << endl
+        << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude 
+        << " | Set Altitude: " << setAltitude << endl
         << "RX Input: " << throttleInput << " | Throttle: " << newThrottle 
         << " | Hz: " << loopRate << endl << endl;
     fflush(stdout);
@@ -158,6 +159,8 @@ int main(int argc, char *argv[]) {
                 cout << endl << "\t\t!!!! TESTING MOTORS BEFORE ARM !!!!" << endl << endl;
                 motorTest = true;
             }
+            if (string(argv[i]) == "-nm" || string(argv[i]) == "--no-motors")
+                noMotors = true;
             if (string(argv[i]) == "-h" || string(argv[i]) == "--help") {
                 showUsage(argv[0]);
                 return 1;
