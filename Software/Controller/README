@@ -1,3 +1,0 @@
-Controller Code
-
-There are two different processors on the Controller, the Raspberry Pi CM3 is the main processor, and the ATTiny10 is a power management processor. The code for each is located in the folders in this directory.

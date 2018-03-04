@@ -1,9 +1,0 @@
-Drone Code
-
-There are several processors on the drone, each of which are listed below, and their code is located in the folders in this directory.
-
-Raspberry Pi CM3: This is the central processor for the drone, and handles the livestreaming pipelines, OpenCV stereo computer vision, ultrasonic sensor array, and general obstacle avoidance calaculations.
-
-ATTiny44: This processor is used on the battery, for reading cell voltages, battery temperature and communicating with the central processor, the Raspberry Pi CM3.
-
-STM32F446: This processor is used as the flight controller for the drone. This sends the actual PWM signals to the motor ESCs and communicates with the Raspberry Pi CM3.
