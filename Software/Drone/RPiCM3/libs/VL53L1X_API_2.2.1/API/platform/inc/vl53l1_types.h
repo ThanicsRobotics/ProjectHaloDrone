@@ -67,7 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /** \ingroup VL53L1_portingType_group
  * @{
  */
-
+typedef int CP_STATUS;
 
 typedef unsigned long long uint64_t;
 

@@ -29,11 +29,7 @@ volatile signed char gyroRoll = 0;
 
 //Configures inputs and outputs of IO Expander
 void setupIOExpander() {
-    if ((i2cFd = i2cOpen(1, ADDR, 0)) < 0) {
-        cout << "I2C Failed: " << strerror(errno) << endl;
-        exit(1);
-    }
-    cout << "Opening I2C. FD: " << i2cFd << " ID: " << pthread_self() << endl;
+    
     //i2cFd = wiringPiI2CSetup(ADDR);
 
     //Configuration bytes (Inputs are 1's, Outputs 0's)

@@ -63,7 +63,7 @@ uint32_t _power_board_extended = 0;
 // cache of the comms type flag
 uint8_t global_comms_type = 0;
 
-#define  VL53L1_COMMS_CHUNK_SIZE  56
+#define  VL53L1_COMMS_CHUNK_SIZE  32
 #define  VL53L1_COMMS_BUFFER_SIZE 64
 
 #define GPIO_INTERRUPT          RS_GPIO62
@@ -112,13 +112,13 @@ VL53L1_Error VL53L1_CommsInitialise(
 	}
 	else if(global_comms_type == VL53L1_SPI)
 	{
-		if ((CP_STATUS)RANGING_SENSOR_COMMS_Init_SPI_V2W8(0, 0, 0) != CP_STATUS_OK)
-		{
-			RANGING_SENSOR_COMMS_Get_Error_Text(comms_error_string); /*lint !e534 ignoring return value */
-			trace_i2c("VL53L1_CommsInitialise: RANGING_SENSOR_COMMS_Init_SPI_V2W8() failed\n");
-			trace_i2c(comms_error_string);
-			status = VL53L1_ERROR_CONTROL_INTERFACE;
-		}
+		// if ((CP_STATUS)RANGING_SENSOR_COMMS_Init_SPI_V2W8(0, 0, 0) != CP_STATUS_OK)
+		// {
+		// 	RANGING_SENSOR_COMMS_Get_Error_Text(comms_error_string); /*lint !e534 ignoring return value */
+		// 	trace_i2c("VL53L1_CommsInitialise: RANGING_SENSOR_COMMS_Init_SPI_V2W8() failed\n");
+		// 	trace_i2c(comms_error_string);
+		// 	status = VL53L1_ERROR_CONTROL_INTERFACE;
+		// }
 	}
 	else
 	{
@@ -148,16 +148,16 @@ VL53L1_Error VL53L1_CommsClose(
 			status = VL53L1_ERROR_CONTROL_INTERFACE;
 		}
 	}
-	else if(global_comms_type == VL53L1_SPI)
-	{
-		if((CP_STATUS)RANGING_SENSOR_COMMS_Fini_SPI_V2W8() != CP_STATUS_OK)
-		{
-			RANGING_SENSOR_COMMS_Get_Error_Text(comms_error_string); /*lint !e534 ignoring return value */
-			trace_i2c("VL53L1_CommsClose: RANGING_SENSOR_COMMS_Fini_SPI_V2W8() failed\n");
-			trace_i2c(comms_error_string);
-			status = VL53L1_ERROR_CONTROL_INTERFACE;
-		}
-	}
+	// else if(global_comms_type == VL53L1_SPI)
+	// {
+	// 	if((CP_STATUS)RANGING_SENSOR_COMMS_Fini_SPI_V2W8() != CP_STATUS_OK)
+	// 	{
+	// 		RANGING_SENSOR_COMMS_Get_Error_Text(comms_error_string); /*lint !e534 ignoring return value */
+	// 		trace_i2c("VL53L1_CommsClose: RANGING_SENSOR_COMMS_Fini_SPI_V2W8() failed\n");
+	// 		trace_i2c(comms_error_string);
+	// 		status = VL53L1_ERROR_CONTROL_INTERFACE;
+	// 	}
+	// }
 	else
 	{
 		trace_i2c("VL53L1_CommsClose: Comms must be one of VL53L1_I2C or VL53L1_SPI\n");
@@ -258,20 +258,20 @@ VL53L1_Error VL53L1_WriteMulti(
 			trace_i2c(comms_error_string);
 		}
 	}
-	else if(global_comms_type == VL53L1_SPI)
-	{
-		if((CP_STATUS)RANGING_SENSOR_COMMS_Write_SPI_16I(0, 0, index, pdata, count) != CP_STATUS_OK)
-		{
-			status = VL53L1_ERROR_CONTROL_INTERFACE;
-		}
+	// else if(global_comms_type == VL53L1_SPI)
+	// {
+	// 	if((CP_STATUS)RANGING_SENSOR_COMMS_Write_SPI_16I(0, 0, index, pdata, count) != CP_STATUS_OK)
+	// 	{
+	// 		status = VL53L1_ERROR_CONTROL_INTERFACE;
+	// 	}
 
-		if(status != VL53L1_ERROR_NONE)
-		{
-			RANGING_SENSOR_COMMS_Get_Error_Text(comms_error_string); /*lint !e534 ignoring return value */
-			trace_i2c("VL53L1_WriteMulti RANGING_SENSOR_COMMS_Write_SPI_16I() failed\n");
-			trace_i2c(comms_error_string);
-		}
-	}
+	// 	if(status != VL53L1_ERROR_NONE)
+	// 	{
+	// 		RANGING_SENSOR_COMMS_Get_Error_Text(comms_error_string); /*lint !e534 ignoring return value */
+	// 		trace_i2c("VL53L1_WriteMulti RANGING_SENSOR_COMMS_Write_SPI_16I() failed\n");
+	// 		trace_i2c(comms_error_string);
+	// 	}
+	// }
 	else
 	{
 		trace_i2c("VL53L1_WriteMulti: Comms must be one of VL53L1_I2C or VL53L1_SPI\n");

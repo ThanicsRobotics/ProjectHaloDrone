@@ -41,6 +41,7 @@ extern "C"
  * @brief  All end user OS/platform/application definitions
  */
 
+#define CP_STATUS_OK 0
 
 /**
  * @def do_division_u
