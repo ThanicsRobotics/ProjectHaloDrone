@@ -4,7 +4,6 @@ VL53L1_Dev_t _laser1;
 VL53L1_DEV laser1 = &_laser1;
 bool isInterrupt = false;
 
-
 void initLasers() {
     laser1->i2c_slave__device_address = 0x52;
     VL53L1_CommsInitialise(_laser1, 0, 400);
@@ -25,10 +24,10 @@ void autonomousLowPowerRangingTest(VL53L1_DEV laser) {
     status = VL53L1_SetInterMeasurementPeriodMilliSeconds(laser, 500);
     status = VL53L1_StartMeasurement(laser);
 
-    if(status){
+    if(status != 0){
         printf("VL53L1_StartMeasurement failed \n");
         while(1);
-    }	
+    }
     if (isInterrupt){
         // do // interrupt mode
         // {

@@ -72,7 +72,7 @@ typedef struct {
  * @brief   Declare the device Handle as a pointer of the structure @a VL53L1_Dev_t.
  *
  */
-typedef VL53L1_Dev_t *VL53L1_DEV;GetT
+typedef VL53L1_Dev_t *VL53L1_DEV;
 
 /**
  * @def PALDevDataGet
