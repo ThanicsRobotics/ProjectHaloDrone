@@ -55,7 +55,7 @@ typedef struct {
 	VL53L1_DevData_t   Data;
 	/*!< Low Level Driver data structure */
 
-	uint8_t   i2c_slave_address;
+	uint8_t   I2cDevAddr;
 		/*!< i2c device address user specific field */
 	uint8_t   comms_type;
 		/*!< Type of comms : VL53L1_I2C or VL53L1_SPI */
@@ -64,6 +64,7 @@ typedef struct {
 
 	uint32_t  new_data_ready_poll_duration_ms;
 		/*!< New data ready poll duration in ms - for debug */
+	int I2cHandle;
 } VL53L1_Dev_t;
 
 
