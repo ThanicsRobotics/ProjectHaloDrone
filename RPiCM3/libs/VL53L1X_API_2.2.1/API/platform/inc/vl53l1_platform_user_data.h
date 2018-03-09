@@ -72,7 +72,7 @@ typedef struct {
  * @brief   Declare the device Handle as a pointer of the structure @a VL53L1_Dev_t.
  *
  */
-typedef VL53L1_Dev_t *VL53L1_DEV;
+typedef VL53L1_Dev_t *VL53L1_DEV;GetT
 
 /**
  * @def PALDevDataGet
@@ -84,7 +84,7 @@ typedef VL53L1_Dev_t *VL53L1_DEV;
  * like PALDevDataGet(FilterData.field)[i] or
  * PALDevDataGet(FilterData.MeasurementIndex)++
  */
-#define PALDevDataGet(Dev, field) (Dev->Data.field)
+// #define PALDevDataGet(Dev, field) (Dev->Data.field)
 
 
 /**
@@ -94,7 +94,7 @@ typedef VL53L1_Dev_t *VL53L1_DEV;
  * @param field     ST structure field name
  * @param data      Data to be set
  */
-#define PALDevDataSet(Dev, field, data) ((Dev->Data.field) = (data))
+// #define PALDevDataSet(Dev, field, data) ((Dev->Data.field) = (data))
 
 
 /**
@@ -103,7 +103,7 @@ typedef VL53L1_Dev_t *VL53L1_DEV;
  *
  * @param Dev      Device Handle
  */
-#define VL53L1DevStructGetLLDriverHandle(Dev) (&Dev->Data.LLData)
+// #define VL53L1DevStructGetLLDriverHandle(Dev) (&Dev->Data.LLData)
 
 /**
  * @def VL53L1DevStructGetLLResultsHandle
@@ -111,7 +111,7 @@ typedef VL53L1_Dev_t *VL53L1_DEV;
  *
  * @param Dev      Device Handle
  */
-#define VL53L1DevStructGetLLResultsHandle(Dev) (&Dev->Data.llresults)
+// #define VL53L1DevStructGetLLResultsHandle(Dev) (&Dev->Data.llresults)
 
 
 

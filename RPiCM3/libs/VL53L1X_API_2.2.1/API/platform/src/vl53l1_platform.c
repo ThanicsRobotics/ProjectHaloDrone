@@ -46,13 +46,14 @@
 #endif
 
 #include "vl53l1_platform.h"
+#include "../inc/vl53l1_platform_user_data.h"
 #include "vl53l1_platform_log.h"
 
-#ifdef PAL_EXTENDED
-	#include "vl53l1_register_strings.h"
-#else
-	#define VL53L1_get_register_name(a,b)
-#endif
+// #ifdef PAL_EXTENDED
+// 	#include "vl53l1_register_strings.h"
+// #else
+// 	#define VL53L1_get_register_name(a,b)
+// #endif
 
 //#include "ranging_sensor_comms.h"
 //#include "power_board_defs.h"
@@ -97,7 +98,7 @@ VL53L1_Error VL53L1_CommsInitialise(
 {
 	VL53L1_Error status = VL53L1_ERROR_NONE;
 
-	i2cOpen(1, pdev->i2c_slave_address, 0);
+	pdev->I2CHandle = i2cOpen(1, pdev->i2c_slave_address, 0);
 
 	// char comms_error_string[ERROR_TEXT_LENGTH];
 
@@ -140,20 +141,23 @@ VL53L1_Error VL53L1_CommsClose(
 	VL53L1_Dev_t *pdev)
 {
 	VL53L1_Error status = VL53L1_ERROR_NONE;
-	char comms_error_string[ERROR_TEXT_LENGTH];
 
-	// SUPPRESS_UNUSED_WARNING(pdev);
+	i2cClose(pdev->I2cHandle);
 
-	if(global_comms_type == VL53L1_I2C)
-	{
-		if((CP_STATUS)RANGING_SENSOR_COMMS_Fini_CCI() != CP_STATUS_OK)
-		{
-			RANGING_SENSOR_COMMS_Get_Error_Text(comms_error_string); /*lint !e534 ignoring return value */
-			trace_i2c("VL53L1_CommsClose: RANGING_SENSOR_COMMS_Fini_CCI() failed\n");
-			trace_i2c(comms_error_string);
-			status = VL53L1_ERROR_CONTROL_INTERFACE;
-		}
-	}
+	// char comms_error_string[ERROR_TEXT_LENGTH];
+
+	// // SUPPRESS_UNUSED_WARNING(pdev);
+
+	// if(global_comms_type == VL53L1_I2C)
+	// {
+	// 	if((CP_STATUS)RANGING_SENSOR_COMMS_Fini_CCI() != CP_STATUS_OK)
+	// 	{
+	// 		RANGING_SENSOR_COMMS_Get_Error_Text(comms_error_string); /*lint !e534 ignoring return value */
+	// 		trace_i2c("VL53L1_CommsClose: RANGING_SENSOR_COMMS_Fini_CCI() failed\n");
+	// 		trace_i2c(comms_error_string);
+	// 		status = VL53L1_ERROR_CONTROL_INTERFACE;
+	// 	}
+	// }
 	// else if(global_comms_type == VL53L1_SPI)
 	// {
 	// 	if((CP_STATUS)RANGING_SENSOR_COMMS_Fini_SPI_V2W8() != CP_STATUS_OK)
@@ -164,11 +168,11 @@ VL53L1_Error VL53L1_CommsClose(
 	// 		status = VL53L1_ERROR_CONTROL_INTERFACE;
 	// 	}
 	// }
-	else
-	{
-		trace_i2c("VL53L1_CommsClose: Comms must be one of VL53L1_I2C or VL53L1_SPI\n");
-		status = VL53L1_ERROR_CONTROL_INTERFACE;
-	}
+	// else
+	// {
+	// 	trace_i2c("VL53L1_CommsClose: Comms must be one of VL53L1_I2C or VL53L1_SPI\n");
+	// 	status = VL53L1_ERROR_CONTROL_INTERFACE;
+	// }
 
 	return status;
 }
@@ -181,25 +185,26 @@ uint8_t _I2CBuffer[256];
 
 int _I2CWrite(VL53L1_DEV Dev, uint8_t *pdata, uint32_t count) {
     int status;
-    int i2c_time_out = I2C_TIME_OUT_BASE+ count* I2C_TIME_OUT_BYTE;
+    // int i2c_time_out = I2C_TIME_OUT_BASE+ count* I2C_TIME_OUT_BYTE;
 
-    status = HAL_I2C_Master_Transmit(Dev->I2cHandle, Dev->I2cDevAddr, pdata, count, i2c_time_out);
-    if (status) {
-        //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
-        //XNUCLEO6180XA1_I2C1_Init(&hi2c1);
-    }
+    // status = HAL_I2C_Master_Transmit(Dev->I2cHandle, Dev->I2cDevAddr, pdata, count, i2c_time_out);
+    status = i2cDeviceWrite(pdev->I2cHandle, pdata, count);
+	// if (status) {
+    //     //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
+    //     //XNUCLEO6180XA1_I2C1_Init(&hi2c1);
+    // }
     return status;
 }
 
 int _I2CRead(VL53L1_DEV Dev, uint8_t *pdata, uint32_t count) {
     int status;
-    int i2c_time_out = I2C_TIME_OUT_BASE+ count* I2C_TIME_OUT_BYTE;
-
-    status = HAL_I2C_Master_Receive(Dev->I2cHandle, Dev->I2cDevAddr|1, pdata, count, i2c_time_out);
-    if (status) {
-        //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
-        //XNUCLEO6180XA1_I2C1_Init(&hi2c1);
-    }
+    // int i2c_time_out = I2C_TIME_OUT_BASE+ count* I2C_TIME_OUT_BYTE;
+	status = i2cDeviceRead(pdev->I2cHandle, pdata, count);
+    // status = HAL_I2C_Master_Receive(Dev->I2cHandle, Dev->I2cDevAddr|1, pdata, count, i2c_time_out);
+    // if (status) {
+    //     //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
+    //     //XNUCLEO6180XA1_I2C1_Init(&hi2c1);
+    // }
     return status;
 }
 
@@ -630,7 +635,8 @@ VL53L1_Error VL53L1_GetTickCount(
 
 	VL53L1_Error status  = VL53L1_ERROR_NONE;
 
-	*ptick_count_ms = timeGetTime();
+	// *ptick_count_ms = timeGetTime();
+	*ptick_count_ms = 0;
 
 	trace_print(
 	VL53L1_TRACE_LEVEL_DEBUG,
@@ -670,9 +676,9 @@ VL53L1_Error VL53L1_WaitValueMaskEx(
 	uint32_t     trace_functions = 0;
 #endif
 
-	_LOG_STRING_BUFFER(register_name);
+	// _LOG_STRING_BUFFER(register_name);
 
-	SUPPRESS_UNUSED_WARNING(poll_delay_ms);
+	// SUPPRESS_UNUSED_WARNING(poll_delay_ms);
 
 #ifdef VL53L1_LOG_ENABLE
 	/* look up register name */
@@ -697,7 +703,7 @@ VL53L1_Error VL53L1_WaitValueMaskEx(
 #ifdef VL53L1_LOG_ENABLE
 	trace_functions = _LOG_GET_TRACE_FUNCTIONS();
 #endif
-	_LOG_SET_TRACE_FUNCTIONS(VL53L1_TRACE_FUNCTION_NONE);
+	// _LOG_SET_TRACE_FUNCTIONS(VL53L1_TRACE_FUNCTION_NONE);
 
 	/* wait until value is found, timeout reached on error occurred */
 
@@ -730,7 +736,7 @@ VL53L1_Error VL53L1_WaitValueMaskEx(
 	}
 
 	/* Restore function logging */
-	_LOG_SET_TRACE_FUNCTIONS(trace_functions);
+	// _LOG_SET_TRACE_FUNCTIONS(trace_functions);
 
 	if (found == 0 && status == VL53L1_ERROR_NONE)
 		status = VL53L1_ERROR_TIME_OUT;
