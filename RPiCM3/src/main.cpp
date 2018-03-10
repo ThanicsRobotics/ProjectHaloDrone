@@ -21,11 +21,11 @@
 #include <pthread.h>
 
 //Project headers
-#include "ultrasonic.h"
-#include "serial.h"
-#include "spi.h"
-#include "pid.h"
-#include "laser.h"
+#include <ultrasonic.h>
+#include <serial.h>
+#include <spi.h>
+#include <pid.h>
+#include <laser.h>
 
 #define GYRO_CAL 0x04
 
