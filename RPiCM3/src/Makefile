@@ -17,7 +17,7 @@ $(EXEC): $(OBJ) $(OTHER_OBJECTS)
 	$(CC) $(CFLAGS) $(OBJ) $(OTHER_OBJECTS) -o $@ $(LIBS)
 
 .cpp.o:
-	$(CC) -c $(CFLAGS) -I $(DIR1) -I $(DIR2) -I $(DIR3) $< -o $@ $(LIBS)
+	$(CC) -c $(CFLAGS) -B $(DIR1) -B $(DIR2) -B $(DIR3) $< -o $@ $(LIBS)
 
 clean:
 	rm *.o $(EXEC)
