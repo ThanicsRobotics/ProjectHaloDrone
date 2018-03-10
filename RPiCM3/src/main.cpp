@@ -25,6 +25,7 @@
 #include "serial.h"
 #include "spi.h"
 #include "pid.h"
+#include "laser.h"
 
 #define GYRO_CAL 0x04
 
@@ -34,7 +35,7 @@ using namespace std;
 pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t spiThread, serialThread;
 
-string projectPath = "/home/pi/ProjectHalo/Software/Drone/RPiCM3/src/";
+string projectPath = "/home/pi/ProjectHaloDrone/RPiCM3/src/";
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
