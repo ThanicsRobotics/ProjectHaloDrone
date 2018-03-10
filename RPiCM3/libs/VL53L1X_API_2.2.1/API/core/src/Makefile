@@ -6,7 +6,7 @@ PATH=/home/pi/ProjectHaloDrone/RPiCM3
 DIR1=$(PATH)/inc/
 DIR2=$(PATH)/libs/VL53L1X_API_2.2.1/API/core/inc/
 DIR3=$(PATH)/libs/VL53L1X_API_2.2.1/API/platform/inc/
-OBJ= $(SOURCES:.c=.o)
+OBJ=$(SOURCES:.c=.o)
 
 all: $(OBJ)
 
