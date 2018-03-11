@@ -1,4 +1,5 @@
-#include "../libs/VL53L1X_API_2.2.1/API/core/inc/vl53l1_api.h"
+#include <laser.h>
+#include <vl53l1_api.h>
 
 VL53L1_Dev_t _laser1;
 VL53L1_DEV laser1 = &_laser1;

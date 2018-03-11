@@ -1,4 +1,4 @@
-#include "ultrasonic.h"
+#include <ultrasonic.h>
 
 //WiringPi Libraries
 #include <wiringPi.h>
@@ -15,6 +15,8 @@
 
 using namespace std;
 
+volatile int gpioI2cFd;
+
 //Pulse timing variables
 int start_time = 0;
 int pulse_time = 0;
@@ -29,7 +31,7 @@ volatile signed char gyroRoll = 0;
 void setupIOExpander() {
     
     //i2cFd = wiringPiI2CSetup(ADDR);
-
+    gpioI2cFd = i2cOpen(1, ADDR, 0);
     //Configuration bytes (Inputs are 1's, Outputs 0's)
     //Port 0: 01010101
     //wiringPiI2CWriteReg8(i2cFd, 0x0C, 0x55);

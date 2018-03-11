@@ -11,6 +11,8 @@
 #define HIGH 1
 #define EDGE_RISING 1
 
+extern volatile int gpioI2cFd;
+
 //Pulse timing variables
 extern int start_time;
 extern int pulse_time;
