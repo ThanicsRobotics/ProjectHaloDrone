@@ -64,14 +64,14 @@ void shutdown() {
     pthread_join(serialThread, NULL);
     pthread_join(spiThread, NULL);
 
-    cout << "Closing I2C.\t\tFD: " << i2cFd << " \tID: " << pthread_self() << endl;
+    cout << "Closing I2C.\t\tFD: " << gpioI2cFd << " \tID: " << pthread_self() << endl;
     cout << "Closing Serial.\tFD: " << serialFd << " \tID: " << pthread_self() << endl;
     cout << "Closing SPI.\t\tFD: " << spiFd << " \tID: " << pthread_self() << endl;
 
     //Close ports
     spiClose(spiFd);
     serClose(serialFd);
-    i2cClose(i2cFd);
+    i2cClose(gpioI2cFd);
     gpioTerminate();
 
     cout << endl << "Resetting Flight Controller..." << endl << endl;
