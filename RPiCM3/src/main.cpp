@@ -35,6 +35,8 @@ using namespace std;
 pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t spiThread, serialThread;
 
+volatile int i2cFd;
+
 string projectPath = "/home/pi/ProjectHaloDrone/RPiCM3/src/";
 
 //Terminal signal handler (for ending program via terminal)

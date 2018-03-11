@@ -2,11 +2,11 @@ CC=gcc
 CFLAGS=-Wall -Wextra
 LIBS=-lwiringPi -lrt -lpigpio
 SOURCES=vl53l1_platform.c vl53l1_platform_init.c vl53l1_platform_log.c
-PATH=/home/pi/ProjectHaloDrone/RPiCM3
-DIR1=$(PATH)/inc/
-DIR2=$(PATH)/libs/VL53L1X_API_2.2.1/API/core/inc/
-DIR3=$(PATH)/libs/VL53L1X_API_2.2.1/API/platform/inc/
-OBJ=$(SOURCES:.c=.o)
+PROJPATH=/home/pi/ProjectHaloDrone/RPiCM3
+DIR1=$(PROJPATH)/inc/
+DIR2=$(PROJPATH)/libs/VL53L1X_API_2.2.1/API/core/inc/
+DIR3=$(PROJPATH)/libs/VL53L1X_API_2.2.1/API/platform/inc/
+OBJ= $(SOURCES:.c=.o)
 
 all: $(OBJ)
 
