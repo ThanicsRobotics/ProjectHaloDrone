@@ -6,15 +6,16 @@ VL53L1_DEV laser1 = &_laser1;
 bool isInterrupt = false;
 
 void initLasers() {
-    laser1->i2c_slave__device_address = 0x52;
-    VL53L1_CommsInitialise(_laser1, 0, 400);
+    laser1->I2cDevAddr = 0x52;
+    VL53L1_CommsInitialise(laser1, 0, 400);
 }
 
 void closeLasers() {
-    VL53L1_CommsClose(_laser1);
+    VL53L1_CommsClose(laser1);
 }
 
 void autonomousLowPowerRangingTest(VL53L1_DEV laser) {
+    int status = VL53L1_ERROR_NONE;
     static VL53L1_RangingMeasurementData_t RangingData;
     printf("Autonomous Ranging Test\n");
     status = VL53L1_WaitDeviceBooted(laser);
