@@ -30,20 +30,17 @@ volatile signed char gyroRoll = 0;
 //Configures inputs and outputs of IO Expander
 void setupIOExpander() {
     
-    //i2cFd = wiringPiI2CSetup(ADDR);
     gpioI2cFd = i2cOpen(1, ADDR, 0);
+
     //Configuration bytes (Inputs are 1's, Outputs 0's)
     //Port 0: 01010101
-    //wiringPiI2CWriteReg8(i2cFd, 0x0C, 0x55);
-    i2cWriteByteData(i2cFd, 0x0C, 0x55);
+    i2cWriteByteData(gpioI2cFd, 0x0C, 0x55);
     
     //Port 1: 01010101
-    //wiringPiI2CWriteReg8(i2cFd, 0x0D, 0x55);
-    i2cWriteByteData(i2cFd, 0x0D, 0x55);
+    i2cWriteByteData(gpioI2cFd, 0x0D, 0x55);
 
     //Port 2: 11000000
-    //wiringPiI2CWriteReg8(i2cFd, 0x0E, 0xC0);
-    i2cWriteByteData(i2cFd, 0x0E, 0xC0);
+    i2cWriteByteData(gpioI2cFd, 0x0E, 0xC0);
 
     //Initialization of IO Expander interrupts
     wiringPiISR(INT_PIN, INT_EDGE_RISING, handleEcho);
@@ -79,13 +76,13 @@ void digitalIOWrite(int pin, int state) {
     //Change output depending on port and pin number
     switch (port) {
         case 0:
-            i2cWriteByteData(i2cFd, 0x04, state << pin);
+            i2cWriteByteData(gpioI2cFd, 0x04, state << pin);
             break;
         case 1:
-            i2cWriteByteData(i2cFd, 0x05, state << (pin - 10));
+            i2cWriteByteData(gpioI2cFd, 0x05, state << (pin - 10));
             break;
         case 2:
-            i2cWriteByteData(i2cFd, 0x06, state << (pin - 20));
+            i2cWriteByteData(gpioI2cFd, 0x06, state << (pin - 20));
             break;
         default:
             break;
