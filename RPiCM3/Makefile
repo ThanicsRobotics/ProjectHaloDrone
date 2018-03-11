@@ -6,12 +6,10 @@ DIR3=$(PROJPATH)/libs/VL53L1X_API_2.2.1/API/platform/src/
 OBJECTS=$(wildcard $(DIR2)/*.o) $(wildcard $(DIR3)/*.o) $(wildcard $(DIR1)/*.o)
 EXEC=halo
 
-all: $(EXEC)
+all:
 	+$(MAKE) -C src
 	+$(MAKE) -C libs
-
-$(EXEC): 
-	$(CC) $(CFLAGS) $(OBJECTS) -o $@ $(LIBS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXEC) $(LIBS)
 
 clean:
 	+$(MAKE) clean -C src
