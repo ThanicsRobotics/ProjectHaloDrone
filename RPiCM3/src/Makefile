@@ -1,7 +1,6 @@
 CC=g++
 CFLAGS=-Wall -Wextra -pthread
 LIBS=-lwiringPi -lrt -lpigpio
-#SOURCES=main.cpp serial.cpp spi.cpp pid.cpp ultrasonic.cpp laser.cpp
 SOURCES=$(wildcard *.cpp)
 PROJPATH=/home/pi/ProjectHaloDrone/RPiCM3
 DIR1=-I$(PROJPATH)/inc/

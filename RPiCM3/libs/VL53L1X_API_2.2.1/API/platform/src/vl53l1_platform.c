@@ -82,6 +82,19 @@
  *  or if the C-driver is implemented directly on the STM32
  */
 
+/* when not customized by application define dummy one */
+#ifndef VL53L1_GetI2cBus
+/** This macro can be overloaded by user to enforce i2c sharing in RTOS context
+ */
+#   define VL53L1_GetI2cBus(...) (void)0
+#endif
+
+#ifndef VL53L1_PutI2cBus
+/** This macro can be overloaded by user to enforce i2c sharing in RTOS context
+ */
+#   define VL53L1_PutI2cBus(...) (void)0
+#endif
+
 #define trace_print(level, ...) \
 	_LOG_TRACE_PRINT(VL53L1_TRACE_MODULE_PLATFORM, \
 	level, VL53L1_TRACE_FUNCTION_NONE, ##__VA_ARGS__)

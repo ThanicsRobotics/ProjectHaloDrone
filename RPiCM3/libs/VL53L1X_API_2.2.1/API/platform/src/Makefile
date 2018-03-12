@@ -1,7 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra
 LIBS=-lwiringPi -lrt -lpigpio
-# SOURCES=vl53l1_platform.c vl53l1_platform_init.c vl53l1_platform_log.c
 SOURCES=$(wildcard *.c)
 PROJPATH=/home/pi/ProjectHaloDrone/RPiCM3
 DIR1=$(PROJPATH)/inc/
