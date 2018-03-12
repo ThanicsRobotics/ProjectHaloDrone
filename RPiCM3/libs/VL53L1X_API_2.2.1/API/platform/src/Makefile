@@ -14,4 +14,4 @@ all: $(OBJ)
 	$(CC) -c $(CFLAGS) -I$(DIR1) -I$(DIR2) -I$(DIR3) $< -o $@ $(LIBS)
 
 clean:
-	rm *.o
+	rm -f *.o
