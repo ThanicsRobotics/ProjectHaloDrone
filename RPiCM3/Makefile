@@ -4,15 +4,15 @@ PROJPATH=/home/pi/ProjectHaloDrone/RPiCM3
 DIR1=$(PROJPATH)/src
 DIR2=$(PROJPATH)/libs/VL53L1X_API_2.2.1/API/core/src
 DIR3=$(PROJPATH)/libs/VL53L1X_API_2.2.1/API/platform/src
-OBJECTS=$(wildcard $(DIR2)/*.o) $(wildcard $(DIR3)/*.o) $(wildcard $(DIR1)/*.o)
+OBJECTS=$(wildcard $(DIR1)/*.o) $(wildcard $(DIR2)/*.o) $(wildcard $(DIR3)/*.o)
 EXEC=halo
 
 all:
 	+$(MAKE) -C src
 	+$(MAKE) -C libs
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXEC)
+	+$(CC) $(CFLAGS) $(OBJECTS) -o $(EXEC)
 
 clean:
 	+$(MAKE) clean -C src
 	+$(MAKE) clean -C libs
-	rm -f $(EXEC)
+	+rm -f $(EXEC)
