@@ -1,4 +1,5 @@
 CC=g++
+CFLAGS=-Wall -Wextra
 PROJPATH=/home/pi/ProjectHaloDrone/RPiCM3
 DIR1=$(PROJPATH)/src
 DIR2=$(PROJPATH)/libs/VL53L1X_API_2.2.1/API/core/src
@@ -9,7 +10,7 @@ EXEC=halo
 all:
 	+$(MAKE) -C src
 	+$(MAKE) -C libs
-	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXEC) $(LIBS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXEC)
 
 clean:
 	+$(MAKE) clean -C src
