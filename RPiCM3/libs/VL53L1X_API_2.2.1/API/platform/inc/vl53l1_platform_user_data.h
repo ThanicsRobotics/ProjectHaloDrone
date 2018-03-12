@@ -64,7 +64,7 @@ typedef struct {
 
 	uint32_t  new_data_ready_poll_duration_ms;
 		/*!< New data ready poll duration in ms - for debug */
-	int I2cHandle;
+	int I2cHandle; 
 } VL53L1_Dev_t;
 
 

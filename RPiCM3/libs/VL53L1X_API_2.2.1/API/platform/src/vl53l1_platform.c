@@ -46,7 +46,7 @@
 #endif
 
 #include "vl53l1_platform.h"
-#include "../inc/vl53l1_platform_user_data.h"
+#include "vl53l1_platform_user_data.h"
 #include "vl53l1_platform_log.h"
 
 // #ifdef PAL_EXTENDED
@@ -98,7 +98,7 @@ VL53L1_Error VL53L1_CommsInitialise(
 {
 	VL53L1_Error status = VL53L1_ERROR_NONE;
 
-	pdev->I2CHandle = i2cOpen(1, pdev->i2c_slave_address, 0);
+	pdev->I2cHandle = i2cOpen(1, pdev->I2cDevAddr, 0);
 
 	// char comms_error_string[ERROR_TEXT_LENGTH];
 
@@ -188,7 +188,7 @@ int _I2CWrite(VL53L1_DEV Dev, uint8_t *pdata, uint32_t count) {
     // int i2c_time_out = I2C_TIME_OUT_BASE+ count* I2C_TIME_OUT_BYTE;
 
     // status = HAL_I2C_Master_Transmit(Dev->I2cHandle, Dev->I2cDevAddr, pdata, count, i2c_time_out);
-    status = i2cDeviceWrite(pdev->I2cHandle, pdata, count);
+    status = i2cDeviceWrite(Dev->I2cHandle, pdata, count);
 	// if (status) {
     //     //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
     //     //XNUCLEO6180XA1_I2C1_Init(&hi2c1);
@@ -199,7 +199,7 @@ int _I2CWrite(VL53L1_DEV Dev, uint8_t *pdata, uint32_t count) {
 int _I2CRead(VL53L1_DEV Dev, uint8_t *pdata, uint32_t count) {
     int status;
     // int i2c_time_out = I2C_TIME_OUT_BASE+ count* I2C_TIME_OUT_BYTE;
-	status = i2cDeviceRead(pdev->I2cHandle, pdata, count);
+	status = i2cDeviceRead(Dev->I2cHandle, pdata, count);
     // status = HAL_I2C_Master_Receive(Dev->I2cHandle, Dev->I2cDevAddr|1, pdata, count, i2c_time_out);
     // if (status) {
     //     //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
