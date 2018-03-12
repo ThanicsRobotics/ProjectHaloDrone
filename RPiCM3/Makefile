@@ -14,3 +14,4 @@ all:
 clean:
 	+$(MAKE) clean -C src
 	+$(MAKE) clean -C libs
+	rm $(EXEC)

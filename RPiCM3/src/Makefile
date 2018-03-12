@@ -13,4 +13,4 @@ all: $(SOURCES)
 	$(CC) -c $(CFLAGS) $(DIR1) $(DIR2) $(DIR3) $< -o $@ $(LIBS)
 
 clean:
-	rm $(EXEC) *.o
+	rm *.o

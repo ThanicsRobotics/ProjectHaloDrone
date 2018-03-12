@@ -70,6 +70,7 @@
 #include "vl53l1_preset_setup.h"
 #include "vl53l1_api_debug.h"
 #include "vl53l1_api_core.h"
+#include "vl53l1_def.h"
 
 /* Check for minimum user zone requested by Xtalk calibration */
 /* no need for VL53L1_MAX_USER_ZONES check, set 5 to pass the test */
