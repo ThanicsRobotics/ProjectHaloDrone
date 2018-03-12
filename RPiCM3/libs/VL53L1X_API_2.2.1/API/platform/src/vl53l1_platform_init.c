@@ -53,7 +53,7 @@ VL53L1_Error VL53L1_platform_init(
 
 	/* remember comms settings */
 
-	pdev->i2c_slave_address = i2c_slave_address;
+	pdev->I2cDevAddr = i2c_slave_address;
 	pdev->comms_type        = comms_type;
 	pdev->comms_speed_khz   = comms_speed_khz;
 
