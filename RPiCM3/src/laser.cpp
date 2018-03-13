@@ -5,9 +5,13 @@
 VL53L1_Dev_t _laser1;
 VL53L1_DEV laser1 = &_laser1;
 bool isInterrupt = false;
+bool lasersStarted = false;
 
 void initLasers() {
-    VL53L1_platform_init(laser1, 0x29, 0, 400);
+    if (VL53L1_platform_init(laser1, 0x29, 0, 400) != VL53L1_ERROR_NONE) {
+        printf("Laser Init Error\n");
+    }
+    else lasersStarted = true;
 }
 
 void closeLasers() {

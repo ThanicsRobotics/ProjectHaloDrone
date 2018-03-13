@@ -76,7 +76,7 @@ void shutdown() {
     spiClose(spiFd);
     serClose(serialFd);
     i2cClose(gpioI2cFd);
-    closeLasers();
+    if (lasersStarted) closeLasers();
     gpioTerminate();
 
     cout << endl << "Resetting Flight Controller..." << endl << endl;
