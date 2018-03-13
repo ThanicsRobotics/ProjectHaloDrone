@@ -201,7 +201,7 @@ int _I2CWrite(VL53L1_DEV Dev, uint8_t *pdata, uint32_t count) {
     // int i2c_time_out = I2C_TIME_OUT_BASE+ count* I2C_TIME_OUT_BYTE;
 
     // status = HAL_I2C_Master_Transmit(Dev->I2cHandle, Dev->I2cDevAddr, pdata, count, i2c_time_out);
-    status = i2cDeviceWrite(Dev->I2cHandle, pdata, count);
+    status = i2cWriteDevice(Dev->I2cHandle, pdata, count);
 	// if (status) {
     //     //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);
     //     //XNUCLEO6180XA1_I2C1_Init(&hi2c1);
@@ -212,7 +212,7 @@ int _I2CWrite(VL53L1_DEV Dev, uint8_t *pdata, uint32_t count) {
 int _I2CRead(VL53L1_DEV Dev, uint8_t *pdata, uint32_t count) {
     int status;
     // int i2c_time_out = I2C_TIME_OUT_BASE+ count* I2C_TIME_OUT_BYTE;
-	status = i2cDeviceRead(Dev->I2cHandle, pdata, count);
+	status = i2cReadDevice(Dev->I2cHandle, pdata, count);
     // status = HAL_I2C_Master_Receive(Dev->I2cHandle, Dev->I2cDevAddr|1, pdata, count, i2c_time_out);
     // if (status) {
     //     //VL6180x_ErrLog("I2C error 0x%x %d len", dev->I2cAddr, len);

@@ -64,37 +64,37 @@ VL53L1_Error VL53L1_platform_init(
 				pdev->comms_type,
 				pdev->comms_speed_khz);
 
-	/* Ensure device is in reset */
-	if (status == VL53L1_ERROR_NONE)
-		status = VL53L1_GpioXshutdown(0);
+	// /* Ensure device is in reset */
+	// if (status == VL53L1_ERROR_NONE)
+	// 	status = VL53L1_GpioXshutdown(0);
 
-	/* disable the platform regulators */
-	if (status == VL53L1_ERROR_NONE)
-		status = VL53L1_GpioPowerEnable(0);
+	// /* disable the platform regulators */
+	// if (status == VL53L1_ERROR_NONE)
+	// 	status = VL53L1_GpioPowerEnable(0);
 
-	/* set the NCS pin for I2C mode */
-	if (status == VL53L1_ERROR_NONE)
-		status = VL53L1_GpioCommsSelect(0);
+	// /* set the NCS pin for I2C mode */
+	// if (status == VL53L1_ERROR_NONE)
+	// 	status = VL53L1_GpioCommsSelect(0);
 
-	/* 1ms Wait to ensure XSHUTD / NCS are in the right state */
-	if (status == VL53L1_ERROR_NONE)
-		status = VL53L1_WaitUs(pdev, 1000);
+	// /* 1ms Wait to ensure XSHUTD / NCS are in the right state */
+	// if (status == VL53L1_ERROR_NONE)
+	// 	status = VL53L1_WaitUs(pdev, 1000);
 
-	/* enable the platform regulators */
-	if (status == VL53L1_ERROR_NONE)
-		status = VL53L1_GpioPowerEnable(1);
+	// /* enable the platform regulators */
+	// if (status == VL53L1_ERROR_NONE)
+	// 	status = VL53L1_GpioPowerEnable(1);
 
-	/* 1ms Wait for power regs to settle */
-	if (status == VL53L1_ERROR_NONE)
-		status = VL53L1_WaitUs(pdev, 1000);
+	// /* 1ms Wait for power regs to settle */
+	// if (status == VL53L1_ERROR_NONE)
+	// 	status = VL53L1_WaitUs(pdev, 1000);
 
-	/* finally, bring the device out of reset */
-	if (status == VL53L1_ERROR_NONE)
-		status = VL53L1_GpioXshutdown(1);
+	// /* finally, bring the device out of reset */
+	// if (status == VL53L1_ERROR_NONE)
+	// 	status = VL53L1_GpioXshutdown(1);
 
-	/*  Wait 100us for device to exit reset */
-	if (status == VL53L1_ERROR_NONE)
-		status = VL53L1_WaitUs(pdev, 100);
+	// /*  Wait 100us for device to exit reset */
+	// if (status == VL53L1_ERROR_NONE)
+	// 	status = VL53L1_WaitUs(pdev, 100);
 
 	return status;
 }
@@ -111,16 +111,16 @@ VL53L1_Error VL53L1_platform_terminate(
 	VL53L1_Error status = VL53L1_ERROR_NONE;
 
 	/* put device in reset */
-	if (status == VL53L1_ERROR_NONE) /*lint !e774 always true*/
-		status = VL53L1_GpioXshutdown(0);
+	// if (status == VL53L1_ERROR_NONE) /*lint !e774 always true*/
+	// 	status = VL53L1_GpioXshutdown(0);
 
-	/* disable the platform regulators */
-	if (status == VL53L1_ERROR_NONE)
-		status = VL53L1_GpioPowerEnable(0);
+	// /* disable the platform regulators */
+	// if (status == VL53L1_ERROR_NONE)
+	// 	status = VL53L1_GpioPowerEnable(0);
 
-	/* close the comms interfaces */
-	if (status == VL53L1_ERROR_NONE)
-		status = VL53L1_CommsClose(pdev);
+	// /* close the comms interfaces */
+	// if (status == VL53L1_ERROR_NONE)
+	// 	status = VL53L1_CommsClose(pdev);
 
 	return status;
 }
