@@ -1,5 +1,6 @@
 #include <laser.h>
 #include <vl53l1_api.h>
+#include <vl53l1_platform_init.h>
 
 VL53L1_Dev_t _laser1;
 VL53L1_DEV laser1 = &_laser1;
