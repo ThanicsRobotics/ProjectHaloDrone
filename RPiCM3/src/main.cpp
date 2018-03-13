@@ -27,6 +27,10 @@
 #include <pid.h>
 #include <laser.h>
 
+//Laser API Library
+#include <vl53l1_platform_init.h>
+#include <vl53l1_api.h>
+
 #define GYRO_CAL 0x04
 
 using namespace std;
