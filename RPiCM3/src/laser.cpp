@@ -6,12 +6,11 @@ VL53L1_DEV laser1 = &_laser1;
 bool isInterrupt = false;
 
 void initLasers() {
-    laser1->I2cDevAddr = 0x52;
-    VL53L1_CommsInitialise(laser1, 0, 400);
+    VL53L1_platform_init(laser1, 0x29, 0, 400);
 }
 
 void closeLasers() {
-    VL53L1_CommsClose(laser1);
+    VL53L1_platform_terminate(laser1);
 }
 
 void autonomousLowPowerRangingTest(VL53L1_DEV laser) {

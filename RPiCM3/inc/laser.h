@@ -6,7 +6,7 @@
 extern VL53L1_Dev_t _laser1;
 extern VL53L1_DEV laser1;
 
-void initLaser();
+void initLasers();
 void closeLasers();
 void autonomousLowPowerRangingTest();
 

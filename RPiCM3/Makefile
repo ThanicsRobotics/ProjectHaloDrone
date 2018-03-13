@@ -17,3 +17,6 @@ clean:
 	+$(MAKE) clean -C src
 	+$(MAKE) clean -C libs
 	rm -f $(EXEC)
+
+install:
+	ln -sf halo /usr/bin/

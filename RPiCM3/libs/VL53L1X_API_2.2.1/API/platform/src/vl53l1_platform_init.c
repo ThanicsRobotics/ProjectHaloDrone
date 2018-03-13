@@ -119,8 +119,8 @@ VL53L1_Error VL53L1_platform_terminate(
 	// 	status = VL53L1_GpioPowerEnable(0);
 
 	// /* close the comms interfaces */
-	// if (status == VL53L1_ERROR_NONE)
-	// 	status = VL53L1_CommsClose(pdev);
+	if (status == VL53L1_ERROR_NONE)
+		status = VL53L1_CommsClose(pdev);
 
 	return status;
 }

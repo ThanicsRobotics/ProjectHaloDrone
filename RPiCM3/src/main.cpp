@@ -72,6 +72,7 @@ void shutdown() {
     spiClose(spiFd);
     serClose(serialFd);
     i2cClose(gpioI2cFd);
+    closeLasers();
     gpioTerminate();
 
     cout << endl << "Resetting Flight Controller..." << endl << endl;
@@ -99,6 +100,9 @@ void calculateAbsoluteAltitude() {
 void mainLoop() {
     cout << "Waiting for configuration..." << endl;
     while(!serialConfigured || !spiConfigured || !authenticated || !armed) delay(10);
+    cout << "Starting lasers..." << endl;
+    initLasers();
+    autonomousLowPowerRangingTest(laser1);
     cout << "Starting main loop" << endl;
     if (testGyro) {
         while(run) {
