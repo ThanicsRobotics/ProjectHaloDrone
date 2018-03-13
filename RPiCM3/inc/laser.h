@@ -8,6 +8,6 @@ extern VL53L1_DEV laser1;
 
 void initLasers();
 void closeLasers();
-void autonomousLowPowerRangingTest();
+void autonomousLowPowerRangingTest(VL53L1_DEV laser);
 
 #endif
