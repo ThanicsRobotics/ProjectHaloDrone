@@ -9,6 +9,6 @@ The controller for the Halo drone is equally as innovative as the drone. This is
 ![halo controller v137 2](https://user-images.githubusercontent.com/18484036/34462250-9a78b516-ee0d-11e7-8bbf-212de0dd6c10.png)
 ## Files
 ### Software: 
-All source code used by both the drone and controller
+Drone source code is in this repository, the controller code can be found here: https://github.com/ThanicsRobotics/ProjectHaloController
 ### For ECAD and MCAD Files:
 Go to our other repository here: https://github.com/ThanicsRobotics/ProjectHaloCAD
