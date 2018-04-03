@@ -19,4 +19,5 @@ clean:
 	rm -f $(EXEC)
 
 install:
+	update/updateSTM32Firmware.sh
 	ln -sf halo /usr/bin/
