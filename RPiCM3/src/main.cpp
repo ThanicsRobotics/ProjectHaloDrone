@@ -23,15 +23,13 @@
 //Project headers
 #include <ultrasonic.h>
 #include <serial.h>
+#include <altitude.h>
 #include <spi.h>
 #include <pid.h>
-#include <laser.h>
-
-//Laser API Library
-#include <vl53l1_platform_init.h>
-#include <vl53l1_api.h>
+#include <stream.h>
 
 #define GYRO_CAL 0x04
+#define BARO_DELAY 30
 
 using namespace std;
 
@@ -44,17 +42,10 @@ string projectPath = "/home/pi/ProjectHaloDrone/RPiCM3/src/";
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
 
-//Pressure Altitude variables
-char baroData[9];
-char baroCoefficients[17];
-
-// int pressure;
-// int temperature;
-volatile int altitude = 0;
 volatile int lastAltitude = 0;
 
-float loopRate = 0.0;
-int loopStartTime = 0;
+string camera;
+string receiver;
 
 //Shutting down threads and closing ports
 void shutdown() {
@@ -76,7 +67,6 @@ void shutdown() {
     spiClose(spiFd);
     serClose(serialFd);
     i2cClose(gpioI2cFd);
-    if (lasersStarted) closeLasers();
     gpioTerminate();
 
     cout << endl << "Resetting Flight Controller..." << endl << endl;
@@ -86,27 +76,9 @@ void shutdown() {
     system(("sudo openocd -f " + projectPath + "reset.cfg").c_str());
 }
 
-//Using gyro angles and raw distance, calculate absolute altitude of vehicle
-void calculateAbsoluteAltitude() {
-    loopRate = 1.0 / ((millis() - loopStartTime) / 1000.0);
-    loopStartTime = millis();
-    int rawDistance = getUltrasonicData(1, 3, 30);
-    //int rawDistance = 45;
-    altitude = angleCorrection(rawDistance);
-    cout << "Pitch: " << (int)gyroPitch << " | Roll: " << (int)gyroRoll << endl
-        << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude 
-        << " | Set Altitude: " << setAltitude << endl
-        << "RX Input: " << throttleInput << " | Throttle: " << newThrottle 
-        << " | Hz: " << loopRate << endl << endl;
-    fflush(stdout);
-}
-
 void mainLoop() {
     cout << "Waiting for configuration..." << endl;
     while(!serialConfigured || !spiConfigured || !authenticated || !armed) delay(10);
-    cout << "Starting lasers..." << endl;
-    initLasers();
-    autonomousLowPowerRangingTest(laser1);
     cout << "Starting main loop" << endl;
     if (testGyro) {
         while(run) {
@@ -121,9 +93,9 @@ void mainLoop() {
         while(!armed);
     }
     while(run) {
-        calculateAbsoluteAltitude();
+        getPressureAltitude();
         calculatePID();
-        while(millis() - loopStartTime < 150);
+        while(millis() - loopStartTime < BARO_DELAY);
     }
 }
 
@@ -135,7 +107,8 @@ void showUsage(string name) {
         << "\t-c,--controller-enabled \tRun program to connect with controller\n"
         << "\t-nc,--no-controller \t\tRun program without connecting to controller\n"
         << "\t-aa,--auto-arm \t\t\tDrone automatically ARMS after gyro calibration\n"
-        << "\t-pre,--pre-start \t\t\tDrone gives data before starting motors\n"
+        << "\t-c,--camera [camera (ex. /dev/video0)] \tStreaming camera\n"
+        << "\t-r,--receiver [IP Address] \tStreaming receiver IP Address\n"
         << endl;
 }
 
@@ -170,6 +143,12 @@ int main(int argc, char *argv[]) {
             }
             if (string(argv[i]) == "-nm" || string(argv[i]) == "--no-motors")
                 noMotors = true;
+            if (string(argv[i]) == "-c" || string(argv[i]) == "--camera") {
+                camera = string(argv[i+1]);
+            }
+            if (string(argv[i]) == "-r" || string(argv[i]) == "--receiver") {
+                receiver = string(argv[i+1]);
+            }
             if (string(argv[i]) == "-h" || string(argv[i]) == "--help") {
                 showUsage(argv[0]);
                 return 1;
@@ -181,7 +160,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    setupIOExpander();
+    setupBarometer();
 
     //Creating threads
     //  -> spiThread

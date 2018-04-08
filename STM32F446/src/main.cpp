@@ -86,7 +86,6 @@ int coefficient;
 int count = 0;
 bool wordStart = false;
 bool wordEnd = false;
-unsigned int loopCount = 0;
 
 //Sends all motor PWM signals LOW
 void motors_off() {
@@ -593,17 +592,13 @@ int main() {
     
     // We wait until 4000us are passed.
     if ((onTime.read_us() - loop_timer < 4000)) {
-      if (loopCount % 4 == 0) {
-        spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
-      }
-      else if ((loopCount % 6 == 0) && spi.receive()) {
+      if (spi.receive()) {
         short int data = spi.read();
         if (data >= 0 && data <= 900) {
           mod_receiver_input_throttle = data + 1000;
         }
       }
     }
-    loopCount += 1;
     //spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.

@@ -21,3 +21,6 @@ clean:
 install:
 	update/updateSTM32Firmware.sh
 	ln -sf halo /usr/bin/
+
+updater:
+	$(CC) $(CFLAGS) update/updater.cpp -o update/updater $(LIBS)
