@@ -73,7 +73,7 @@ void shutdown() {
     delay(500);
     
     //Reset command to STM32
-    system(("sudo openocd -f " + projectPath + "reset.cfg").c_str());
+    resetSTM32F446();
 }
 
 void mainLoop() {

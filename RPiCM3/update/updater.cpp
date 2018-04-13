@@ -124,4 +124,7 @@ int main() {
             cout << "Invalid Response. Shutting Down." << endl;
             exit(0);
     }
+    pinMode(SEL0, INPUT);
+    pinMode(SEL1, INPUT);
+    pinMode(SEL2, INPUT);
 }

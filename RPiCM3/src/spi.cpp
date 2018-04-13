@@ -4,6 +4,7 @@
 #include <ultrasonic.h>
 
 #include <pigpio.h>
+#include <wiringPi.h>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +13,8 @@
 #include <pthread.h>
 #include <string.h>
 #include <unistd.h>
+
+#define SEL2 5
 
 char stm32_rx_buffer[100];
 char stm32_tx_buffer[100];
@@ -70,10 +73,17 @@ void arm() {
     armed = true;
 }
 
+void resetSTM32F446() {
+    pinMode(SEL2, OUTPUT);
+    digitalWrite(SEL2, LOW);
+    system(("sudo openocd -f " + projectPath + "reset.cfg").c_str());
+    pinMode(SEL2, INPUT);
+}
+
 //Making sure the STM32F446 is listening...
 void authFlightController() {
     //Reset flight controller using OpenOCD
-    system(("sudo openocd -f " + projectPath + "reset.cfg").c_str());
+    resetSTM32F446();
 
     authenticated = false;
     char buffer[100];
