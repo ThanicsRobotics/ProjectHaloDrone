@@ -1,7 +1,7 @@
 #ifndef STREAM_H
 #define STREAM_H
 
-#include <string>
+#include <string.h>
 
 extern string camera;
 extern string receiver;
