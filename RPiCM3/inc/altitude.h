@@ -1,18 +1,18 @@
 #ifndef ALTITUDE_H
 #define ALTITUDE_H
 
-int baroI2cFd;
+extern int baroI2cFd;
 
-char pressureMSB;
-char pressureCSB;
-char pressureLSB;
-char tempMSB;
-char tempLSB;
+extern char pressureMSB;
+extern char pressureCSB;
+extern char pressureLSB;
+extern char tempMSB;
+extern char tempLSB;
 
-volatile int pressureAltitude;
+extern volatile int pressureAltitude;
 
-float loopRate;
-int loopStartTime;
+extern float loopRate;
+extern int loopStartTime;
 
 void setupBarometer();
 void getPressureAltitude();

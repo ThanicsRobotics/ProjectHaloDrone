@@ -1,5 +1,8 @@
 #include <altitude.h>
 #include <ultrasonic.h>
+#include <serial.h>
+#include <pid.h>
+
 #include <wiringPi.h>
 #include <pigpio.h>
 #include <iostream>
