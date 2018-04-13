@@ -37,6 +37,7 @@ extern pthread_mutex_t stm32_mutex;
 void setupSPI();
 void arm();
 void disarm();
+void resetSTM32F446();
 void authFlightController();
 void sendThrottle();
 void *spiLoop(void *void_ptr);

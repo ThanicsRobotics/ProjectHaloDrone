@@ -44,9 +44,6 @@ void signal_callback_handler(int);
 
 volatile int lastAltitude = 0;
 
-string camera;
-string receiver;
-
 //Shutting down threads and closing ports
 void shutdown() {
     cout << endl << "Closing Threads and Ports..." << endl << endl;
