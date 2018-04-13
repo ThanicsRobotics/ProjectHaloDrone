@@ -8,6 +8,24 @@
 
 using namespace std;
 
+void program() {
+    cout << "Would you like to program(p) or set fuses(f), or both(b)? (p/f/b): ";
+    string input = "";
+    getline(cin, input);
+    if (input == "p") {
+        cout << "Programming..." << endl;
+        system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U flash:w:firmwares/simonkesc.hex:i");
+    }
+    if (input == "f") {
+        cout << "Setting fuses..." << endl;
+        system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2E:m -U hfuse:w:0xC9:m");
+    }
+    if (input == "b") {
+        cout << "Programming and setting fuses..." << endl;
+        system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2E:m -U hfuse:w:0xC9:m -U flash:w:firmwares/simonkesc.hex:i");
+    }
+}
+
 void updateSTM32F446() {
     cout << "Updating STM32F446..." << endl;
     digitalWrite(SEL2, LOW);
@@ -24,24 +42,14 @@ void updateESC1() {
     cout << "Updating ESC1..." << endl;
     digitalWrite(SEL0, HIGH);
     digitalWrite(SEL1, LOW);
-    system("avrdude -p m8 -C avrdude.conf -c pi_1 -v");
+    program();
 }
 
 void updateESC2() {
-    cout << "Would you like to program(p) or set fuses(f)? (p/f): ";
+    cout << "Updating ESC2..." << endl;
     digitalWrite(SEL0, LOW);
     digitalWrite(SEL1, LOW);
-    
-    string input = "";
-    getline(cin, input);
-    if (input == "p") {
-	cout << "Programming..." << endl;
-	system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U flash:w:firmwares/simonkesc.hex:i");
-    }
-    if (input == "f") {
-	cout << "Setting fuses..." << endl;
-	system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2E:m -U hfuse:w:0xC9:m");
-    }
+    program();
 
 }
 
@@ -49,14 +57,14 @@ void updateESC3() {
     cout << "Updating ESC3..." << endl;
     digitalWrite(SEL0, LOW);
     digitalWrite(SEL1, HIGH);
-    system("avrdude -p m8 -C avrdude.conf -c cm3 -v");
+    program();
 }
 
 void updateESC4() {
     cout << "Updating ESC4..." << endl;
     digitalWrite(SEL0, HIGH);
     digitalWrite(SEL1, HIGH);
-    system("avrdude -p m8 -C avrdude.conf -c cm3 -v");
+    program();
 }
 
 void updateAllESCs() {
