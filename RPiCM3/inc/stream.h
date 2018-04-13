@@ -2,9 +2,10 @@
 #define STREAM_H
 
 #include <string.h>
+#include <iostream>
 
-extern string camera;
-extern string receiver;
+string camera;
+string receiver;
 
 void startStream(string camera, string address);
 
