@@ -4,9 +4,9 @@
 #include <string.h>
 #include <iostream>
 
-string camera;
-string receiver;
+std::string camera;
+std::string receiver;
 
-void startStream(string camera, string address);
+void startStream(std::string camera, std::string address);
 
 #endif
