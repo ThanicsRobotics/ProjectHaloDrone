@@ -3,23 +3,20 @@ CFLAGS=-Wall -Wextra -pthread
 LIBS=-lwiringPi -lrt -lpigpio
 PROJPATH=/home/pi/ProjectHaloDrone/RPiCM3
 DIR1=$(PROJPATH)/src/
-DIR2=$(PROJPATH)/libs/VL53L1X_API_2.2.1/API/core/src/
-DIR3=$(PROJPATH)/libs/VL53L1X_API_2.2.1/API/platform/src/
-OBJ=$(patsubst %.cpp,%.o,$(wildcard $(DIR1)*.cpp)) $(patsubst %.c,%.o,$(wildcard $(DIR2)*.c)) $(patsubst %.c,%.o,$(wildcard $(DIR3)*.c))
+OBJ=$(patsubst %.cpp,%.o,$(wildcard $(DIR1)*.cpp))
 EXEC=halo
 
 all:
 	+$(MAKE) -C src
-	+$(MAKE) -C libs
+	# +$(MAKE) -C libs
 	$(CC) $(CFLAGS) $(OBJ) -o $(EXEC) $(LIBS)
 
 clean:
 	+$(MAKE) clean -C src
-	+$(MAKE) clean -C libs
+	# +$(MAKE) clean -C libs
 	rm -f $(EXEC)
 
 install:
-	update/updateSTM32Firmware.sh
 	ln -sf halo /usr/bin/
 
 updater:
