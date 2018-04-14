@@ -7,7 +7,7 @@
 #include <pigpio.h>
 #include <iostream>
 
-#define BARO_ADDR 0xC0
+#define BARO_ADDR 0x60
 
 int baroI2cFd;
 
