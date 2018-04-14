@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <wiringPi.h>
 #include <pthread.h>
 #include <string.h>
 #include <unistd.h>
@@ -31,7 +30,7 @@ volatile bool noMotors;
 volatile bool run = true;
 
 //CS0 is barometer, CS1 is STM32 flight controller
-volatile int SPI_CS = 1;
+volatile int SPI_CS = 0;
 volatile int spiFd;
 
 using namespace std;
@@ -125,7 +124,7 @@ void sendThrottle() {
 
 void *spiLoop(void *void_ptr) {
     //Switch to flight controller, setup SPI @ 1.5MHz
-    SPI_CS = 1;
+    SPI_CS = 0;
     setupSPI();
     authFlightController();
     while(run) {

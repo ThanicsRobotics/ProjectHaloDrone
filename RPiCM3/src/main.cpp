@@ -53,7 +53,7 @@ void shutdown() {
     
     //Stop threads
     run = false;
-    delay(1000);
+    //delay(1000);
 
     //Join Threads to main  
     pthread_join(serialThread, NULL);
