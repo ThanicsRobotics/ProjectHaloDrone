@@ -4,8 +4,8 @@
 #include <string.h>
 #include <iostream>
 
-std::string camera;
-std::string receiver;
+extern std::string camera;
+extern std::string receiver;
 
 void startStream(std::string camera, std::string address);
 
