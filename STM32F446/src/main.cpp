@@ -561,7 +561,6 @@ int main() {
     //throttle = 1500;
 
     if (start == 2) {                                                          //The motors are started.
-      //pc.printf("hi %d\r\n", throttle);
       if (throttle > 1800) throttle = 1800;                                   //We need some room to keep full control at full throttle.
       esc_1 = throttle - pid_output_pitch + pid_output_roll - pid_output_yaw; //Calculate the pulse for esc 1 (front-right - CCW)
       esc_2 = throttle + pid_output_pitch + pid_output_roll + pid_output_yaw; //Calculate the pulse for esc 2 (rear-right - CW)

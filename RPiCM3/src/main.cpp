@@ -27,6 +27,7 @@
 #include <spi.h>
 #include <pid.h>
 #include <stream.h>
+#include <gps.h>
 
 #define GYRO_CAL 0x04
 #define BARO_DELAY 30
@@ -44,8 +45,8 @@ void signal_callback_handler(int);
 
 volatile int lastAltitude = 0;
 
-std::string camera;
-std::string receiver;
+string camera;
+string receiver;
 
 //Shutting down threads and closing ports
 void shutdown() {
@@ -94,8 +95,10 @@ void mainLoop() {
     }
     while(run) {
         getPressureAltitude();
-        calculatePID();
-        while(millis() - loopStartTime < BARO_DELAY);
+        readGPS();
+        delay(100);
+        // calculatePID();
+        // while(millis() - loopStartTime < BARO_DELAY);
     }
 }
 
@@ -161,6 +164,7 @@ int main(int argc, char *argv[]) {
     }
 
     setupBarometer();
+    startGPS();
 
     //Creating threads
     //  -> spiThread

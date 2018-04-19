@@ -1,5 +1,5 @@
-#include <spi.h>
-#include <serial.h>
+#include <fcinterface.h>
+#include <radio.h>
 #include <pid.h>
 #include <ultrasonic.h>
 
@@ -148,10 +148,7 @@ void *spiLoop(void *void_ptr) {
             sendThrottle();
             
             //Use SPI to get gyro angles, send throttle
-            spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
-            gyroPitch = (signed char)stm32_rx_buffer[0];
-            gyroRoll = (signed char)stm32_rx_buffer[1];
-            //gyroRoll = (int)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
+            spiWrite(spiFd, stm32_tx_buffer, 2);
         }
     }
     disarm();
