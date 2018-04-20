@@ -27,6 +27,7 @@
 #include <pid.h>
 #include <stream.h>
 #include <gps.h>
+#include <radio.h>
 
 #define GYRO_CAL 0x04
 #define BARO_DELAY 30
@@ -59,14 +60,13 @@ void shutdown() {
     pthread_join(serialThread, NULL);
     pthread_join(spiThread, NULL);
 
-    cout << "Closing I2C.\t\tFD: " << gpioI2cFd << " \tID: " << pthread_self() << endl;
-    cout << "Closing Serial.\tFD: " << serialFd << " \tID: " << pthread_self() << endl;
-    cout << "Closing SPI.\t\tFD: " << spiFd << " \tID: " << pthread_self() << endl;
+    cout << "Closing I2C, UART, SPI..." << endl;
 
     //Close ports
     spiClose(spiFd);
-    serClose(serialFd);
-    i2cClose(gpioI2cFd);
+    serClose(radioFd);
+    i2cClose(baroI2cFd);
+    i2cClose(gpsFd);
     gpioTerminate();
 
     cout << endl << "Resetting Flight Controller..." << endl << endl;

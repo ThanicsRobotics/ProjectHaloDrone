@@ -18,5 +18,5 @@ void startGPS() {
 
 void readGPS() {
     char buffer[256];
-    cout << i2cReadBlockData(gpsFd, 0xFF, &buffer);
+    cout << i2cReadBlockData(gpsFd, 0xFF, buffer);
 }

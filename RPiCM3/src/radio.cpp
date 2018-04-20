@@ -1,5 +1,3 @@
-#if 0
-
 #include <radio.h>
 #include <mavlink/common/mavlink.h>
 #include <pigpio.h>
@@ -62,7 +60,9 @@ void mavlinkReceive() {
                     mavlink_command_long_t command;
                     switch (command.command) {
                         case MAV_CMD_NAV_LAND:
+                            break;
                         case MAV_CMD_NAV_TAKEOFF:
+                            break;
                     }
                     break;
                 default:
@@ -79,4 +79,3 @@ void *serialLoop(void *void_ptr) {
     }
     return NULL;
 }
-#endif
