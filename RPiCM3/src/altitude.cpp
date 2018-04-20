@@ -27,12 +27,22 @@ void setupBarometer() {
     baroI2cFd = i2cOpen(1, BARO_ADDR, 0);       //Open I2C address
     i2cWriteByteData(baroI2cFd, 0x26, 0x98);    //Set OSR = 8         B10011000
     i2cWriteByteData(baroI2cFd, 0x13, 0x07);    //Enable Data Flags     B00000111
-    i2cWriteByteData(baroI2cFd, 0x26, 0x99);    //Set Active            B10111001
+    i2cWriteByteData(baroI2cFd, 0x26, 0x99);    //Set Active            B10011001
+    takeReading();
+}
+
+void takeReading() {
+    unsigned char config = i2cReadByteData(baroI2cFd, 0x26);
+    config &= ~(1<<1);  //Clear OST bit
+    i2cWriteByteData(baroI2cFd, 0x26, config);
+    config = i2cReadByteData(baroI2cFd, 0x26);
+    config |= (1<<1); //Set OST bit
+    i2cWriteByteData(baroI2cFd, 0x26, config);
 }
 
 void getPressureAltitude() {
     int status = i2cReadByteData(baroI2cFd, 0x00);
-    // if (status & 0x08) {
+    if (status & 0x08) {
         pressureMSB = i2cReadByteData(baroI2cFd, 0x01);
         pressureCSB = i2cReadByteData(baroI2cFd, 0x02);
         pressureLSB = i2cReadByteData(baroI2cFd, 0x03);
@@ -41,8 +51,10 @@ void getPressureAltitude() {
 
         pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
         cout << "Altitude: " << pressureAltitude << endl;
-    // }
-    // else {
-    //     cout << "Barometer not ready" << endl;
-    // }
+    }
+    else {
+        cout << "Barometer not ready" << endl;
+        takeReading();
+    }
+    takeReading();
 }

@@ -93,7 +93,7 @@ void mainLoop() {
     }
     while(run) {
         getPressureAltitude();
-        readGPS();
+        //readGPS();
         delay(100);
         // calculatePID();
         // while(millis() - loopStartTime < BARO_DELAY);
