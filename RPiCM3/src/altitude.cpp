@@ -50,9 +50,11 @@ void getPressureAltitude() {
         tempMSB = i2cReadByteData(baroI2cFd, 0x04);
         tempLSB = i2cReadByteData(baroI2cFd, 0x05);
 
-        //pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
-        bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
-        cout << "Altitude: " << x << endl;
+        pressureAltitude = (float)((int)(pressureMSB << 8 | pressureCSB));
+        if (pressureMSB >> 7) pressureAltitude += (float)((pressureLSB >> 4)/16.0);
+        else pressureAltitude -= (float)((pressureLSB >> 4)/16.0);
+        //bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
+        cout << "Altitude: " << pressureAltitude << endl;
     }
     else {
         cout << "Barometer not ready" << endl;
