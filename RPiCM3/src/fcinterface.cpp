@@ -1,7 +1,6 @@
 #include <fcinterface.h>
 #include <radio.h>
 #include <pid.h>
-#include <ultrasonic.h>
 
 #include <pigpio.h>
 #include <wiringPi.h>
@@ -26,6 +25,13 @@ volatile bool armed = false;
 volatile bool testGyro = false;
 volatile bool motorTest;
 volatile bool noMotors;
+
+//Data received from SPI
+volatile short int FCReceivedData = 0;
+
+//Gyro angle variables
+volatile signed char gyroPitch = 0;
+volatile signed char gyroRoll = 0;
 
 volatile bool run = true;
 
@@ -148,7 +154,8 @@ void *spiLoop(void *void_ptr) {
             sendThrottle();
             
             //Use SPI to get gyro angles, send throttle
-            spiWrite(spiFd, stm32_tx_buffer, 2);
+            spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
+            FCReceivedData = (short)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
         }
     }
     disarm();

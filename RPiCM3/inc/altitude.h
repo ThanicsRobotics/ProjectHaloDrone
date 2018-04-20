@@ -16,6 +16,5 @@ extern int loopStartTime;
 
 void setupBarometer();
 void getPressureAltitude();
-void calculateAbsoluteAltitude();
 
 #endif

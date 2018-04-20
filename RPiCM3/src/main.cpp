@@ -21,10 +21,9 @@
 #include <pthread.h>
 
 //Project headers
-#include <ultrasonic.h>
 #include <serial.h>
 #include <altitude.h>
-#include <spi.h>
+#include <fcinterface.h>
 #include <pid.h>
 #include <stream.h>
 #include <gps.h>
@@ -179,8 +178,8 @@ int main(int argc, char *argv[]) {
     fflush(stdout);
     int start = millis();
     int repeat = 1;
-    while (gyroRoll != GYRO_CAL) {
-        if (millis() - start > 20000) {
+    while (FCReceivedData != GYRO_CAL) {
+        if (millis() - start > 10000) {
             cout << "Gyro not responding, resetting..." << endl;
             delay(1000);
             authenticated = false;

@@ -23,6 +23,11 @@ extern volatile bool testGyro;
 extern volatile bool motorTest;
 extern volatile bool noMotors;
 
+//Gyro angle variables
+extern volatile signed char gyroPitch;
+extern volatile signed char gyroRoll;
+extern volatile short int FCReceivedData;
+
 extern volatile bool run;
 
 //CS0 is barometer, CS1 is STM32 flight controller

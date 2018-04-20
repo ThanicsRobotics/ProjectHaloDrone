@@ -1,5 +1,5 @@
 #include <serial.h>
-#include <spi.h>
+#include <fcinterface.h>
 
 #include <pigpio.h>
 #include <wiringPi.h>

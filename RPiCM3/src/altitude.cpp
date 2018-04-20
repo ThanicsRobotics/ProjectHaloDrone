@@ -1,5 +1,4 @@
 #include <altitude.h>
-#include <ultrasonic.h>
 #include <serial.h>
 #include <pid.h>
 
@@ -47,18 +46,4 @@ void getPressureAltitude() {
     else {
         cout << "Barometer not ready" << endl;
     }
-}
-
-//Using gyro angles and raw distance, calculate absolute altitude of vehicle
-void calculateAbsoluteAltitude() {
-    loopRate = 1.0 / ((millis() - loopStartTime) / 1000.0);
-    loopStartTime = millis();
-    int rawDistance = getUltrasonicData(1, 3, 30);
-    altitude = angleCorrection(rawDistance);
-    cout << "Pitch: " << (int)gyroPitch << " | Roll: " << (int)gyroRoll << endl
-        << " | Raw Distance: " << rawDistance << " | Altitude: " << altitude 
-        << " | Set Altitude: " << setAltitude << endl
-        << "RX Input: " << throttleInput << " | Throttle: " << newThrottle 
-        << " | Hz: " << loopRate << endl << endl;
-    fflush(stdout);
 }

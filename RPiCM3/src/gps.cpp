@@ -1,7 +1,8 @@
 #include <pigpio.h>
 #include <gps.h>
+#include <iostream>
 
-#define GPS_ADDR 
+#define GPS_ADDR 0x42
 
 int gpsFd;
 
