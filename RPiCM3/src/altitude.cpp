@@ -4,6 +4,7 @@
 #include <wiringPi.h>
 #include <pigpio.h>
 #include <iostream>
+#include <bitset>
 
 #define BARO_ADDR 0x60
 
@@ -49,8 +50,9 @@ void getPressureAltitude() {
         tempMSB = i2cReadByteData(baroI2cFd, 0x04);
         tempLSB = i2cReadByteData(baroI2cFd, 0x05);
 
-        pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
-        cout << "Altitude: " << pressureAltitude << endl;
+        //pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
+        bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
+        cout << "Altitude: " << x << endl;
     }
     else {
         cout << "Barometer not ready" << endl;
