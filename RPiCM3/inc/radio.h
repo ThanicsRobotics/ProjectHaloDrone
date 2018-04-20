@@ -3,11 +3,11 @@
 
 #include <stdint.h>
 
-extern int radioFd;
-extern int rollPWM;
-extern int pitchPWM;
-extern int yawPWM;
-extern int altitudePWM;
+extern volatile int radioFd;
+extern volatile int rollPWM;
+extern volatile int pitchPWM;
+extern volatile int yawPWM;
+extern volatile int altitudePWM;
 
 extern volatile bool serialConfigured;
 

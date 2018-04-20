@@ -1,5 +1,5 @@
 #include <pid.h>
-#include <serial.h>
+#include <radio.h>
 
 int pid_p_gain = 20;                    //Gain setting for the roll P-controller
 int pid_i_gain = 0;                     //Gain setting for the roll I-controller
@@ -21,9 +21,9 @@ float map(int x, int in_min, int in_max, int out_min, int out_max) {
 //Calculate throttle factor for altitude management through PID loop
 void calculatePID() {
     //Increase or decrease set altitude proportional to stick position
-    if (throttleInput < 1000) throttleInput = 1500;
-    if (throttleInput >= 1520) setAltitude += 0.2 * map(throttleInput, 1520, 2000, 1, 20);
-    else if (throttleInput <= 1480) setAltitude -= 0.2 * map(throttleInput, 1000, 1480, 20, 1);
+    if (altitudePWM < 1000) altitudePWM = 1500;
+    if (altitudePWM >= 1520) setAltitude += 0.2 * map(altitudePWM, 1520, 2000, 1, 20);
+    else if (altitudePWM <= 1480) setAltitude -= 0.2 * map(altitudePWM, 1000, 1480, 20, 1);
     if (setAltitude < 0) setAltitude = 0;
 
     pid_error_temp = (int)setAltitude - altitude;

@@ -207,8 +207,6 @@ int main(int argc, char *argv[]) {
                 shutdown();
                 exit(0);
             }
-            cout << "RX: " << throttleInput << endl;
-            fflush(stdout);
             delay(200);
         }
         armed = true;

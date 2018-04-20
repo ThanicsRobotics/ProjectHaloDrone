@@ -7,11 +7,11 @@
 #define SYSID 1
 #define COMPID 1
 
-int radioFd;
-int rollPWM;
-int pitchPWM;
-int yawPWM;
-int altitudePWM;
+volatile int radioFd;
+volatile int rollPWM;
+volatile int pitchPWM;
+volatile int yawPWM;
+volatile int altitudePWM;
 
 volatile bool serialConfigured;
 
@@ -31,11 +31,11 @@ void setupRadio() {
 void sendHeartbeat(uint8_t mode, uint8_t status) {
     mavlink_message_t msg;
     uint16_t len;
-    int8_t buf[MAVLINK_MAX_PACKET_LEN];
+    uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 
-    mavlink_msg_heartbeat_pack(SYSID, COMPID, &msg, MAV_TYPE_QUADROTOR, MAV_AUTOPILOT, mode, 0, status);
+    mavlink_msg_heartbeat_pack(SYSID, COMPID, &msg, MAV_TYPE_QUADROTOR, MAV_AUTOPILOT_GENERIC, mode, 0, status);
     len = mavlink_msg_to_send_buffer(buf, &msg);
-    serWrite(radioFd, buf, len);
+    serWrite(radioFd, (char*)buf, len);
 }
 
 void mavlinkReceive() {
