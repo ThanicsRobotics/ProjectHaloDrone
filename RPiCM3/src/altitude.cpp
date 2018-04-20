@@ -39,7 +39,7 @@ void getPressureAltitude() {
         tempMSB = i2cReadByteData(baroI2cFd, 0x04);
         tempLSB = i2cReadByteData(baroI2cFd, 0x05);
 
-        pressureAltitude = (int)((float)(pressureMSB << 8 | pressureCSB + (float)((pressureLSB >> 4)/16.0))*100);
+        pressureAltitude = (int)(((float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0))*100);
         cout << "Altitude: " << pressureAltitude << endl;
     // }
     // else {

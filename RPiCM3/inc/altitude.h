@@ -3,11 +3,11 @@
 
 extern int baroI2cFd;
 
-extern char pressureMSB;
-extern char pressureCSB;
-extern char pressureLSB;
-extern char tempMSB;
-extern char tempLSB;
+extern unsigned char pressureMSB;
+extern unsigned char pressureCSB;
+extern unsigned char pressureLSB;
+extern unsigned char tempMSB;
+extern unsigned char tempLSB;
 
 extern volatile int pressureAltitude;
 
