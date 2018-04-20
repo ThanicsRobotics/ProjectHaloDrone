@@ -3,17 +3,18 @@ CFLAGS=-Wall -Wextra -pthread
 LIBS=-lwiringPi -lrt -lpigpio
 PROJPATH=/home/pi/ProjectHaloDrone/RPiCM3
 DIR1=$(PROJPATH)/src/
-OBJ=$(patsubst %.cpp,%.o,$(wildcard $(DIR1)*.cpp))
+DIR2=$(PROJPATH)/libs/NemaTode/src/
+OBJ=$(patsubst %.cpp,%.o,$(wildcard $(DIR1)*.cpp)) $(patsubst %.cpp,%.o,$(wildcard $(DIR2)*.cpp))
 EXEC=halo
 
 all:
 	+$(MAKE) -C src
-	# +$(MAKE) -C libs
+	+$(MAKE) -C libs
 	$(CC) $(CFLAGS) $(OBJ) -o $(EXEC) $(LIBS)
 
 clean:
 	+$(MAKE) clean -C src
-	# +$(MAKE) clean -C libs
+	+$(MAKE) clean -C libs
 	rm -f $(EXEC)
 
 install:
