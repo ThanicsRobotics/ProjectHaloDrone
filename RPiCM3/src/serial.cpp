@@ -78,11 +78,11 @@ void readLine() {
     else return;
 }
 
-void *serialLoop(void *void_ptr) {
-    setupSerial();
-    while(run) {
-        readLine();
-        //delayMicroseconds(500);
-    }
-    return NULL;
-}
+// void *serialLoop(void *void_ptr) {
+//     setupSerial();
+//     while(run) {
+//         readLine();
+//         //delayMicroseconds(500);
+//     }
+//     return NULL;
+// }

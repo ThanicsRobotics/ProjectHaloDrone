@@ -1,4 +1,5 @@
 #include <radio.h>
+#include <fcinterface.h>
 #include <mavlink/common/mavlink.h>
 #include <pigpio.h>
 #include <iostream>
@@ -11,6 +12,8 @@ int rollPWM;
 int pitchPWM;
 int yawPWM;
 int altitudePWM;
+
+volatile bool serialConfigured;
 
 using namespace std;
 
@@ -27,11 +30,11 @@ void setupRadio() {
 
 void sendHeartbeat(uint8_t mode, uint8_t status) {
     mavlink_message_t msg;
-    uint8_t len;
-    uint8_t buf[MAVLINK_MAX_PACKET_LEN];
+    uint16_t len;
+    int8_t buf[MAVLINK_MAX_PACKET_LEN];
 
     mavlink_msg_heartbeat_pack(SYSID, COMPID, &msg, MAV_TYPE_QUADROTOR, MAV_AUTOPILOT, mode, 0, status);
-    uint16_t len = mavlink_msg_to_send_buffer(buf, &msg);
+    len = mavlink_msg_to_send_buffer(buf, &msg);
     serWrite(radioFd, buf, len);
 }
 

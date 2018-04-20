@@ -21,7 +21,6 @@
 #include <pthread.h>
 
 //Project headers
-#include <serial.h>
 #include <altitude.h>
 #include <fcinterface.h>
 #include <pid.h>

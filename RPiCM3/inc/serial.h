@@ -8,13 +8,12 @@ extern int charCount;
 extern char serialBuffer[100];
 extern bool wordEnd;
 extern bool coFlag;
-extern volatile bool serialConfigured;
 
 extern volatile int throttleInput;
 
 void setupSerial();
 void readChar();
 void readLine();
-void *serialLoop(void *void_ptr);
+// void *serialLoop(void *void_ptr);
 
 #endif
