@@ -1,5 +1,4 @@
 #include <altitude.h>
-#include <serial.h>
 #include <pid.h>
 
 #include <wiringPi.h>
@@ -10,11 +9,11 @@
 
 int baroI2cFd;
 
-char pressureMSB;
-char pressureCSB;
-char pressureLSB;
-char tempMSB;
-char tempLSB;
+unsigned char pressureMSB;
+unsigned char pressureCSB;
+unsigned char pressureLSB;
+unsigned char tempMSB;
+unsigned char tempLSB;
 
 volatile int pressureAltitude = 0;
 volatile int altitude = 0;
@@ -33,17 +32,17 @@ void setupBarometer() {
 
 void getPressureAltitude() {
     int status = i2cReadByteData(baroI2cFd, 0x00);
-    if (status & 0x08) {
+    // if (status & 0x08) {
         pressureMSB = i2cReadByteData(baroI2cFd, 0x01);
         pressureCSB = i2cReadByteData(baroI2cFd, 0x02);
         pressureLSB = i2cReadByteData(baroI2cFd, 0x03);
         tempMSB = i2cReadByteData(baroI2cFd, 0x04);
         tempLSB = i2cReadByteData(baroI2cFd, 0x05);
 
-        pressureAltitude = (int)((float)(pressureMSB << 16 | pressureCSB << 8 | pressureLSB)*100);
+        pressureAltitude = (int)((float)(pressureMSB << 8 | pressureCSB + (float)((pressureLSB >> 4)/16.0))*100);
         cout << "Altitude: " << pressureAltitude << endl;
-    }
-    else {
-        cout << "Barometer not ready" << endl;
-    }
+    // }
+    // else {
+    //     cout << "Barometer not ready" << endl;
+    // }
 }
