@@ -15,7 +15,7 @@ unsigned char pressureLSB;
 unsigned char tempMSB;
 unsigned char tempLSB;
 
-volatile int pressureAltitude = 0;
+volatile float pressureAltitude = 0;
 volatile int altitude = 0;
 
 float loopRate = 0.0;
@@ -27,7 +27,7 @@ void setupBarometer() {
     baroI2cFd = i2cOpen(1, BARO_ADDR, 0);       //Open I2C address
     i2cWriteByteData(baroI2cFd, 0x26, 0x98);    //Set OSR = 8         B10011000
     i2cWriteByteData(baroI2cFd, 0x13, 0x07);    //Enable Data Flags     B00000111
-    i2cWriteByteData(baroI2cFd, 0x26, 0xB9);    //Set Active            B10111001
+    i2cWriteByteData(baroI2cFd, 0x26, 0x99);    //Set Active            B10111001
 }
 
 void getPressureAltitude() {
@@ -39,7 +39,7 @@ void getPressureAltitude() {
         tempMSB = i2cReadByteData(baroI2cFd, 0x04);
         tempLSB = i2cReadByteData(baroI2cFd, 0x05);
 
-        pressureAltitude = (int)(((float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0))*100);
+        pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
         cout << "Altitude: " << pressureAltitude << endl;
     // }
     // else {
