@@ -10,11 +10,11 @@
 
 int baroI2cFd;
 
-unsigned char pressureMSB;
-unsigned char pressureCSB;
-unsigned char pressureLSB;
-unsigned char tempMSB;
-unsigned char tempLSB;
+char pressureMSB;
+char pressureCSB;
+char pressureLSB;
+char tempMSB;
+char tempLSB;
 
 volatile float pressureAltitude = 0;
 volatile int altitude = 0;
@@ -50,9 +50,7 @@ void getPressureAltitude() {
         tempMSB = i2cReadByteData(baroI2cFd, 0x04);
         tempLSB = i2cReadByteData(baroI2cFd, 0x05);
 
-        pressureAltitude = (float)((int)(pressureMSB << 8 | pressureCSB));
-        if (pressureMSB >> 7) pressureAltitude += (float)((pressureLSB >> 4)/16.0);
-        else pressureAltitude -= (float)((pressureLSB >> 4)/16.0);
+        pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
         //bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
         cout << "Altitude: " << pressureAltitude << endl;
     }
