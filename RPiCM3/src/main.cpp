@@ -161,7 +161,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    cout << "Waiting for barometer calibration";
+    fflush(stdout);
     setupBarometer();
+    cout << "Done" << endl;
+    fflush(stdout);
     startGPS();
 
     //Creating threads
