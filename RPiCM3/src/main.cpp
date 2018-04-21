@@ -168,6 +168,7 @@ int main(int argc, char *argv[]) {
     cout << "Done" << endl;
     fflush(stdout);
     startGPS();
+    Stream teleStream(TELE, "192.168.168.232", "9999", NULL);
 
     //Creating threads
     //  -> spiThread
