@@ -27,20 +27,21 @@ using namespace std;
 
 void setupBarometer() {
     baroI2cFd = i2cOpen(1, BARO_ADDR, 0);       //Open I2C address
-    i2cWriteByteData(baroI2cFd, 0x26, 0x98);    //Set OSR = 8         B10011000
+    i2cWriteByteData(baroI2cFd, 0x26, 0xB8);    //Set OSR = 8         B10011000
     i2cWriteByteData(baroI2cFd, 0x13, 0x07);    //Enable Data Flags     B00000111
-    i2cWriteByteData(baroI2cFd, 0x26, 0x99);    //Set Active            B10011001
+    i2cWriteByteData(baroI2cFd, 0x26, 0xB9);    //Set Active            B10011001
     takeReading();
 
     float altitudeSum = 0;
     //Calibrate to current altitude
-    for(int i = 0; i < 9; i++) {
+    for(int i = 0; i < 10; i++) {
         altitudeSum += getPressureAltitude();
         cout << ".";
         fflush(stdout);
     }
     surfaceAltitude = altitudeSum/10;
     cout << endl << "Surface Alt: " << surfaceAltitude << endl;
+    i2cWriteByteData(baroI2cFd, 0x2D, (int)surfaceAltitude);
 }
 
 void takeReading() {
@@ -67,11 +68,11 @@ float getPressureAltitude() {
             //bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
             //cout << "Altitude: " << pressureAltitude << endl;
             gotAltitude = true;
-            return (pressureAltitude - surfaceAltitude);
+            return pressureAltitude;
         }
         else {
             //cout << "Barometer not ready" << endl;
-            takeReading();
+            //takeReading();
         }
     }
     takeReading();
