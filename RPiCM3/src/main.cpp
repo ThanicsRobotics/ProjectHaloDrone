@@ -92,7 +92,8 @@ void mainLoop() {
         while(!armed);
     }
     while(run) {
-        getPressureAltitude();
+        altitude = getPressureAltitude();
+        cout << "Altitude: " << altitude << endl;
         //readGPS();
         delay(100);
         // calculatePID();

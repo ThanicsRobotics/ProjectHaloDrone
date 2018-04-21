@@ -17,7 +17,7 @@ int8_t tempMSB;
 int8_t tempLSB;
 
 volatile float pressureAltitude = 0;
-volatile int altitude = 0;
+volatile float altitude = 0;
 float surfaceAltitude = 0;
 
 float loopRate = 0.0;
@@ -40,6 +40,7 @@ void setupBarometer() {
         fflush(stdout);
     }
     surfaceAltitude = altitudeSum/10;
+    cout << endl << "Surface Alt: " << surfaceAltitude << endl;
 }
 
 void takeReading() {
@@ -64,12 +65,12 @@ float getPressureAltitude() {
 
             pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
             //bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
-            cout << "Altitude: " << pressureAltitude << endl;
+            //cout << "Altitude: " << pressureAltitude << endl;
             gotAltitude = true;
-            return pressureAltitude - surfaceAltitude;
+            return (pressureAltitude - surfaceAltitude);
         }
         else {
-            cout << "Barometer not ready" << endl;
+            //cout << "Barometer not ready" << endl;
             takeReading();
         }
     }

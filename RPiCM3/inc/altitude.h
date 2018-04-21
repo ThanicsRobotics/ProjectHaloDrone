@@ -19,6 +19,6 @@ extern int loopStartTime;
 
 void setupBarometer();
 void takeReading();
-void getPressureAltitude();
+float getPressureAltitude();
 
 #endif
