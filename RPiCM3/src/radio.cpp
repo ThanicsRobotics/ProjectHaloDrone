@@ -3,6 +3,7 @@
 #include <mavlink/common/mavlink.h>
 #include <pigpio.h>
 #include <iostream>
+#include <wiringPi.h>
 
 #define SYSID 1
 #define COMPID 1
@@ -78,7 +79,8 @@ void mavlinkReceive() {
 void *serialLoop(void *void_ptr) {
     setupRadio();
     while(run) {
-        mavlinkReceive();
+        //mavlinkReceive();
+        delay(1000);
     }
     return NULL;
 }

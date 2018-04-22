@@ -1,4 +1,5 @@
 #include <stream.h>
+#include <fcinterface.h>
 
 #include <stdio.h>
 #include <stdlib.h>
