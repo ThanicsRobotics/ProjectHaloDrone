@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
     cout << "Done" << endl;
     fflush(stdout);
     startGPS();
-    teleStream.openReceiveChannel();
+    teleStream.receiveData();
 
     //Creating threads
     //  -> spiThread

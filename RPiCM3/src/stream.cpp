@@ -30,20 +30,20 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-void *receiveLoop(void*) {
-    while(run) {
-        int numbytes;  
-        char buf[MAXDATASIZE];
-        if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-            perror("recv");
-            exit(1);
-        }
+// void *receiveLoop(void*) {
+//     while(run) {
+//         int numbytes;  
+//         char buf[MAXDATASIZE];
+//         if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+//             perror("recv");
+//             exit(1);
+//         }
 
-        buf[numbytes] = '\0';
+//         buf[numbytes] = '\0';
 
-        printf("client: received '%s'\n",buf);
-    }
-}
+//         printf("client: received '%s'\n",buf);
+//     }
+// }
 
 void startVideoStream(char *ip_address, char *camera_address) {
     system(("gst-launch-1.0 -v v4l2src device=" + (std::string)camera_address + " ! jpegenc ! rtpjpegpay ! udpsink host=" + (std::string)ip_address + " port=5000").c_str());
@@ -114,8 +114,22 @@ int Stream::sendData(char *data) {
     }
 }
 
-int Stream::openReceiveChannel() {
-    pthread_create(&receiveChannel, NULL, receiveLoop, NULL);
+// int Stream::openReceiveChannel() {
+//     pthread_create(&receiveChannel, NULL, receiveLoop, NULL);
+// }
+
+int Stream::receiveData() {
+    int numbytes;  
+    char buf[MAXDATASIZE];
+    
+    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+        perror("recv");
+        exit(1);
+    }
+
+    buf[numbytes] = '\0';
+
+    printf("client: received '%s'\n",buf);
 }
 
 void Stream::closeStream() {
