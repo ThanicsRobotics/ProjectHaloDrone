@@ -7,7 +7,9 @@
 class Stream {
     public:
         Stream(int streamType, char *ip_address, char *port, char *camera_address);
-        
+        void closeStream();
+        int sendData(char* data);
+        int openReceiveChannel();
 };
 
 #endif

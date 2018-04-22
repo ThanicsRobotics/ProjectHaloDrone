@@ -47,6 +47,8 @@ volatile int lastAltitude = 0;
 string camera;
 string receiver;
 
+Stream teleStream;
+
 //Shutting down threads and closing ports
 void shutdown() {
     cout << endl << "Closing Threads and Ports..." << endl << endl;
@@ -168,7 +170,9 @@ int main(int argc, char *argv[]) {
     cout << "Done" << endl;
     fflush(stdout);
     startGPS();
-    Stream teleStream(TELE, "192.168.168.232", "9999", NULL);
+    teleStream = Stream(TELE, "192.168.168.232", "9999", NULL);
+    teleStream.openReceiveChannel();
+    teleStream.closeStream();
 
     //Creating threads
     //  -> spiThread
