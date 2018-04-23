@@ -163,6 +163,11 @@ int main(int argc, char *argv[]) {
         showUsage(argv[0]);
         return 1;
     }
+    
+    for(int i = 0; i < 11; i++) {
+        teleStream.receiveData();
+    }
+    teleStream.sendData("Hello from drone");
 
     cout << "Waiting for barometer calibration";
     fflush(stdout);
@@ -170,8 +175,7 @@ int main(int argc, char *argv[]) {
     cout << "Done" << endl;
     fflush(stdout);
     startGPS();
-    teleStream.receiveData();
-
+    
     //Creating threads
     //  -> spiThread
     //  -> serialThread

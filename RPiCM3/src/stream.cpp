@@ -18,7 +18,7 @@
 
 pthread_t receiveChannel;
 int sockfd;
-char clientIP[INET6_ADDRSTRLEN];
+char serverIP[INET6_ADDRSTRLEN];
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -87,8 +87,8 @@ void startTelemetryStream(char *ip_address, char *port) {
     }
 
     inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
-            clientIP, sizeof clientIP);
-    printf("client: connecting to %s\n", clientIP);
+            serverIP, sizeof serverIP);
+    printf("client: connecting to %s\n", serverIP);
 
     freeaddrinfo(servinfo); // all done with this structure
 }
@@ -106,9 +106,10 @@ Stream::Stream(int streamType, char *ip_address, char *port, char *camera_addres
     }
 }
 
-int Stream::sendData(char *data) {
+int Stream::sendData(std::string data) {
     int numbytes;
-    if ((numbytes = send(sockfd, data, MAXDATASIZE-1, 0)) == -1) {
+    const char* newdata = data.c_str();
+    if ((numbytes = send(sockfd, newdata, MAXDATASIZE-1, 0)) == -1) {
         perror("send");
         exit(1);
     }
@@ -121,7 +122,7 @@ int Stream::sendData(char *data) {
 int Stream::receiveData() {
     int numbytes;  
     char buf[MAXDATASIZE];
-    
+
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv");
         exit(1);
@@ -133,7 +134,7 @@ int Stream::receiveData() {
 }
 
 void Stream::closeStream() {
-    printf("Closing Stream with %s\n", clientIP);
+    printf("Closing Stream with %s\n", serverIP);
     close(sockfd);
 }
 
