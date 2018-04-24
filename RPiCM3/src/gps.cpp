@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <fstream>
+#include <iomanip>
 #include <nmeaparse/nmea.h>
 
 #define GPS_ADDR 0x42
@@ -14,7 +16,6 @@ using namespace nmea;
 int gpsFd;
 NMEAParser parser;
 GPSService gps(parser);
-parser.log = false;
 
 void startGPS() {
     gps.onUpdate += [&gps](){
@@ -27,6 +28,7 @@ void startGPS() {
 		cout << "+/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
 		cout << endl;
 	};
+    parser.log = false;
 
     if ((gpsFd = i2cOpen(1, GPS_ADDR, 0)) < 0) {
         cout << "GPS Init Failed\n";
@@ -60,7 +62,7 @@ void readGPSSentence() {
     }
     cout << "GPS: " << gpsSentence << endl;
     try {
-			parser.readLine(line);
+			parser.readLine(gpsSentence);
     }
     catch (NMEAParseError& e) {
         cout << e.message << endl << endl;
