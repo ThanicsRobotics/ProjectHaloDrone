@@ -8,13 +8,13 @@
 
 #define GPS_ADDR 0x42
 
+using namespace std;
+using namespace nmea;
+
 int gpsFd;
 NMEAParser parser;
 GPSService gps(parser);
 parser.log = false;
-
-using namespace std;
-using namespace nmea;
 
 void startGPS() {
     gps.onUpdate += [&gps](){
@@ -45,10 +45,15 @@ void readGPSSentence() {
             index = 0;
             gpsSentence[index] = byte;
             index += 1;
-            while (byte != '\n') {
+            while (byte != '\n' ) {
                 byte = i2cReadByte(gpsFd);
-                gpsSentence[index] = byte;
-                index += 1;
+                if (byte < 128 && byte > 0) {
+                    gpsSentence[index] = byte;
+                    index += 1;
+                }
+            }
+            for (int i = index; i < 100; i++) {
+                gpsSentence[index] = '\0';
             }
             gpsSentenceComplete = true;
         }
