@@ -4,7 +4,7 @@
 extern int gpsFd;
 
 void startGPS();
-void readGPS();
+void readGPSSentence();
 
 
 #endif

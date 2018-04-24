@@ -96,7 +96,7 @@ void mainLoop() {
     while(run) {
         altitude = getPressureAltitude();
         cout << "Altitude: " << altitude << endl;
-        readGPS();
+        readGPSSentence();
         delay(100);
         // calculatePID();
         // while(millis() - loopStartTime < BARO_DELAY);

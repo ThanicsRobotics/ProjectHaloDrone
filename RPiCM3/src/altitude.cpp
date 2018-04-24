@@ -42,7 +42,7 @@ void setupBarometer() {
     surfaceAltitude = altitudeSum/10;
     cout << endl << "Surface Alt: " << surfaceAltitude << endl;
     delay(600);
-    i2cWriteByteData(baroI2cFd, 0x2D, (int)surfaceAltitude);
+    i2cWriteByteData(baroI2cFd, 0x2D, 0);
 }
 
 void takeReading() {
@@ -69,7 +69,7 @@ float getPressureAltitude() {
             //bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
             //cout << "Altitude: " << pressureAltitude << endl;
             gotAltitude = true;
-            return pressureAltitude;
+            return pressureAltitude - surfaceAltitude;
         }
         else {
             //cout << "Barometer not ready" << endl;
