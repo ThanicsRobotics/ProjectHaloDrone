@@ -41,6 +41,7 @@ void setupBarometer() {
     }
     surfaceAltitude = altitudeSum/10;
     cout << endl << "Surface Alt: " << surfaceAltitude << endl;
+    delay(600);
     i2cWriteByteData(baroI2cFd, 0x2D, (int)surfaceAltitude);
 }
 

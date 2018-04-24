@@ -47,7 +47,7 @@ volatile int lastAltitude = 0;
 string camera;
 string receiver;
 
-Stream teleStream(TELE, "192.168.168.232", "9999", NULL);
+//Stream teleStream(TELE, "192.168.168.232", "9999", NULL);
 
 //Shutting down threads and closing ports
 void shutdown() {
@@ -96,7 +96,7 @@ void mainLoop() {
     while(run) {
         altitude = getPressureAltitude();
         cout << "Altitude: " << altitude << endl;
-        //readGPS();
+        readGPS();
         delay(100);
         // calculatePID();
         // while(millis() - loopStartTime < BARO_DELAY);
@@ -163,14 +163,14 @@ int main(int argc, char *argv[]) {
         showUsage(argv[0]);
         return 1;
     }
-    mavlinkReceivePacket(teleStream.receiveDataPacket());
-    mavlinkReceivePacket(teleStream.receiveDataPacket());
-    mavlinkReceivePacket(teleStream.receiveDataPacket());
+    // mavlinkReceivePacket(teleStream.receiveDataPacket());
+    // mavlinkReceivePacket(teleStream.receiveDataPacket());
+    // mavlinkReceivePacket(teleStream.receiveDataPacket());
     // for(int i = 0; i < 11; i++) {
     //     teleStream.receiveDataPacket();
     // }
-    string message = "Hello from drone";
-    teleStream.sendData((uint8_t*)message.c_str(), sizeof(message));
+    // string message = "Hello from drone";
+    // teleStream.sendData((uint8_t*)message.c_str(), sizeof(message));
 
     cout << "Waiting for barometer calibration";
     fflush(stdout);
