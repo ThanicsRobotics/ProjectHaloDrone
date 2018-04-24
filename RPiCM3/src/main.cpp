@@ -68,7 +68,7 @@ void shutdown() {
     i2cClose(baroI2cFd);
     i2cClose(gpsFd);
     gpioTerminate();
-    teleStream.closeStream();
+    //teleStream.closeStream();
 
     cout << endl << "Resetting Flight Controller..." << endl << endl;
     delay(500);
@@ -79,7 +79,7 @@ void shutdown() {
 
 void mainLoop() {
     cout << "Waiting for configuration..." << endl;
-    while(!serialConfigured || !spiConfigured || !authenticated || !armed) delay(10);
+    while(!spiConfigured || !authenticated || !armed) delay(10);
     cout << "Starting main loop" << endl;
     if (testGyro) {
         while(run) {
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
     pthread_create(&spiThread, NULL, spiLoop, NULL);
 
     //Wait for gyro calibration, reset calibration if necessary
-    while(!serialConfigured || !spiConfigured || !authenticated) delay(10);
+    while(!spiConfigured || !authenticated) delay(10);
     delay(200);
     cout << "Waiting for gyro calibration..." << endl;
     fflush(stdout);

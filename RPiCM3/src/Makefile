@@ -4,7 +4,7 @@ LIBS=-lwiringPi -lrt -lpigpio
 SOURCES=$(wildcard *.cpp)
 PROJPATH=/home/pi/ProjectHaloDrone/RPiCM3
 DIR1=-I$(PROJPATH)/inc/
-DIR2=-I$(PROJPATH)/libs/NemaTode/include/nmeaparse/
+DIR2=-I$(PROJPATH)/libs/NemaTode/include/
 OBJ= $(SOURCES:.cpp=.o)
 
 all: $(OBJ)
