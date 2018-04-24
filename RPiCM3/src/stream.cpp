@@ -105,24 +105,24 @@ Stream::Stream(int streamType, char *ip_address, char *port, char *camera_addres
     }
 }
 
-int Stream::sendData(uint8_t *data)
+int Stream::sendData(uint8_t *data, uint16_t len)
 {
-    //const char* newdata = data.c_str();
     int numbytes;
-    if ((numbytes = send(sockfd, data, MAXDATASIZE-1, 0)) == -1) {
+    if ((numbytes = send(sockfd, data, len, 0)) == -1) {
         perror("send");
         exit(1);
     }
+    printf("Sent %d bytes\n", numbytes);
 }
 
 // int Stream::openReceiveChannel() {
 //     pthread_create(&receiveChannel, NULL, receiveLoop, NULL);
 // }
 
-char *Stream::receiveDataPacket()
+uint8_t *Stream::receiveDataPacket()
 {
     int numbytes;
-    char buf[MAXDATASIZE];
+    uint8_t buf[MAXDATASIZE];
 
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
         perror("recv");
@@ -131,8 +131,8 @@ char *Stream::receiveDataPacket()
 
     buf[numbytes] = '\0';
 
-    printf("client: received '%s'\n",buf);
-    char *bufPointer = buf;
+    printf("client: received %d bytes: '%s'\n", numbytes, buf);
+    uint8_t *bufPointer = buf;
     return bufPointer;
 }
 

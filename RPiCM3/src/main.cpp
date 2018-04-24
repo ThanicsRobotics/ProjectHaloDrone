@@ -164,10 +164,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     mavlinkReceivePacket(teleStream.receiveDataPacket());
-    for(int i = 0; i < 11; i++) {
-        teleStream.receiveDataPacket();
-    }
-    teleStream.sendData("Hello from drone");
+    mavlinkReceivePacket(teleStream.receiveDataPacket());
+    mavlinkReceivePacket(teleStream.receiveDataPacket());
+    // for(int i = 0; i < 11; i++) {
+    //     teleStream.receiveDataPacket();
+    // }
+    string message = "Hello from drone";
+    teleStream.sendData((uint8_t*)message.c_str(), sizeof(message));
 
     cout << "Waiting for barometer calibration";
     fflush(stdout);

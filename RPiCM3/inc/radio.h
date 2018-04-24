@@ -11,10 +11,15 @@ extern volatile int altitudePWM;
 
 extern volatile bool serialConfigured;
 
-void setupRadio();
-uint8_t *sendHeartbeat(uint8_t mode, uint8_t status);
-void mavlinkReceiveByte();
-void mavlinkReceivePacket();
+// void setupRadio();
+struct buffer {
+    uint8_t *buf;
+    uint16_t len;
+};
+
+buffer sendHeartbeat(uint8_t mode, uint8_t status);
+void mavlinkReceiveByte(uint8_t data);
+void mavlinkReceivePacket(uint8_t *packet);
 void *serialLoop(void *void_ptr);
 
 #endif
