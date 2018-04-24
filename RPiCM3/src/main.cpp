@@ -163,9 +163,9 @@ int main(int argc, char *argv[]) {
         showUsage(argv[0]);
         return 1;
     }
-    
+    mavlinkReceivePacket(teleStream.receiveDataPacket());
     for(int i = 0; i < 11; i++) {
-        teleStream.receiveData();
+        teleStream.receiveDataPacket();
     }
     teleStream.sendData("Hello from drone");
 

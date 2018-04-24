@@ -13,33 +13,44 @@ volatile int rollPWM;
 volatile int pitchPWM;
 volatile int yawPWM;
 volatile int altitudePWM;
+int controllerStatus;
 
 volatile bool serialConfigured;
 
 using namespace std;
 
-void setupRadio() {
-    if ((radioFd = serOpen("/dev/serial0", 9600, 0)) < 0) {
-        cout << "Unable to open serial interface: " << strerror(errno) << endl;
-        fflush(stdout);
-    }
-    else {
-        cout << "Opening Serial. FD: " << radioFd << " ID: " << pthread_self() << endl;
-        serialConfigured = true;
-    }
-}
+// void setupRadio() {
+//     if ((radioFd = serOpen("/dev/serial0", 9600, 0)) < 0) {
+//         cout << "Unable to open serial interface: " << strerror(errno) << endl;
+//         fflush(stdout);
+//     }
+//     else {
+//         cout << "Opening Serial. FD: " << radioFd << " ID: " << pthread_self() << endl;
+//         serialConfigured = true;
+//     }
+// }
 
-void sendHeartbeat(uint8_t mode, uint8_t status) {
+uint8_t *sendHeartbeat(uint8_t mode, uint8_t status) {
     mavlink_message_t msg;
     uint16_t len;
     uint8_t buf[MAVLINK_MAX_PACKET_LEN];
 
     mavlink_msg_heartbeat_pack(SYSID, COMPID, &msg, MAV_TYPE_QUADROTOR, MAV_AUTOPILOT_GENERIC, mode, 0, status);
     len = mavlink_msg_to_send_buffer(buf, &msg);
-    serWrite(radioFd, (char*)buf, len);
+    return buf;
 }
 
-void mavlinkReceive() {
+void mavlinkReceivePacket(char *packet) {
+    uint8_t byte = 0;
+    int i = 0;
+    while (byte != '\0') {
+        byte = packet[i];
+        mavlinkReceiveByte((uint8_t)packet[i]);
+        i += 1;
+    }
+}
+
+void mavlinkReceiveByte(uint8_t data) {
     mavlink_message_t msg;
     mavlink_status_t status;
     while (serDataAvailable(radioFd)) {
@@ -49,7 +60,9 @@ void mavlinkReceive() {
                 case MAVLINK_MSG_ID_HEARTBEAT:
                     mavlink_heartbeat_t hb;
                     mavlink_msg_heartbeat_decode(&msg, &hb);
-                    
+                    controllerStatus = hb.system_status;
+                    printf("Heartbeat from: %d, mode: %d, status: %d\n", 
+                    hb.sysid, hb.mode, controllerStatus);
                     break;
                 case MAVLINK_MSG_ID_RC_CHANNELS:
                     mavlink_rc_channels_t channels;

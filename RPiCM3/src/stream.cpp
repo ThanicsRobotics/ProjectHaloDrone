@@ -14,9 +14,8 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#define MAXDATASIZE 100 // max number of bytes we can get at once 
+#define MAXDATASIZE 500 // max number of bytes we can get at once 
 
-pthread_t receiveChannel;
 int sockfd;
 char serverIP[INET6_ADDRSTRLEN];
 
@@ -106,10 +105,11 @@ Stream::Stream(int streamType, char *ip_address, char *port, char *camera_addres
     }
 }
 
-int Stream::sendData(std::string data) {
+int Stream::sendData(uint8_t *data)
+{
+    //const char* newdata = data.c_str();
     int numbytes;
-    const char* newdata = data.c_str();
-    if ((numbytes = send(sockfd, newdata, MAXDATASIZE-1, 0)) == -1) {
+    if ((numbytes = send(sockfd, data, MAXDATASIZE-1, 0)) == -1) {
         perror("send");
         exit(1);
     }
@@ -119,8 +119,9 @@ int Stream::sendData(std::string data) {
 //     pthread_create(&receiveChannel, NULL, receiveLoop, NULL);
 // }
 
-int Stream::receiveData() {
-    int numbytes;  
+char *Stream::receiveDataPacket()
+{
+    int numbytes;
     char buf[MAXDATASIZE];
 
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
@@ -131,6 +132,8 @@ int Stream::receiveData() {
     buf[numbytes] = '\0';
 
     printf("client: received '%s'\n",buf);
+    char *bufPointer = buf;
+    return bufPointer;
 }
 
 void Stream::closeStream() {

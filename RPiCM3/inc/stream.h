@@ -11,9 +11,8 @@ class Stream {
     public:
         Stream(int streamType, char *ip_address, char *port, char *camera_address);
         void closeStream();
-        int sendData(std::string data);
-        //int openReceiveChannel();
-        int receiveData();
+        int Stream::sendData(uint8_t *data);
+        char *Stream::receiveDataPacket();
 };
 
 #endif
