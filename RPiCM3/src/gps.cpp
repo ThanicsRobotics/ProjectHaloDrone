@@ -36,9 +36,13 @@ void startGPS() {
 }
 
 void readGPSSentence() {
-    char nmeaMessage[1000];
+    char nmeaMessage[6000];
     int messageSize = i2cReadByteData(gpsFd, 0xFD) << 8 | i2cReadByteData(gpsFd, 0xFE);
     printf("size: %d\n", messageSize);
+    if (messageSize > 0) {
+        i2cReadI2CBlockData(gpsFd, 0xFF, nmeaMessage, messageSize);
+        printf("GPS:\n%s\n", nmeaMessage);
+    }
     // char gpsSentence[100];
     // i2cWriteByte(gpsFd, 0xFF);
     // bool gpsSentenceComplete = false;
