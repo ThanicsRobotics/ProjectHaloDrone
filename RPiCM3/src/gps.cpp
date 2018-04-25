@@ -36,37 +36,37 @@ void startGPS() {
 }
 
 void readGPSSentence() {
-    char nmeaMessage[6000];
-    int messageSize = i2cReadByteData(gpsFd, 0xFD) << 8 | i2cReadByteData(gpsFd, 0xFE);
-    printf("size: %d\n", messageSize);
-    if (messageSize > 0) {
-        i2cReadI2CBlockData(gpsFd, 0xFF, nmeaMessage, messageSize);
-        printf("GPS:\n%s\n", nmeaMessage);
-    }
-    // char gpsSentence[100];
-    // i2cWriteByte(gpsFd, 0xFF);
-    // bool gpsSentenceComplete = false;
-    // int index = 0;
-    // while (!gpsSentenceComplete) {
-    //     char byte = i2cReadByte(gpsFd);
-    //     if (byte == '$') {
-    //         index = 0;
-    //         gpsSentence[index] = byte;
-    //         index += 1;
-    //         while (byte != '\n' ) {
-    //             byte = i2cReadByte(gpsFd);
-    //             // if (byte < 128 && byte > 0) {
-    //                 gpsSentence[index] = byte;
-    //                 index += 1;
-    //             // }
-    //         }
-    //         for (int i = index; i < 100; i++) {
-    //             gpsSentence[index] = '\0';
-    //         }
-    //         gpsSentenceComplete = true;
-    //     }
+    // char nmeaMessage[6000];
+    // int messageSize = i2cReadByteData(gpsFd, 0xFD) << 8 | i2cReadByteData(gpsFd, 0xFE);
+    // printf("size: %d\n", messageSize);
+    // if (messageSize > 0) {
+    //     i2cReadI2CBlockData(gpsFd, 0xFF, nmeaMessage, messageSize);
+    //     printf("GPS:\n%s\n", nmeaMessage);
     // }
-    // cout << "GPS: " << gpsSentence << endl;
+    char gpsSentence[100];
+    i2cWriteByte(gpsFd, 0xFF);
+    bool gpsSentenceComplete = false;
+    int index = 0;
+    while (!gpsSentenceComplete) {
+        char byte = i2cReadByte(gpsFd);
+        if (byte == '$') {
+            index = 0;
+            gpsSentence[index] = byte;
+            index += 1;
+            while (byte != '\n' ) {
+                byte = i2cReadByte(gpsFd);
+                // if (byte < 128 && byte > 0) {
+                    gpsSentence[index] = byte;
+                    index += 1;
+                // }
+            }
+            for (int i = index; i < 100; i++) {
+                gpsSentence[index] = '\0';
+            }
+            gpsSentenceComplete = true;
+        }
+    }
+    cout << "GPS: " << gpsSentence << endl;
     // try {
 	// 		parser.readLine(gpsSentence);
     // }
