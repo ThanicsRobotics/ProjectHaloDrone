@@ -576,6 +576,11 @@ int main() {
       if (esc_2 < 1100) esc_2 = 1100;                                         //Keep the motors running.
       if (esc_3 < 1100) esc_3 = 1100;                                         //Keep the motors running.
       if (esc_4 < 1100) esc_4 = 1100;                                         //Keep the motors running.
+
+      if (esc_1 < 1010) esc_1 = 1000;                                         //Keep the motors running.
+      if (esc_2 < 1010) esc_2 = 1000;                                         //Keep the motors running.
+      if (esc_3 < 1010) esc_3 = 1000;                                         //Keep the motors running.
+      if (esc_4 < 1010) esc_4 = 1000;                                         //Keep the motors running.
       
       if (esc_1 > 2000) esc_1 = 2000;                                           //Limit the esc-1 pulse to 2000us.
       if (esc_2 > 2000) esc_2 = 2000;                                           //Limit the esc-2 pulse to 2000us.
