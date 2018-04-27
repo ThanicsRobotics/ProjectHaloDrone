@@ -4,7 +4,7 @@
 //WiringPi Library
 #include <wiringPi.h>
 
-//Standard Libraries
+//Other Libraries
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>

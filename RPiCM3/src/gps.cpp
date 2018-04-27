@@ -33,7 +33,7 @@ void startGPS() {
     // if ((gpsFd = i2cOpen(1, GPS_ADDR, 0)) < 0) {
     //     cout << "GPS Init Failed\n";
     // }
-    bbI2COpen(2,3,100000);
+    bbI2COpen(2,3,400000);
 }
 
 void bbWriteByte(uint8_t byte) {
@@ -67,17 +67,6 @@ uint8_t bbReadByte() {
 }
 
 void readGPSSentence() {
-    
-
-    uint16_t messageSize = (bbReadByteData(0xFD) << 8) | bbReadByteData(0xFE);
-    cout << "size: " << messageSize << endl;
-    //char nmeaMessage[6000];
-    //int messageSize = i2cReadByteData(gpsFd, 0xFD) << 8 | i2cReadByteData(gpsFd, 0xFE);
-    // printf("size: %d\n", messageSize);
-    // if (messageSize > 0) {
-    //     i2cReadI2CBlockData(gpsFd, 0xFF, nmeaMessage, messageSize);
-    //     printf("GPS:\n%s\n", nmeaMessage);
-    // }
     char gpsSentence[100];
     bbWriteByte(0xFF);
     bool gpsSentenceComplete = false;
@@ -110,5 +99,12 @@ void readGPSSentence() {
         // You can keep feeding data to the gps service...
         // The previous data is ignored and the parser is reset.
     }
-    cout << gps.fix.toString() << endl;
+    //cout << gps.fix.toString() << endl;
+}
+
+GPSService readGPS() {
+    for(int i = 0; i < 5; i++) {
+        readGPSSentence();
+    }
+    return gps;
 }
