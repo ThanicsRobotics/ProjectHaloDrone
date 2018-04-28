@@ -47,7 +47,7 @@ buffer sendHeartbeat(uint8_t mode, uint8_t status) {
 void mavlinkReceivePacket(uint8_t *packet) {
     uint8_t byte = 1;
     int i = 0;
-    while (byte != NULL) {
+    while (byte != '\0') {
         printf("byte %d\n", i);
         byte = packet[i];
         mavlinkReceiveByte(byte);
@@ -58,7 +58,7 @@ void mavlinkReceivePacket(uint8_t *packet) {
 void mavlinkReceiveByte(uint8_t data) {
     mavlink_message_t msg;
     mavlink_status_t status;
-    if(mavlink_parse_char(0, data, &msg, &status)) {
+    if(mavlink_parse_char(MAVLINK_COMM_0, data, &msg, &status)) {
         printf("Received message with ID %d, sequence: %d from component %d of system %d\n", msg.msgid, msg.seq, msg.compid, msg.sysid);
         // switch(msg.msgid) {
         //     case MAVLINK_MSG_ID_HEARTBEAT:
@@ -92,6 +92,11 @@ void mavlinkReceiveByte(uint8_t data) {
     }
     else printf("fail\n");
 }
+
+// receivedMessage getControllerData(Stream stream) {
+//     receivedMessage msg;
+//     mavlinkReceivePacket(stream.receiveDataPacket());
+// }
 
 void *serialLoop(void *void_ptr) {
     //setupRadio();

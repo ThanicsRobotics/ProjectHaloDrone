@@ -39,6 +39,14 @@ extern std::string projectPath;
 //Mutex for STM32 communication threading
 extern pthread_mutex_t stm32_mutex;
 
+struct fcMessage {
+    float travelAngle;
+    int pitchPWM;
+    int rollPWM;
+    int throttle;
+    int yawPWM;
+};
+
 void setupSPI();
 void arm();
 void disarm();

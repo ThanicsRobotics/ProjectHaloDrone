@@ -81,15 +81,18 @@ void startTelemetryStream(char *ip_address, char *port) {
     }
 
     if (p == NULL) {
-        fprintf(stderr, "client: failed to connect\n");
+        fprintf(stderr, "Failed to connect\n");
         exit(1);
     }
 
     inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
             serverIP, sizeof serverIP);
-    printf("client: connecting to %s\n", serverIP);
+    printf("Connecting to %s as client\n", serverIP);
 
     freeaddrinfo(servinfo); // all done with this structure
+
+    string message = "Hello from drone!\n";
+    Stream::sendData((uint8_t*)message.c_str(), sizeof(message));
 }
 
 Stream::Stream(int streamType, char *ip_address, char *port, char *camera_address) {
@@ -131,7 +134,7 @@ uint8_t *Stream::receiveDataPacket()
 
     buf[numbytes] = '\0';
 
-    printf("client: received %d bytes: '%s'\n", numbytes, buf);
+    printf("Received %d bytes: '%s'\n", numbytes, buf);
     uint8_t *bufPointer = buf;
     return bufPointer;
 }

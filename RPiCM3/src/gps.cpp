@@ -102,9 +102,8 @@ void readGPSSentence() {
     //cout << gps.fix.toString() << endl;
 }
 
-GPSService readGPS() {
+void readGPS() {
     for(int i = 0; i < 5; i++) {
         readGPSSentence();
     }
-    return gps;
 }

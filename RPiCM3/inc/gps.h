@@ -19,6 +19,7 @@ extern int gpsFd;
 
 void startGPS();
 void readGPSSentence();
-GPSService readGPS();
+void readGPS();
+extern GPSService gps;
 
 #endif

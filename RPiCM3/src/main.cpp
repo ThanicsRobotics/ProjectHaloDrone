@@ -47,7 +47,7 @@ volatile int lastAltitude = 0;
 string camera;
 string receiver;
 
-//Stream teleStream(TELE, "192.168.168.232", "9999", NULL);
+Stream teleStream(TELE, "192.168.168.232", "9999", NULL);
 
 //Shutting down threads and closing ports
 void shutdown() {
@@ -61,14 +61,13 @@ void shutdown() {
     pthread_join(serialThread, NULL);
     pthread_join(spiThread, NULL);
 
-    cout << "Closing I2C, UART, SPI..." << endl;
+    cout << "Closing I2C, UART, SPI, TCP Socket..." << endl;
 
     //Close ports
     spiClose(spiFd);
     i2cClose(baroI2cFd);
-    i2cClose(gpsFd);
     gpioTerminate();
-    //teleStream.closeStream();
+    teleStream.closeStream();
 
     cout << endl << "Resetting Flight Controller..." << endl << endl;
     delay(500);
@@ -94,12 +93,14 @@ void mainLoop() {
         while(!armed);
     }
     while(run) {
-        altitude = getPressureAltitude();
+        //altitude = getPressureAltitude();
         cout << "Altitude: " << altitude << endl;
+
+        mavlinkReceivePacket(teleStream.receiveDataPacket());
+        
         readGPSSentence();
         delay(100);
-        // calculatePID();
-        // while(millis() - loopStartTime < BARO_DELAY);
+        //calculatePID();
     }
 }
 
@@ -163,20 +164,10 @@ int main(int argc, char *argv[]) {
         showUsage(argv[0]);
         return 1;
     }
-    // mavlinkReceivePacket(teleStream.receiveDataPacket());
-    // mavlinkReceivePacket(teleStream.receiveDataPacket());
-    // mavlinkReceivePacket(teleStream.receiveDataPacket());
-    // for(int i = 0; i < 11; i++) {
-    //     teleStream.receiveDataPacket();
-    // }
-    // string message = "Hello from drone";
-    // teleStream.sendData((uint8_t*)message.c_str(), sizeof(message));
-
+    
     cout << "Waiting for barometer calibration";
     fflush(stdout);
-    setupBarometer();
-    cout << "Done" << endl;
-    fflush(stdout);
+    //setupBarometer();
     startGPS();
     
     //Creating threads
