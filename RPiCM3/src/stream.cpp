@@ -18,6 +18,7 @@
 
 int sockfd;
 char serverIP[INET6_ADDRSTRLEN];
+isActive = false;
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -28,21 +29,6 @@ void *get_in_addr(struct sockaddr *sa)
 
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
-
-// void *receiveLoop(void*) {
-//     while(run) {
-//         int numbytes;  
-//         char buf[MAXDATASIZE];
-//         if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-//             perror("recv");
-//             exit(1);
-//         }
-
-//         buf[numbytes] = '\0';
-
-//         printf("client: received '%s'\n",buf);
-//     }
-// }
 
 void startVideoStream(char *ip_address, char *camera_address) {
     system(("gst-launch-1.0 -v v4l2src device=" + (std::string)camera_address + " ! jpegenc ! rtpjpegpay ! udpsink host=" + (std::string)ip_address + " port=5000").c_str());
@@ -65,8 +51,7 @@ void startTelemetryStream(char *ip_address, char *port) {
 
     // loop through all the results and connect to the first we can
     for(p = servinfo; p != NULL; p = p->ai_next) {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype,
-                p->ai_protocol)) == -1) {
+        if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
             perror("client: socket");
             continue;
         }
@@ -91,11 +76,15 @@ void startTelemetryStream(char *ip_address, char *port) {
 
     freeaddrinfo(servinfo); // all done with this structure
 
-    string message = "Hello from drone!\n";
-    Stream::sendData((uint8_t*)message.c_str(), sizeof(message));
+    std::string message = "Hello from drone!\n";
+    this->sendData((uint8_t*)message.c_str(), sizeof(message));
 }
 
-Stream::Stream(int streamType, char *ip_address, char *port, char *camera_address) {
+Stream::Stream() {
+
+}
+
+Stream::startStream(int streamType, char *ip_address, char *port, char *camera_address) {
     switch(streamType) {
         case VIDEO:
             startVideoStream(ip_address, camera_address);

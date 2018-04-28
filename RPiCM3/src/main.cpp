@@ -34,6 +34,9 @@
 
 using namespace std;
 
+bool controllerConnected = false;
+bool streamEnabled = false;
+
 //Thread mutex and gyro thread function
 pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t spiThread, serialThread;
@@ -47,8 +50,7 @@ volatile int lastAltitude = 0;
 
 string camera;
 string receiver;
-
-Stream teleStream(TELE, "192.168.168.232", "9999", NULL);
+Stream teleStream;
 
 volatile bool keyLoopActive;
 volatile int lastKey;
@@ -71,7 +73,7 @@ void shutdown() {
     spiClose(spiFd);
     i2cClose(baroI2cFd);
     gpioTerminate();
-    teleStream.closeStream();
+    if(teleStream.isActive) teleStream.closeStream();
 
     cout << endl << "Resetting Flight Controller..." << endl << endl;
     delay(500);
@@ -144,6 +146,7 @@ void showUsage(string name) {
         << "\t-aa,--auto-arm \t\t\tDrone automatically ARMS after gyro calibration\n"
         << "\t-c,--camera [camera (ex. /dev/video0)] \tStreaming camera\n"
         << "\t-r,--receiver [IP Address] \tStreaming receiver IP Address\n"
+        << "\t-s,--stream \t\t\tEnable streaming\n"
         << endl;
 }
 
@@ -159,7 +162,6 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, signal_callback_handler);
 
     bool autoArm = false;
-    bool controllerConnected = false;
 
     //Filtering command line options
     if (argc > 1) {
@@ -184,6 +186,8 @@ int main(int argc, char *argv[]) {
             if (string(argv[i]) == "-r" || string(argv[i]) == "--receiver") {
                 receiver = string(argv[i+1]);
             }
+            if (string(argv[i]) == "-s" || string(argv[i]) == "--stream")
+                streamEnabled = true;
             if (string(argv[i]) == "-h" || string(argv[i]) == "--help") {
                 showUsage(argv[0]);
                 return 1;

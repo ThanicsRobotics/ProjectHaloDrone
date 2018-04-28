@@ -9,10 +9,13 @@
 
 class Stream {
     public:
-        Stream(int streamType, char *ip_address, char *port, char *camera_address);
+        Stream();
+        void startStream(int streamType, char *ip_address, char *port, char *camera_address);
         void closeStream();
         int sendData(uint8_t *data, uint16_t len);
         uint8_t *receiveDataPacket();
+        void startTelemetryStream(char *ip_address, char *port);
+        bool isActive;
 };
 
 #endif
