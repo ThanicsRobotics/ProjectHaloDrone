@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-Wall -Wextra -pthread
-LIBS=-lwiringPi -lrt -lpigpio -lnurses
+LIBS=-lwiringPi -lrt -lpigpio -lncurses
 PROJPATH=/home/pi/ProjectHaloDrone/RPiCM3
 DIR1=$(PROJPATH)/src/
 DIR2=$(PROJPATH)/libs/NemaTode/src/

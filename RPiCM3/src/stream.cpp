@@ -34,7 +34,7 @@ void startVideoStream(char *ip_address, char *camera_address) {
     system(("gst-launch-1.0 -v v4l2src device=" + (std::string)camera_address + " ! jpegenc ! rtpjpegpay ! udpsink host=" + (std::string)ip_address + " port=5000").c_str());
 }
 
-void startTelemetryStream(char *ip_address, char *port) {
+void Stream::startTelemetryStream(char *ip_address, char *port) {
     printf("Starting telemetry stream...\n");
 
     struct addrinfo hints, *servinfo, *p;

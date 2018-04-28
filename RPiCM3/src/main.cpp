@@ -85,7 +85,13 @@ void shutdown() {
 
 void *keyLoop(void*) {
     while (keyLoopActive) {
-        lastKey = getch();
+        int key = getch();
+        int throttle = 1000;
+        if (key == KEY_UP) throttle += 50;
+        else if (key == KEY_DOWN) throttle -= 50;
+        if (throttle < 1000) throttle = 1000;
+        if (throttle > 2000) throttle = 2000;
+        newThrottle = throttle;
         delay(50);
     }
     return NULL;
@@ -114,10 +120,15 @@ void mainLoop() {
         cbreak();
         noecho();
         printw("Welcome to Halo");
+        mvprintw(1,0,"Throttle: ");
+        refresh();
+        keyLoopActive = true;
         while(run) {  
-            printw("%d", lastKey);
+            mvprintw(1,11,"%d", newThrottle);
+            refresh();
             delay(200);
         }
+        keyLoopActive = false;
         pthread_join(keyThread, NULL);
         endwin();
     }
