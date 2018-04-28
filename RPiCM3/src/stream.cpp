@@ -18,7 +18,7 @@
 
 int sockfd;
 char serverIP[INET6_ADDRSTRLEN];
-isActive = false;
+bool isActive = false;
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -84,7 +84,7 @@ Stream::Stream() {
 
 }
 
-Stream::startStream(int streamType, char *ip_address, char *port, char *camera_address) {
+void Stream::startStream(int streamType, char *ip_address, char *port, char *camera_address) {
     switch(streamType) {
         case VIDEO:
             startVideoStream(ip_address, camera_address);

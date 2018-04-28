@@ -14,7 +14,7 @@
 //Communication Pins
 I2C i2c(PB_9,PB_8);                         //sda,scl
 //Serial pc(USBTX, USBRX);                    //tx,rx
-Serial radio(PB_6, PB_7);
+// Serial radio(PB_6, PB_7);
 SPISlave spi(PA_7, PA_6, PA_5, PA_4);       //mosi, miso, sclk, ssel
 Timer onTime;
 
@@ -25,14 +25,13 @@ DigitalOut motor3(PB_0);
 DigitalOut motor4(PB_1);
 
 //Radio Serial Buffer
-char radioBuffer[128];
+// char radioBuffer[128];
 
 //RF Protocol Coefficients
-const int throttleCoefficient = 3;
-const int rollCoefficient = 4;
-const int pitchCoefficient = 5;
-const int yawCoefficient = 6;
-bool authenticated = false;
+// const int throttleCoefficient = 3;
+// const int rollCoefficient = 4;
+// const int pitchCoefficient = 5;
+// const int yawCoefficient = 6;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
@@ -58,7 +57,7 @@ int pid_max_yaw = 400;                      //Maximum output of the PID-controll
 uint8_t last_channel_1, last_channel_2, last_channel_3, last_channel_4;
 uint8_t highByte, lowByte;
 volatile int receiver_input_roll, receiver_input_pitch, receiver_input_throttle, receiver_input_yaw;
-volatile int mod_receiver_input_throttle;
+volatile short int mod_receiver_input_throttle;
 int counter_channel_1, counter_channel_2, counter_channel_3, counter_channel_4, loop_counter;
 int esc_1, esc_2, esc_3, esc_4;
 int throttle; 
@@ -81,11 +80,14 @@ float pid_i_mem_pitch, pid_pitch_setpoint, gyro_pitch_input, pid_output_pitch, p
 float pid_i_mem_yaw, pid_yaw_setpoint, gyro_yaw_input, pid_output_yaw, pid_last_yaw_d_error;
 float angle_roll_acc, angle_pitch_acc, angle_pitch, angle_roll;
 bool gyro_angles_set;
-bool coFlag = false;
-int coefficient;
-int count = 0;
-bool wordStart = false;
-bool wordEnd = false;
+
+bool authenticated = false;
+
+// bool coFlag = false;
+// int coefficient;
+// int count = 0;
+// bool wordStart = false;
+// bool wordEnd = false;
 
 //Sends all motor PWM signals LOW
 void motors_off() {
@@ -103,76 +105,76 @@ void motors_on() {
   motor4 = 1;
 }
 
-void readline() {
-  //Read character incoming on serial bus
-  char thisChar = radio.getc();
-  //pc.printf("%c\r\n", thisChar);
+// void readline() {
+//   //Read character incoming on serial bus
+//   char thisChar = radio.getc();
+//   //pc.printf("%c\r\n", thisChar);
 
-  //Check if this character is the end of message
-  if (thisChar == '\n') {
-    wordEnd = true;
-    radioBuffer[count] = '\0';
-    count = 0;
-    return;
-  }
+//   //Check if this character is the end of message
+//   if (thisChar == '\n') {
+//     wordEnd = true;
+//     radioBuffer[count] = '\0';
+//     count = 0;
+//     return;
+//   }
 
-  //If we just finished a message, start a new one in the buffer
-  else if (wordEnd == true) {
-    radioBuffer[count] = thisChar;
-    count++;
-    wordEnd = false;
-    return;
-  }
+//   //If we just finished a message, start a new one in the buffer
+//   else if (wordEnd == true) {
+//     radioBuffer[count] = thisChar;
+//     count++;
+//     wordEnd = false;
+//     return;
+//   }
 
-  //Assign the next character to the current buffer
-  else {
-    radioBuffer[count] = thisChar;
-    count++;
-    return;
-  }
-}
+//   //Assign the next character to the current buffer
+//   else {
+//     radioBuffer[count] = thisChar;
+//     count++;
+//     return;
+//   }
+// }
 
-void updateTelemetry(int data, int myCoefficient) {
-  //Figuring out which coefficient the data corresponds to, and setting it
-  switch (myCoefficient) {
-    case throttleCoefficient:
-      receiver_input_throttle = data;
-      break;
-    case rollCoefficient:
-      receiver_input_roll = data;
-      break;
-    case pitchCoefficient:
-      receiver_input_pitch = data;
-      break;
-    case yawCoefficient:
-      receiver_input_yaw = data;
-      break;
-    default:
-      break;
-  }
-}
+// void updateTelemetry(int data, int myCoefficient) {
+//   //Figuring out which coefficient the data corresponds to, and setting it
+//   switch (myCoefficient) {
+//     case throttleCoefficient:
+//       receiver_input_throttle = data;
+//       break;
+//     case rollCoefficient:
+//       receiver_input_roll = data;
+//       break;
+//     case pitchCoefficient:
+//       receiver_input_pitch = data;
+//       break;
+//     case yawCoefficient:
+//       receiver_input_yaw = data;
+//       break;
+//     default:
+//       break;
+//   }
+// }
 
-void rxInterrupt() {
-  readline();                                                             //Read data from serial bus 
-  if (wordEnd == true) {                                                  //If we have finished a message
-    int data = (int)strtol(radioBuffer, NULL, 10);                             //Convert hex data to decimal
-    //pc.printf("%d\r\n", data);
-    if (coFlag == true && data > 999) {                                   //If we have a coefficient and data for PWM is valid
-      updateTelemetry(data, coefficient);                                 //Update the input values
-      coFlag = false;
-    }
-    else {
-      if (data < 10) {                                                    //If data is less than 10, it is a coefficient
-        coFlag = true;
-      }
-      coefficient = data;
-    }
-    memset(radioBuffer,0,sizeof(radioBuffer));
-  }
-  else {
-    return;
-  }
-}
+// void rxInterrupt() {
+//   readline();                                                             //Read data from serial bus 
+//   if (wordEnd == true) {                                                  //If we have finished a message
+//     int data = (int)strtol(radioBuffer, NULL, 10);                             //Convert hex data to decimal
+//     //pc.printf("%d\r\n", data);
+//     if (coFlag == true && data > 999) {                                   //If we have a coefficient and data for PWM is valid
+//       updateTelemetry(data, coefficient);                                 //Update the input values
+//       coFlag = false;
+//     }
+//     else {
+//       if (data < 10) {                                                    //If data is less than 10, it is a coefficient
+//         coFlag = true;
+//       }
+//       coefficient = data;
+//     }
+//     memset(radioBuffer,0,sizeof(radioBuffer));
+//   }
+//   else {
+//     return;
+//   }
+// }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Subroutine for reading the gyro
@@ -370,13 +372,15 @@ void authRasPiCM3() {
 }
 
 int main() {
+  receiver_input_pitch = receiver_input_roll = receiver_input_yaw = 1500;
+
   //Configure communications
   onTime.start();                                                             //Start loop timer
   i2c.frequency(400000);                                                      //I2C Frequency set to 400kHz
-  radio.baud(9600);                                                           //Serial Radio baud rate at 9600bps
-  radio.attach(&rxInterrupt);
+  //radio.baud(9600);                                                           //Serial Radio baud rate at 9600bps
+  //radio.attach(&rxInterrupt);
   
-  //Setup the spi for 16 bit data, mode 0 and 1.5MHz clock rate
+  //Setup the spi for 16 bit data, mode 0 and 3MHz clock rate
   spi.format(16,0);
   spi.frequency(3000000);
   
@@ -603,7 +607,7 @@ int main() {
         }
       }
     }
-    //spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
+    spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 

@@ -113,32 +113,32 @@ void mainLoop() {
         armRequest = true;
         while(!armed);
     }
-    if (!controllerConnected) {
-        pthread_t keyThread;
-        pthread_create(&keyThread, NULL, keyLoop, NULL);
-        initscr();
-        cbreak();
-        noecho();
-        printw("Welcome to Halo");
-        mvprintw(1,0,"Throttle: ");
-        refresh();
-        keyLoopActive = true;
-        while(run) {  
-            mvprintw(1,11,"%d", newThrottle);
-            refresh();
-            delay(200);
-        }
-        keyLoopActive = false;
-        pthread_join(keyThread, NULL);
-        endwin();
-    }
+    // if (!controllerConnected) {
+    //     pthread_t keyThread;
+    //     pthread_create(&keyThread, NULL, keyLoop, NULL);
+    //     initscr();
+    //     cbreak();
+    //     noecho();
+    //     printw("Welcome to Halo");
+    //     mvprintw(1,0,"Throttle: ");
+    //     refresh();
+    //     keyLoopActive = true;
+    //     while(run) {  
+    //         mvprintw(1,11,"%d", newThrottle);
+    //         refresh();
+    //         delay(200);
+    //     }
+    //     keyLoopActive = false;
+    //     pthread_join(keyThread, NULL);
+    //     endwin();
+    // }
     else {
         while(run) {
             
             //altitude = getPressureAltitude();
-            cout << "Altitude: " << altitude << endl;
+            //cout << "Altitude: " << altitude << endl;
 
-            mavlinkReceivePacket(teleStream.receiveDataPacket());
+            //mavlinkReceivePacket(teleStream.receiveDataPacket());
             
             readGPSSentence();
             delay(100);
