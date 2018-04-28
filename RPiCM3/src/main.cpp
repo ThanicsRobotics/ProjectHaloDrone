@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <string.h>
 #include <bitset>
+#include <ncurses.h>
 
 //POSIX Thread Library
 #include <pthread.h>
@@ -49,6 +50,9 @@ string receiver;
 
 Stream teleStream(TELE, "192.168.168.232", "9999", NULL);
 
+volatile bool keyLoopActive;
+volatile int lastKey;
+
 //Shutting down threads and closing ports
 void shutdown() {
     cout << endl << "Closing Threads and Ports..." << endl << endl;
@@ -74,6 +78,15 @@ void shutdown() {
     
     //Reset command to STM32
     resetSTM32F446();
+    endwin();
+}
+
+void *keyLoop(void*) {
+    while (keyLoopActive) {
+        lastKey = getch();
+        delay(50);
+    }
+    return NULL;
 }
 
 void mainLoop() {
@@ -92,15 +105,32 @@ void mainLoop() {
         armRequest = true;
         while(!armed);
     }
-    while(run) {
-        //altitude = getPressureAltitude();
-        cout << "Altitude: " << altitude << endl;
+    if (!controllerConnected) {
+        pthread_t keyThread;
+        pthread_create(&keyThread, NULL, keyLoop, NULL);
+        initscr();
+        cbreak();
+        noecho();
+        printw("Welcome to Halo");
+        while(run) {  
+            printw("%d", lastKey);
+            delay(200);
+        }
+        pthread_join(keyThread, NULL);
+        endwin();
+    }
+    else {
+        while(run) {
+            
+            //altitude = getPressureAltitude();
+            cout << "Altitude: " << altitude << endl;
 
-        mavlinkReceivePacket(teleStream.receiveDataPacket());
-        
-        readGPSSentence();
-        delay(100);
-        //calculatePID();
+            mavlinkReceivePacket(teleStream.receiveDataPacket());
+            
+            readGPSSentence();
+            delay(100);
+            //calculatePID();
+        }
     }
 }
 
