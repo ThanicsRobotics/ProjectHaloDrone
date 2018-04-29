@@ -89,7 +89,7 @@ float pid_i_mem_yaw, pid_yaw_setpoint, gyro_yaw_input, pid_output_yaw, pid_last_
 float angle_roll_acc, angle_pitch_acc, angle_pitch, angle_roll;
 bool gyro_angles_set;
 
-bool authenticated = false;
+volatile bool authenticated = false;
 
 // bool coFlag = false;
 // int coefficient;
@@ -447,7 +447,8 @@ int main() {
   spi.reply(GYRO_CAL);
 
   //Wait until the receiver is active and the throttle is set to the lower position.
-  bool armed = false;
+  volatile bool armed = false;
+  volatile bool startingLoop = true;
   bool noMotors = false;
   while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) && !armed) {
     //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
@@ -486,7 +487,7 @@ int main() {
   while(1) {
     calculate_angles();
     //For starting the motors: throttle low and yaw left (step 1)
-    if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || armed) {
+    if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || startingLoop) {
       start = 2;
 
       angle_pitch = angle_pitch_acc;                                         //Set the gyro pitch angle equal to the accelerometer pitch angle when the quadcopter is started.
@@ -501,7 +502,7 @@ int main() {
       pid_i_mem_yaw = 0;
       pid_last_yaw_d_error = 0;
 
-      armed = false;
+      startingLoop = false;
     }
     if (noMotors) start = 1;
     // //When yaw stick is back in the center position start the motors (step 2)
@@ -523,7 +524,7 @@ int main() {
     // }
 
     //Stopping the motors: throttle low and yaw right.
-    if (start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) {
+    if ((start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) || !armed) {
       start = 0;
     }
     
@@ -604,8 +605,8 @@ int main() {
     // We wait until 4000us are passed.
     if ((onTime.read_us() - loop_timer < 4000)) {
       if (spi.receive()) {
-        short int data = spi.read();
-        if (data >= 0 && data <= 1000) {
+        unsigned short int data = spi.read();
+        if (data <= 1000) {
           mod_receiver_input_throttle = data + 1000;
         }
         else {
@@ -614,14 +615,16 @@ int main() {
               spi.reply(STM32_DISARM_CONF);
               break;
             case STM32_DISARM_CONF:
-              start = 1;
+              start = 0;
               armed = false;
               break;
             case STM32_ARM_TEST:
               spi.reply(STM32_ARM_CONF);
               break;
             case STM32_ARM_CONF:
+              start = 2;
               armed = true;
+              startingLoop = true;
               break;
             default:
               break;
