@@ -18,16 +18,16 @@ NMEAParser parser;
 GPSService gps(parser);
 
 void startGPS() {
-    gps.onUpdate += [&gps](){
-		cout << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ') << gps.fix.trackingSatellites 
-        << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " ";
-		cout << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
-		cout << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h [" 
-        << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
-		cout << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E" << "  ";
-		cout << "+/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
-		cout << endl;
-	};
+    // gps.onUpdate += [&gps](){
+	// 	cout << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ') << gps.fix.trackingSatellites 
+    //     << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " ";
+	// 	cout << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
+	// 	cout << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h [" 
+    //     << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
+	// 	cout << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E" << "  ";
+	// 	cout << "+/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
+	// 	cout << endl;
+	// };
     parser.log = false;
 
     // if ((gpsFd = i2cOpen(1, GPS_ADDR, 0)) < 0) {
@@ -90,12 +90,12 @@ void readGPSSentence() {
             gpsSentenceComplete = true;
         }
     }
-    cout << "GPS: " << gpsSentence << endl;
+    //cout << "GPS: " << gpsSentence << endl;
     try {
 			parser.readLine(gpsSentence);
     }
     catch (NMEAParseError& e) {
-        cout << e.message << endl << endl;
+        //cout << e.message << endl << endl;
         // You can keep feeding data to the gps service...
         // The previous data is ignored and the parser is reset.
     }

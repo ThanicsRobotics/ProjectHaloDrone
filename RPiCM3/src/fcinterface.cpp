@@ -53,24 +53,38 @@ void setupSPI() {
 }
 
 void disarm() {
-    //send disarm command
-}
-
-void arm() {
     int data = 0;
-    
-    while ((data != STM32_ARM_CONF) && run) {
-        int armCode = STM32_ARM_TEST;
-        if (motorTest) armCode = MOTOR_TEST;
-        else if (noMotors) armCode = NO_MOTORS;
-        stm32_tx_buffer[0] = 0x00;
-        stm32_tx_buffer[1] = armCode;
+    while ((data != STM32_DISARM_CONF) && run) {
+        int disarmCode = STM32_DISARM_TEST;
+        stm32_tx_buffer[0] = (disarmCode >> 8) & 0xFF;
+        stm32_tx_buffer[1] = disarmCode & 0xFF;
         spiWrite(spiFd, stm32_tx_buffer, 2);
         delay(5);
 
         spiXfer(spiFd, stm32_tx_buffer, stm32_tx_buffer, 2);
         data = stm32_tx_buffer[0] << 8 | stm32_tx_buffer[1];
-        cout << "ARM Response: " << data << endl;
+        //cout << "ARM Response: " << data << endl;
+        spiWrite(spiFd, stm32_tx_buffer, 2);
+        
+        delay(50);
+    }
+    armed = false;
+}
+
+void arm() {
+    int data = 0;
+    while ((data != STM32_ARM_CONF) && run) {
+        int armCode = STM32_ARM_TEST;
+        if (motorTest) armCode = MOTOR_TEST;
+        else if (noMotors) armCode = NO_MOTORS;
+        stm32_tx_buffer[0] = (armCode >> 8) & 0xFF;
+        stm32_tx_buffer[1] = armCode & 0xFF;
+        spiWrite(spiFd, stm32_tx_buffer, 2);
+        delay(5);
+
+        spiXfer(spiFd, stm32_tx_buffer, stm32_tx_buffer, 2);
+        data = stm32_tx_buffer[0] << 8 | stm32_tx_buffer[1];
+        //cout << "ARM Response: " << data << endl;
         spiWrite(spiFd, stm32_tx_buffer, 2);
         
         delay(50);
@@ -135,12 +149,16 @@ void *spiLoop(void *void_ptr) {
     authFlightController();
     while(run) {
         if (armRequest) {
-            cout << "Arming..." << endl;
+            //cout << "Arming..." << endl;
             arm();
             armRequest = false;
         }
+        else if (disarmRequest) {
+            disarm();
+            disarmRequest = false;
+        }
         else if (authRequest) {
-            cout << "Authenticating..." << endl;
+            //cout << "Authenticating..." << endl;
             authFlightController();
             authRequest = false;
         }
@@ -149,14 +167,14 @@ void *spiLoop(void *void_ptr) {
             gyroPitch = (signed char)stm32_rx_buffer[0];
             gyroRoll = (signed char)stm32_rx_buffer[1];
         }
-        else {
-            //Calculate new PID compensated throttle
-            sendThrottle();
-            
-            //Use SPI to get gyro angles, send throttle
-            spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
-            FCReceivedData = (short)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
-        }
+        
+        //Calculate new PID compensated throttle
+        sendThrottle();
+        
+        //Use SPI to get gyro angles, send throttle
+        spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
+        FCReceivedData = (short)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
+        
     }
     disarm();
     return NULL;

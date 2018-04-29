@@ -31,6 +31,10 @@
 
 #define GYRO_CAL 0x04
 #define BARO_DELAY 30
+#define a_KEY 97
+#define d_KEY 100
+#define UP_ARROW_KEY 65
+#define DOWN_ARROW_KEY 66
 
 using namespace std;
 
@@ -57,11 +61,12 @@ volatile int lastKey;
 
 //Shutting down threads and closing ports
 void shutdown() {
-    cout << endl << "Closing Threads and Ports..." << endl << endl;
-    
     //Stop threads
     run = false;
     //delay(1000);
+    endwin();
+
+    cout << endl << "Closing Threads and Ports..." << endl << endl;
 
     //Join Threads to main  
     pthread_join(serialThread, NULL);
@@ -80,17 +85,19 @@ void shutdown() {
     
     //Reset command to STM32
     resetSTM32F446();
-    endwin();
 }
 
 void *keyLoop(void*) {
+    int throttle = 1000;
+    keyLoopActive = true;
     while (keyLoopActive) {
         int key = getch();
-        int throttle = 1000;
-        if (key == KEY_UP) throttle += 50;
-        else if (key == KEY_DOWN) throttle -= 50;
+        if (!armed && key == a_KEY) armRequest = true;
+        else if (armed && key == d_KEY) disarmRequest = true;
+        else if (key == UP_ARROW_KEY) throttle += 50;
+        else if (key == DOWN_ARROW_KEY) throttle -= 50;
         if (throttle < 1000) throttle = 1000;
-        if (throttle > 2000) throttle = 2000;
+        else if (throttle > 2000) throttle = 2000;
         newThrottle = throttle;
         delay(50);
     }
@@ -99,7 +106,7 @@ void *keyLoop(void*) {
 
 void mainLoop() {
     cout << "Waiting for configuration..." << endl;
-    while(!spiConfigured || !authenticated || !armed) delay(10);
+    while(!spiConfigured || !authenticated) delay(10);
     cout << "Starting main loop" << endl;
     if (testGyro) {
         while(run) {
@@ -113,25 +120,31 @@ void mainLoop() {
         armRequest = true;
         while(!armed);
     }
-    // if (!controllerConnected) {
-    //     pthread_t keyThread;
-    //     pthread_create(&keyThread, NULL, keyLoop, NULL);
-    //     initscr();
-    //     cbreak();
-    //     noecho();
-    //     printw("Welcome to Halo");
-    //     mvprintw(1,0,"Throttle: ");
-    //     refresh();
-    //     keyLoopActive = true;
-    //     while(run) {  
-    //         mvprintw(1,11,"%d", newThrottle);
-    //         refresh();
-    //         delay(200);
-    //     }
-    //     keyLoopActive = false;
-    //     pthread_join(keyThread, NULL);
-    //     endwin();
-    // }
+    if (!controllerConnected) {
+        pthread_t keyThread;
+        pthread_create(&keyThread, NULL, keyLoop, NULL);
+        initscr();
+        cbreak();
+        noecho();
+        printw("Welcome to Halo");
+        mvprintw(1,0,"Press 'a' to arm: currently NOT ARMED");
+        mvprintw(2,0,"Throttle: ");
+        mvprintw(3,0,"GPS Status: ");
+        refresh();
+        keyLoopActive = true;
+        while(run) {
+            if (armed) mvprintw(1,0,"Press 'd' to disarm: currently *ARMED*");
+            if (!armed) mvprintw(1,0,"Press 'a' to arm: currently NOT ARMED");
+            readGPS();
+            mvprintw(2,11,"%d", newThrottle);
+            mvprintw(3,13,"%c", gps.fix.status);
+            refresh();
+            //delay(200);
+        }
+        keyLoopActive = false;
+        pthread_join(keyThread, NULL);
+        endwin();
+    }
     else {
         while(run) {
             
@@ -271,18 +284,18 @@ int main(int argc, char *argv[]) {
     }
 
     //Manual arming process through SSH
-    else {
-        cout << "Type 'ARM' to arm the quadcopter: ";
-        string input = "";
-        getline(cin, input);
-        if (input == "ARM") {
-            armRequest = true;
-        }
-        else {
-            shutdown();
-            exit(1);
-        }
-    }
+    // else {
+    //     cout << "Type 'ARM' to arm the quadcopter: ";
+    //     string input = "";
+    //     getline(cin, input);
+    //     if (input == "ARM") {
+    //         armRequest = true;
+    //     }
+    //     else {
+    //         shutdown();
+    //         exit(1);
+    //     }
+    // }
 
     //Start main loop
     mainLoop();

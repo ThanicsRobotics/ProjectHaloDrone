@@ -6,8 +6,10 @@
 
 #define AUTH_KEY 0xF9
 #define GYRO_CAL 0x04
-#define STM32_ARM_TEST 0x9F
-#define STM32_ARM_CONF 0x0A
+#define STM32_ARM_TEST 0xFF9F
+#define STM32_ARM_CONF 0xFF0A
+#define STM32_DISARM_TEST 0xFF8F
+#define STM32_DISARM_CONF 0xFFFB
 #define MOTOR_TEST 0x0F
 #define NO_MOTORS 0x0E
 
@@ -17,6 +19,12 @@ I2C i2c(PB_9,PB_8);                         //sda,scl
 // Serial radio(PB_6, PB_7);
 SPISlave spi(PA_7, PA_6, PA_5, PA_4);       //mosi, miso, sclk, ssel
 Timer onTime;
+
+// Motor Directions:
+// Front Right: CCW
+// Front Left: CW
+// Rear Right: CW
+// Rear Left: CCW
 
 //PWM Motor Pins
 DigitalOut motor1(PC_5);
@@ -580,11 +588,6 @@ int main() {
       if (esc_2 < 1100) esc_2 = 1100;                                         //Keep the motors running.
       if (esc_3 < 1100) esc_3 = 1100;                                         //Keep the motors running.
       if (esc_4 < 1100) esc_4 = 1100;                                         //Keep the motors running.
-
-      if (esc_1 < 1010) esc_1 = 1000;                                         //Keep the motors running.
-      if (esc_2 < 1010) esc_2 = 1000;                                         //Keep the motors running.
-      if (esc_3 < 1010) esc_3 = 1000;                                         //Keep the motors running.
-      if (esc_4 < 1010) esc_4 = 1000;                                         //Keep the motors running.
       
       if (esc_1 > 2000) esc_1 = 2000;                                           //Limit the esc-1 pulse to 2000us.
       if (esc_2 > 2000) esc_2 = 2000;                                           //Limit the esc-2 pulse to 2000us.
@@ -604,6 +607,25 @@ int main() {
         short int data = spi.read();
         if (data >= 0 && data <= 1000) {
           mod_receiver_input_throttle = data + 1000;
+        }
+        else {
+          switch (data) {
+            case STM32_DISARM_TEST:
+              spi.reply(STM32_DISARM_CONF);
+              break;
+            case STM32_DISARM_CONF:
+              start = 1;
+              armed = false;
+              break;
+            case STM32_ARM_TEST:
+              spi.reply(STM32_ARM_CONF);
+              break;
+            case STM32_ARM_CONF:
+              armed = true;
+              break;
+            default:
+              break;
+          }
         }
       }
     }
