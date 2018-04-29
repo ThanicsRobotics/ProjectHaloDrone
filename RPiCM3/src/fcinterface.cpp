@@ -20,6 +20,7 @@ volatile bool spiConfigured = false;
 volatile bool authenticated = false;
 
 volatile bool armRequest = false;
+volatile bool disarmRequest = false;
 volatile bool authRequest = false;
 volatile bool armed = false;
 volatile bool testGyro = false;
@@ -39,15 +40,13 @@ volatile bool run = true;
 volatile int SPI_CS = 0;
 volatile int spiFd;
 
-using namespace std;
-
 void setupSPI() {
     if ((spiFd = spiOpen(SPI_CS, 3000000, 0)) < 0) {
-        cout << "SPI failed: " << strerror(errno) << endl;
+        std::cout << "SPI failed: " << strerror(errno) << "\n";
         exit(1);
     }
     else {
-        cout << "Opening SPI. FD: " << spiFd << " ID: " << pthread_self() << endl;
+        std::cout << "Opening SPI. FD: " << spiFd << " ID: " << pthread_self() << "\n";
         spiConfigured = true;
     }
 }
@@ -63,7 +62,7 @@ void disarm() {
 
         spiXfer(spiFd, stm32_tx_buffer, stm32_tx_buffer, 2);
         data = stm32_tx_buffer[0] << 8 | stm32_tx_buffer[1];
-        //cout << "ARM Response: " << data << endl;
+        //std::cout << "ARM Response: " << data << endl;
         spiWrite(spiFd, stm32_tx_buffer, 2);
         
         delay(50);
@@ -84,7 +83,7 @@ void arm() {
 
         spiXfer(spiFd, stm32_tx_buffer, stm32_tx_buffer, 2);
         data = stm32_tx_buffer[0] << 8 | stm32_tx_buffer[1];
-        //cout << "ARM Response: " << data << endl;
+        //std::cout << "ARM Response: " << data << endl;
         spiWrite(spiFd, stm32_tx_buffer, 2);
         
         delay(50);
@@ -107,7 +106,7 @@ void authFlightController() {
     authenticated = false;
     char buffer[100];
     unsigned int authKey = 0;
-    cout << "Authenticating..." << endl;
+    std::cout << "Authenticating...\n";
     int start = millis();
     while(authKey != AUTH_KEY) {
         //Write to Authentication register
@@ -119,7 +118,7 @@ void authFlightController() {
         //Get Auth Key and send it back
         spiXfer(spiFd, buffer, buffer, 2);
         authKey = buffer[0] << 8 | buffer[1];
-        cout << "Key: " << authKey << endl;
+        std::cout << "Key: " << authKey << "\n";
         spiWrite(spiFd, buffer, 2);
         
         delay(50);
@@ -127,7 +126,7 @@ void authFlightController() {
             exit(1);
         }
     }
-    cout << "Authenticated" << endl;
+    std::cout << "Authenticated\n";
     authenticated = true;
 }
 
@@ -139,7 +138,7 @@ void sendThrottle() {
     
     //CLOCK SPEED TEST
     //unsigned long int clockspeed = buffer[1];
-    //cout << " | Clock: " << clockspeed << endl;
+    //std::cout << " | Clock: " << clockspeed << endl;
 }
 
 void *spiLoop(void *void_ptr) {
@@ -149,7 +148,7 @@ void *spiLoop(void *void_ptr) {
     authFlightController();
     while(run) {
         if (armRequest) {
-            //cout << "Arming..." << endl;
+            //std::cout << "Arming..." << endl;
             arm();
             armRequest = false;
         }
@@ -158,7 +157,7 @@ void *spiLoop(void *void_ptr) {
             disarmRequest = false;
         }
         else if (authRequest) {
-            //cout << "Authenticating..." << endl;
+            //std::cout << "Authenticating..." << endl;
             authFlightController();
             authRequest = false;
         }
@@ -176,6 +175,6 @@ void *spiLoop(void *void_ptr) {
         FCReceivedData = (short)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
         
     }
-    disarm();
+    if (armed) disarm();
     return NULL;
 }

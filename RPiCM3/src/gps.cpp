@@ -10,12 +10,9 @@
 
 #define GPS_ADDR 0x42
 
-using namespace std;
-using namespace nmea;
-
 int gpsFd;
-NMEAParser parser;
-GPSService gps(parser);
+nmea::NMEAParser parser;
+nmea::GPSService gps(parser);
 
 void startGPS() {
     // gps.onUpdate += [&gps](){
@@ -94,7 +91,7 @@ void readGPSSentence() {
     try {
 			parser.readLine(gpsSentence);
     }
-    catch (NMEAParseError& e) {
+    catch (nmea::NMEAParseError& e) {
         //cout << e.message << endl << endl;
         // You can keep feeding data to the gps service...
         // The previous data is ignored and the parser is reset.
