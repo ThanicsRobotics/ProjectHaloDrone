@@ -55,13 +55,16 @@ std::string receiver;
 Stream teleStream;
 
 volatile bool keyLoopActive;
+volatile bool shuttingDown = false;
+volatile bool doneShuttingDown = false;
 volatile int lastKey;
 
 //Shutting down threads and closing ports
 void shutdown() {
+    shuttingDown = true;
     //Stop threads
     run = false;
-    delay(1000);
+    delay(2000);
     endwin();
 
     std::cout << "\nClosing Threads and Ports...\n\n";
@@ -83,6 +86,7 @@ void shutdown() {
     
     //Reset command to STM32
     resetSTM32F446();
+    doneShuttingDown = true;
 }
 
 void *keyLoop(void*) {
@@ -129,22 +133,22 @@ void mainLoop() {
         mvprintw(1,0,"Press 'a' to arm: currently NOT ARMED");
         mvprintw(2,0,"Throttle: ");
         mvprintw(3,0,"GPS Status: ");
-        mvprintw(4,0,"Last Key: ")
+        mvprintw(4,0,"Last Key: ");
         refresh();
         keyLoopActive = true;
         while(run) {
             if (armed) mvprintw(1,0,"Press 'd' to disarm: currently *ARMED*");
             if (!armed) mvprintw(1,0,"Press 'a' to arm: currently NOT ARMED");
-            readGPS();
+            //readGPS();
             mvprintw(2,11,"%d", newThrottle);
-            mvprintw(3,13,"%c", gps.fix.status);
+            //mvprintw(3,13,"%c", gps.fix.status);
             mvprintw(4,11,"%d", lastKey);
             refresh();
             //delay(200);
         }
         keyLoopActive = false;
+        delay(1000);
         pthread_join(keyThread, NULL);
-        endwin();
     }
     else {
         while(run) {
@@ -299,12 +303,14 @@ int main(int argc, char *argv[]) {
     //Start main loop
     mainLoop();
     delay(2000);
+    if (!shuttingDown) shutdown();
+    while (!doneShuttingDown);
     return 0;
 }
 
 void signal_callback_handler(int signum) {
-    shutdown();
-
+    if (!shuttingDown) shutdown();
+    while (!doneShuttingDown);
     std::cout << "\nProgram End\n";
     delay(1000);
 	exit(0);
