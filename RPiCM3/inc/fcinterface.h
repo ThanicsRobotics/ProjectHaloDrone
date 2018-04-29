@@ -56,6 +56,6 @@ void disarm();
 void resetSTM32F446();
 void authFlightController();
 void sendThrottle();
-void *spiLoop(void *void_ptr);
+void *spiLoop(void*);
 
 #endif

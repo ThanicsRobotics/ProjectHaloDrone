@@ -141,8 +141,8 @@ void sendThrottle() {
     //std::cout << " | Clock: " << clockspeed << endl;
 }
 
-void *spiLoop(void *void_ptr) {
-    //Switch to flight controller, setup SPI @ 1.5MHz
+void *spiLoop(void*) {
+    //Switch to flight controller, setup SPI @ 3MHz
     SPI_CS = 0;
     setupSPI();
     authFlightController();

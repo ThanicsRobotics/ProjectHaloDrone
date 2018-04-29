@@ -98,7 +98,7 @@ void mavlinkReceiveByte(uint8_t data) {
 //     mavlinkReceivePacket(stream.receiveDataPacket());
 // }
 
-void *serialLoop(void *void_ptr) {
+void *serialLoop(void*) {
     //setupRadio();
     while(run) {
         //mavlinkReceive();

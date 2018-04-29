@@ -139,6 +139,9 @@ void mainLoop() {
         while(run) {
             if (armed) mvprintw(1,0,"Press 'd' to disarm: currently *ARMED*");
             if (!armed) mvprintw(1,0,"Press 'a' to arm: currently NOT ARMED");
+            mvprintw(5,0,"Arm Request: %d", armRequest);
+            mvprintw(6,0,"Disarm Request: %d", disarmRequest);
+            mvprintw(7,0,"Auth Request: %d", authRequest);
             //readGPS();
             mvprintw(2,11,"%d", newThrottle);
             //mvprintw(3,13,"%c", gps.fix.status);

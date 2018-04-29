@@ -458,7 +458,7 @@ int main() {
     int start = onTime.read_us();
     while (onTime.read_us() - start < 3000) {
       if (spi.receive()) {
-        int data = spi.read();
+        unsigned short int data = spi.read();
         if (data == STM32_ARM_TEST) spi.reply(STM32_ARM_CONF);
         if (data == STM32_ARM_CONF) armed = true;
         if (data == MOTOR_TEST) {
@@ -613,6 +613,8 @@ int main() {
           switch (data) {
             case STM32_DISARM_TEST:
               spi.reply(STM32_DISARM_CONF);
+              start = 0;
+              armed = false;
               break;
             case STM32_DISARM_CONF:
               start = 0;
@@ -620,6 +622,9 @@ int main() {
               break;
             case STM32_ARM_TEST:
               spi.reply(STM32_ARM_CONF);
+              start = 2;
+              armed = true;
+              startingLoop = true;
               break;
             case STM32_ARM_CONF:
               start = 2;
@@ -632,6 +637,7 @@ int main() {
         }
       }
     }
+
     spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.

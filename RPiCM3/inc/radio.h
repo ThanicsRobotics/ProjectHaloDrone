@@ -29,6 +29,6 @@ struct receivedMessage {
 buffer sendHeartbeat(uint8_t mode, uint8_t status);
 void mavlinkReceiveByte(uint8_t data);
 void mavlinkReceivePacket(uint8_t *packet);
-void *serialLoop(void *void_ptr);
+void *serialLoop(void*);
 
 #endif
