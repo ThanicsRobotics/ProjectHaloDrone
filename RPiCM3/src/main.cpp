@@ -17,6 +17,7 @@
 #include <string.h>
 #include <bitset>
 #include <ncurses.h>
+#include <sys/ioctl.h>
 
 //POSIX Thread Library
 #include <pthread.h>
@@ -32,6 +33,7 @@
 #define GYRO_CAL 0x04
 #define BARO_DELAY 30
 #define a_KEY 97
+#define c_KEY 99
 #define d_KEY 100
 #define UP_ARROW_KEY 65
 #define DOWN_ARROW_KEY 66
@@ -57,6 +59,7 @@ Stream teleStream;
 volatile bool keyLoopActive;
 volatile bool shuttingDown = false;
 volatile bool doneShuttingDown = false;
+volatile bool startCli = false;
 volatile int lastKey;
 
 //Shutting down threads and closing ports
@@ -89,22 +92,88 @@ void shutdown() {
     doneShuttingDown = true;
 }
 
-void *keyLoop(void*) {
-    int throttle = 1000;
+// void *keyLoop(void*) {
+//     int throttle = 1000;
+//     keyLoopActive = true;
+//     keypad(stdscr, true);
+//     while (keyLoopActive) {
+//         int key = getch();
+//         lastKey = key;
+//         if (!armed && key == a_KEY) armRequest = true;
+//         else if (armed && key == d_KEY) disarmRequest = true;
+//         // else if (key == c_KEY) {
+//         //     startCli = true;
+//         //     while (startCli) {
+//         //         int key = getch();
+//         //         if (key == 27) startCli = false;
+//         //     }
+//         // }
+//         else if (key == KEY_UP) throttle += 50;
+//         else if (key == KEY_DOWN) throttle -= 50;
+//         if (throttle < 1000) throttle = 1000;
+//         else if (throttle > 2000) throttle = 2000;
+//         newThrottle = throttle;
+//         delay(50);
+//     }
+//     return NULL;
+// }
+
+// void openCli() {
+//     int yMax, xMax;
+//     getmaxyx(stdscr, yMax, xMax);
+//     WINDOW *cliWindow = newwin(20, xMax, 8, 0);
+//     keypad(cliWindow, true);
+//     mvwprintw(cliWindow, 0,0,"Command Line:");
+// }
+
+void motorThrottleTest() {
+    int yMax, xMax;
+    getmaxyx(stdscr, yMax, xMax);
+    WINDOW *win = newwin(yMax, xMax, 0,0);
+    keypad(win, true);
+    mvwprintw(win,1,0,"Press 'a' to arm: currently NOT ARMED");
+    mvwprintw(win,2,0,"Throttle: ");
+    //mvprintw(3,0,"GPS Status: ");
+    mvwprintw(win,4,0,"Last Key: ");
+    //mvprintw(8,0,"Press 'c' to open command line");
+    refresh();
     keyLoopActive = true;
-    while (keyLoopActive) {
-        int key = getch();
-        lastKey = key;
+    int key = 0;
+    while(run) {
+        if (armed) mvwprintw(win,1,0,"Press 'd' to disarm: currently *ARMED*");
+        if (!armed) mvwprintw(win,1,0,"Press 'a' to arm: currently NOT ARMED");
         if (!armed && key == a_KEY) armRequest = true;
         else if (armed && key == d_KEY) disarmRequest = true;
-        else if (key == UP_ARROW_KEY) throttle += 50;
-        else if (key == DOWN_ARROW_KEY) throttle -= 50;
+        else if (key == KEY_UP) throttle += 50;
+        else if (key == KEY_DOWN) throttle -= 50;
+        else if (key == 27) break;
         if (throttle < 1000) throttle = 1000;
         else if (throttle > 2000) throttle = 2000;
         newThrottle = throttle;
-        delay(50);
+
+        mvwprintw(win,5,0,"Arm Request: %d", armRequest);
+        mvwprintw(win,6,0,"Disarm Request: %d", disarmRequest);
+        mvwprintw(win,7,0,"Auth Request: %d", authRequest);
+        //readGPS();
+        mvwprintw(win,2,11,"%d", newThrottle);
+        //mvprintw(3,13,"%c", gps.fix.status);
+        mvwprintw(win,4,11,"%d ", lastKey);
+        refresh();
+        //if (startCli) openCli();
+        key = getch();
     }
-    return NULL;
+    delwin(win);
+}
+void serialConsole() {
+    int yMax, xMax;
+    getmaxyx(stdscr, yMax, xMax);
+    WINDOW *win = newwin(yMax, xMax, 0,0);
+    mvwprintw(win,1,0,"Serial Console");
+    mvwprintw(win,2,0,"Send Message: ");
+    echo();
+    getstr();
+    noecho();
+    delwin(win);
 }
 
 void mainLoop() {
@@ -124,34 +193,46 @@ void mainLoop() {
         while(!armed);
     }
     if (!controllerConnected) {
-        pthread_t keyThread;
-        pthread_create(&keyThread, NULL, keyLoop, NULL);
+        //pthread_t keyThread;
+        //pthread_create(&keyThread, NULL, keyLoop, NULL);
         initscr();
         cbreak();
         noecho();
-        printw("Welcome to Halo");
-        mvprintw(1,0,"Press 'a' to arm: currently NOT ARMED");
-        mvprintw(2,0,"Throttle: ");
-        mvprintw(3,0,"GPS Status: ");
-        mvprintw(4,0,"Last Key: ");
-        refresh();
-        keyLoopActive = true;
-        while(run) {
-            if (armed) mvprintw(1,0,"Press 'd' to disarm: currently *ARMED*");
-            if (!armed) mvprintw(1,0,"Press 'a' to arm: currently NOT ARMED");
-            mvprintw(5,0,"Arm Request: %d", armRequest);
-            mvprintw(6,0,"Disarm Request: %d", disarmRequest);
-            mvprintw(7,0,"Auth Request: %d", authRequest);
-            //readGPS();
-            mvprintw(2,11,"%d", newThrottle);
-            //mvprintw(3,13,"%c", gps.fix.status);
-            mvprintw(4,11,"%d", lastKey);
-            refresh();
-            //delay(200);
+        keypad(stdscr, true);
+        printw("Welcome to Halo -- CTRL-C to quit");
+        mvprintw(1,0,"Options:");
+
+        //Setup Menu
+        std::string options[2] = {"Motor Throttle Test", "Serial Console"};
+        int choice;
+        int highlight = 0;
+        while(1) {
+            while(1) {
+                for(int i = 0; i < 2; i++) {
+                    if (i == highlight) attron(A_REVERSE);
+                    mvprintw(i+2, 1, options[i].c_str());
+                    attroff(A_REVERSE);
+                }
+                choice = getch();
+                switch (choice) {
+                    case KEY_UP:
+                        highlight = (highlight == -1) ? 0 : highlight - 1;
+                        break;
+                    case KEY_DOWN:
+                        highlight = (highlight == 2) ? 1 : highlight + 1;
+                        break;
+                    default:
+                        break;
+                }
+                if (choice == 10) break;
+            }
+            if (highlight == 0) motorThrottleTest();
+            if (highlight == 1) serialConsole();
         }
-        keyLoopActive = false;
-        delay(1000);
-        pthread_join(keyThread, NULL);
+        
+        //keyLoopActive = false;
+        //delay(1000);
+        //pthread_join(keyThread, NULL);
     }
     else {
         while(run) {
