@@ -136,9 +136,10 @@ void motorThrottleTest() {
     //mvprintw(3,0,"GPS Status: ");
     mvwprintw(win,4,0,"Last Key: ");
     //mvprintw(8,0,"Press 'c' to open command line");
-    refresh();
+    wrefresh(win);
     keyLoopActive = true;
     int key = 0;
+    int throttle = 1000;
     while(run) {
         if (armed) mvwprintw(win,1,0,"Press 'd' to disarm: currently *ARMED*");
         if (!armed) mvwprintw(win,1,0,"Press 'a' to arm: currently NOT ARMED");
@@ -158,9 +159,9 @@ void motorThrottleTest() {
         mvwprintw(win,2,11,"%d", newThrottle);
         //mvprintw(3,13,"%c", gps.fix.status);
         mvwprintw(win,4,11,"%d ", lastKey);
-        refresh();
+        wrefresh(win);
         //if (startCli) openCli();
-        key = getch();
+        key = wgetch(win);
     }
     delwin(win);
 }
@@ -169,9 +170,11 @@ void serialConsole() {
     getmaxyx(stdscr, yMax, xMax);
     WINDOW *win = newwin(yMax, xMax, 0,0);
     mvwprintw(win,1,0,"Serial Console");
+    char *msg;
     mvwprintw(win,2,0,"Send Message: ");
+    wrefresh(win);
     echo();
-    getstr();
+    wgetstr(win, msg);
     noecho();
     delwin(win);
 }
@@ -216,10 +219,10 @@ void mainLoop() {
                 choice = getch();
                 switch (choice) {
                     case KEY_UP:
-                        highlight = (highlight == -1) ? 0 : highlight - 1;
+                        highlight = (highlight == 0) ? 0 : highlight - 1;
                         break;
                     case KEY_DOWN:
-                        highlight = (highlight == 2) ? 1 : highlight + 1;
+                        highlight = (highlight == 1) ? 1 : highlight + 1;
                         break;
                     default:
                         break;
