@@ -163,6 +163,7 @@ void motorThrottleTest() {
         //if (startCli) openCli();
         key = wgetch(win);
     }
+    wclear(win);
     delwin(win);
 }
 void serialConsole() {
@@ -202,14 +203,14 @@ void mainLoop() {
         cbreak();
         noecho();
         keypad(stdscr, true);
-        printw("Welcome to Halo -- CTRL-C to quit");
-        mvprintw(1,0,"Options:");
 
         //Setup Menu
         std::string options[2] = {"Motor Throttle Test", "Serial Console"};
         int choice;
         int highlight = 0;
         while(1) {
+            printw("Welcome to Halo -- CTRL-C to quit");
+            mvprintw(1,0,"Options:");
             while(1) {
                 for(int i = 0; i < 2; i++) {
                     if (i == highlight) attron(A_REVERSE);

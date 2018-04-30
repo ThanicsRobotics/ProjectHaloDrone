@@ -601,6 +601,11 @@ int main() {
       esc_3 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-3.
       esc_4 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-4.
     }
+
+    //Keep these motors off
+    esc_2 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-2.
+    esc_3 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-3.
+    esc_4 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-4.
     
     // We wait until 4000us are passed.
     if ((onTime.read_us() - loop_timer < 4000)) {
