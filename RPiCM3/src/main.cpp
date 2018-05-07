@@ -66,7 +66,7 @@ void shutdown() {
     //Stop threads
     run = false;
     delay(2000);
-    endwin();
+    closeGUI();
 
     std::cout << "\nClosing Threads and Ports...\n\n";
 

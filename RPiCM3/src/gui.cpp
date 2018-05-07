@@ -70,7 +70,7 @@ WINDOW* getNewFullWindow(bool keypadEnabled) {
 
 void openSensorReadout() {
     WINDOW *win = getNewFullWindow(true);
-    mvwprintw(win, 0,0, "Sensors & Data:\nPressure Altitude:\nGPS Data:\n-----\nAttitude Data:\nPitch:\nRoll:"\n);
+    mvwprintw(win, 0,0, "Sensors & Data:\nPressure Altitude:\nGPS Data:\n-----\nAttitude Data:\nPitch:\nRoll:\n");
     
 }
 
@@ -124,6 +124,10 @@ void openSerialConsole() {
     mvwprintw(win,2,0,"Sending Heartbeat");
     noecho();
     delwin(win);
+}
+
+void closeGUI() {
+    endwin();
 }
 
 // void *keyLoop(void*) {
