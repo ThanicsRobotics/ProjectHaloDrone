@@ -2,6 +2,7 @@
 #define SERIAL_H
 
 #include <pthread.h>
+#include <inttypes.h>
 
 class Serial {
     public:

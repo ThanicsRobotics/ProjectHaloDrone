@@ -4,5 +4,8 @@
 void startGUI();
 void openMotorThrottleTest();
 void openSerialConsole();
+void openSensorReadout();
+
+extern int lastKey;
 
 #endif

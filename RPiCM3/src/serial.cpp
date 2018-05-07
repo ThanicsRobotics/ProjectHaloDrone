@@ -42,7 +42,7 @@ void *Serial::serialLoop(void*) {
 
 void Serial::startSerialLoop() {
     pthread_t serialThread;
-    pthread_create(&serialThread, NULL, serialLoop, NULL);
+    //pthread_create(&serialThread, NULL, serialLoop, NULL);
 }
 
 char *Serial::readLine() {

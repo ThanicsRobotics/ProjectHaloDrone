@@ -42,7 +42,7 @@ void startGUI() {
         }
         switch (highlight) {
             case 0:
-                motorThrottleTest();
+                openMotorThrottleTest();
                 break;
             case 1:
                 openSerialConsole();
@@ -70,8 +70,7 @@ WINDOW* getNewFullWindow(bool keypadEnabled) {
 
 void openSensorReadout() {
     WINDOW *win = getNewFullWindow(true);
-    mvwprintw(win, 0,0, "Sensors & Data:\nPressure Altitude:\nGPS Data:\n
-    -----\nAttitude Data:\nPitch:\nRoll:"\n);
+    mvwprintw(win, 0,0, "Sensors & Data:\nPressure Altitude:\nGPS Data:\n-----\nAttitude Data:\nPitch:\nRoll:"\n);
     
 }
 
@@ -86,14 +85,13 @@ void openMotorThrottleTest() {
     mvwprintw(win,4,0,"Last Key: ");
     //mvprintw(8,0,"Press 'c' to open command line");
     wrefresh(win);
-    keyLoopActive = true;
     int key = 0;
     int throttle = 1000;
     while(run) {
         if (armed) mvwprintw(win,1,0,"Press 'd' to disarm: currently *ARMED*");
         if (!armed) mvwprintw(win,1,0,"Press 'a' to arm: currently NOT ARMED");
-        if (!armed && key == a_KEY) armRequest = true;
-        else if (armed && key == d_KEY) disarmRequest = true;
+        if (!armed && key == 97) armRequest = true; //a
+        else if (armed && key == 100) disarmRequest = true; //d
         else if (key == KEY_UP) throttle += 50;
         else if (key == KEY_DOWN) throttle -= 50;
         else if (key == 27) break;

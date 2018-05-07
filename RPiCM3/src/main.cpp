@@ -59,7 +59,6 @@ bool keyLoopActive;
 bool shuttingDown = false;
 bool doneShuttingDown = false;
 bool startCli = false;
-int lastKey;
 
 //Shutting down threads and closing ports
 void shutdown() {
