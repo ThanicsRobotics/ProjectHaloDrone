@@ -31,13 +31,22 @@ void Serial::setupSerial(char* port, int baud) {
     }
 }
 
+void *Serial::serialLoop(void*) {
+    if(!serialConfigured) this->setupSerial("/dev/serial0", 9600);
+    while(run) {
+        //this->readLine();
+        //delayMicroseconds(500);
+    }
+    return NULL;
+}
+
 void Serial::startSerialLoop() {
     pthread_t serialThread;
     pthread_create(&serialThread, NULL, serialLoop, NULL);
 }
 
 char *Serial::readLine() {
-    if(!serialConfigured) return -1;
+    if(!serialConfigured) return '\0';
     char buffer[300];
     int i = 0;
     for (char thisChar = (char)serReadByte(serialFd); thisChar != '\n'; 
@@ -96,15 +105,6 @@ char *Serial::readLine() {
 //     }
 //     else return;
 // }
-
-void *serialLoop(void*) {
-    if(!serialConfigured) this->setupSerial("/dev/serial0", 9600);
-    while(run) {
-        readLine();
-        //delayMicroseconds(500);
-    }
-    return NULL;
-}
 
 Serial::~Serial() {
     pthread_join(serialThread, NULL);

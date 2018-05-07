@@ -22,7 +22,8 @@ void program() {
     }
     if (input == "b") {
         cout << "Programming and setting fuses..." << endl;
-        system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2E:m -U hfuse:w:0xC9:m -U flash:w:firmwares/simonkesc.hex:i");
+        //system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2E:m -U hfuse:w:0xC9:m -U flash:w:firmwares/simonkesc.hex:i");
+        system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2F:m -U hfuse:w:0xCA:m -U flash:w:firmwares/simonkesc.hex:i");
     }
 }
 

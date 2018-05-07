@@ -14,10 +14,9 @@ class Serial {
         bool serialConfigured;
         int throttleInput;
     private:
-        void *serialLoop(void*);
-
         pthread_t serialThread;
         int serialFd;
+        void *serialLoop(void*)
 };
 
 #endif
