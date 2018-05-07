@@ -27,6 +27,8 @@ bool noMotors;
 
 //Data received from SPI
 short int FCReceivedData = 0;
+char stm32_rx_buffer[2];
+char stm32_tx_buffer[2];
 
 //Gyro angle variables
 signed char gyroPitch = 0;
@@ -145,12 +147,13 @@ void sendThrottle() {
 //  ^Two 0's always lead start of message
 // ...Pitch_H,Pitch_L,Roll_H,Roll_L,Yaw_H,Yaw_L,Throttle_H,Throttle_L}
 //    ^PWM control values, high byte followed by low byte
-char *packMessage(fcMessage) {
+char *packMessage(fcMessage info) {
     char msg[11];
     msg[0] = 0;
     msg[1] = 0;
-    for (int i = 2; i < 2+sizeof(fcMessage.pwm); i+=2) {
-        uint16_t pwm = fcMessage.pwm[(i-2)/2];
+    int i;
+    for (i = 2; i < 2+sizeof(info.pwm); i+=2) {
+        uint16_t pwm = info.pwm[(i-2)/2];
         msg[i] = (pwm >> 8) & 0xFF;
         msg[i+1] = pwm & 0xFF;
     }
@@ -185,11 +188,11 @@ void *spiLoop(void*) {
         }
         
         //Calculate new PID compensated throttle
-        char stm32_rx_buffer[2];
-        char stm32_tx_buffer[2];
+        //char stm32_rx_buffer[2];
+        //char stm32_tx_buffer[2];
         sendThrottle();
 
-        fcMessage msg;
+        //fcMessage msg;
 
         
         //Use SPI to get gyro angles, send throttle

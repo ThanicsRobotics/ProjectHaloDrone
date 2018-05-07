@@ -53,7 +53,7 @@ void disarm();
 void resetSTM32F446();
 void authFlightController();
 void sendThrottle();
-char *packMessage(fcMessage);
+char *packMessage(fcMessage info);
 void *spiLoop(void*);
 
 #endif

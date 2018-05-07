@@ -6,6 +6,7 @@
 #include <sys/ioctl.h>
 
 bool guiActive = false;
+int lastKey;
 
 void startGUI() {
     //pthread_t keyThread;

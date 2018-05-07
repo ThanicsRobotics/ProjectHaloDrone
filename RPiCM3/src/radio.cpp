@@ -15,8 +15,6 @@ int yawPWM;
 int altitudePWM;
 int controllerStatus;
 
-bool serialConfigured;
-
 buffer sendHeartbeat(uint8_t mode, uint8_t status) {
     mavlink_message_t msg;
     uint16_t len;
