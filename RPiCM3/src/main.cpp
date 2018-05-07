@@ -107,7 +107,17 @@ void mainLoop() {
         while(!armed);
     }
     if (!controllerConnected) {
-        startGUI();
+        // startGUI();
+        Serial radio;
+        radio.setupSerial("/dev/serial0", 9600);
+        printf("Sending Heartbeat\n");
+        buffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+        radio.write(msg.buf, msg.len);
+        printf("Reading MAVLink packets\n");
+        while(1) {
+            mavlinkReceiveByte(radio.readChar());
+        }
+
     }
     else {
         while(run) {

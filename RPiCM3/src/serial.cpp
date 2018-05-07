@@ -59,6 +59,22 @@ char *Serial::readLine() {
     return buffer;
 }
 
+char Serial::readChar() {
+    if(!serialConfigured) return '\0';
+    if(serDataAvailable(serialFd) > 0) {
+        return (char)serReadByte(serialFd);
+    }
+    else return '\0';
+}
+
+int Serial::write(uint8_t* bytes, uint16_t len) {
+    int status = 0;
+    for (int i = 0; i < len; i++) {
+        if(status = serWriteByte(serialFd, bytes[i]) < 0) return status;
+    }
+    return status;
+}
+
 // void readChar() {
 //     // char thisChar = serialGetchar(serialFd);
 //     char thisChar = (char)serReadByte(serialFd);

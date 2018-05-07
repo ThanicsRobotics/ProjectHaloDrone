@@ -105,6 +105,7 @@ int Stream::sendData(uint8_t *data, uint16_t len)
         exit(1);
     }
     printf("Sent %d bytes\n", numbytes);
+    return numbytes;
 }
 
 // int Stream::openReceiveChannel() {

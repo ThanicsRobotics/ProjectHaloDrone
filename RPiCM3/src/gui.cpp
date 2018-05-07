@@ -115,6 +115,7 @@ void openMotorThrottleTest() {
     wclear(win);
     delwin(win);
 }
+
 void openSerialConsole() {
     Serial radio;
     radio.setupSerial("/dev/serial0", 9600);
@@ -122,11 +123,7 @@ void openSerialConsole() {
     getmaxyx(stdscr, yMax, xMax);
     WINDOW *win = newwin(yMax, xMax, 0,0);
     mvwprintw(win,1,0,"Serial Console");
-    char *msg;
-    mvwprintw(win,2,0,"Send Message: ");
-    wrefresh(win);
-    echo();
-    wgetstr(win, msg);
+    mvwprintw(win,2,0,"Sending Heartbeat");
     noecho();
     delwin(win);
 }

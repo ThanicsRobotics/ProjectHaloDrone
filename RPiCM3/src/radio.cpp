@@ -35,7 +35,7 @@ void mavlinkReceivePacket(uint8_t *packet) {
     uint8_t byte = 1;
     int i = 0;
     while (byte != '\0') {
-        printf("byte %d\n", i);
+        printf("byte %d: %d\n", i, byte);
         byte = packet[i];
         mavlinkReceiveByte(byte);
         i += 1;
@@ -46,7 +46,8 @@ void mavlinkReceiveByte(uint8_t data) {
     mavlink_message_t msg;
     mavlink_status_t status;
     if(mavlink_parse_char(MAVLINK_COMM_0, data, &msg, &status)) {
-        printf("Received message with ID %d, sequence: %d from component %d of system %d\n", msg.msgid, msg.seq, msg.compid, msg.sysid);
+        printf("Received message with ID %d, sequence: %d from component %d of system %d\n", 
+        msg.msgid, msg.seq, msg.compid, msg.sysid);
         // switch(msg.msgid) {
         //     case MAVLINK_MSG_ID_HEARTBEAT:
         //         mavlink_heartbeat_t hb;
