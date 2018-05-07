@@ -7,12 +7,12 @@ int pid_d_gain = 0;                   //Gain setting for the roll D-controller
 int pid_max = 500;                      //Maximum output of the PID-controller (+/-)
 int pid_error_temp;
 int pid_i_mem, pid_setpoint, pid_last_d_error;
-volatile int pid_output;
+int pid_output;
 
 //Target Altitude in centimeters
 float setAltitude = 50.0;
 
-volatile short int newThrottle = 0;
+short int newThrottle = 0;
 
 float map(int x, int in_min, int in_max, int out_min, int out_max) {
   return (float)(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;

@@ -16,14 +16,12 @@ int8_t pressureLSB;
 int8_t tempMSB;
 int8_t tempLSB;
 
-volatile float pressureAltitude = 0;
-volatile float altitude = 0;
+float pressureAltitude = 0;
+float altitude = 0;
 float surfaceAltitude = 0;
 
 float loopRate = 0.0;
 int loopStartTime = 0;
-
-using namespace std;
 
 void setupBarometer() {
     baroI2cFd = i2cOpen(1, BARO_ADDR, 0);       //Open I2C address
@@ -36,11 +34,11 @@ void setupBarometer() {
     //Calibrate to current altitude
     for(int i = 0; i < 10; i++) {
         altitudeSum += getPressureAltitude();
-        cout << ".";
+        std::cout << ".";
         fflush(stdout);
     }
     surfaceAltitude = altitudeSum/10;
-    cout << endl << "Surface Alt: " << surfaceAltitude << endl;
+    std::cout << "\nSurface Alt: " << surfaceAltitude << "\n";
     delay(600);
     i2cWriteByteData(baroI2cFd, 0x2D, 0);
 }
@@ -67,12 +65,10 @@ float getPressureAltitude() {
 
             pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
             //bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
-            //cout << "Altitude: " << pressureAltitude << endl;
             gotAltitude = true;
             return pressureAltitude - surfaceAltitude;
         }
         else {
-            //cout << "Barometer not ready" << endl;
             //takeReading();
         }
     }

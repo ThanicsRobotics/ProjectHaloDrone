@@ -8,15 +8,13 @@
 #include <string.h>
 #include <unistd.h>
 
-volatile int serialFd;
-
+int serialFd;
 // int charCount = 0;
 // char serialBuffer[100];
 // bool wordEnd = false;
 // bool coFlag = false;
-volatile bool serialConfigured = false;
-
-volatile int throttleInput = 0;
+bool serialConfigured = false;
+int throttleInput = 0;
 
 Serial::Serial() {
 
@@ -31,6 +29,11 @@ void Serial::setupSerial(char* port, int baud) {
         std::cout << "Opening Serial. FD: " << serialFd << " ID: " << pthread_self() << '\n';
         serialConfigured = true;
     }
+}
+
+void Serial::startSerialLoop() {
+    pthread_t serialThread;
+    pthread_create(&serialThread, NULL, serialLoop, NULL);
 }
 
 char *Serial::readLine() {
@@ -94,11 +97,15 @@ char *Serial::readLine() {
 //     else return;
 // }
 
-void *Serial::serialLoop(void*) {
-    if(!serialConfigured) setupSerial();
+void *serialLoop(void*) {
+    if(!serialConfigured) this->setupSerial("/dev/serial0", 9600);
     while(run) {
         readLine();
         //delayMicroseconds(500);
     }
     return NULL;
+}
+
+Serial::~Serial() {
+    pthread_join(serialThread, NULL);
 }

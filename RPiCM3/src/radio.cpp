@@ -8,27 +8,14 @@
 #define SYSID 1
 #define COMPID 1
 
-volatile int radioFd;
-volatile int rollPWM;
-volatile int pitchPWM;
-volatile int yawPWM;
-volatile int altitudePWM;
+int radioFd;
+int rollPWM;
+int pitchPWM;
+int yawPWM;
+int altitudePWM;
 int controllerStatus;
 
-volatile bool serialConfigured;
-
-using namespace std;
-
-// void setupRadio() {
-//     if ((radioFd = serOpen("/dev/serial0", 9600, 0)) < 0) {
-//         cout << "Unable to open serial interface: " << strerror(errno) << endl;
-//         fflush(stdout);
-//     }
-//     else {
-//         cout << "Opening Serial. FD: " << radioFd << " ID: " << pthread_self() << endl;
-//         serialConfigured = true;
-//     }
-// }
+bool serialConfigured;
 
 buffer sendHeartbeat(uint8_t mode, uint8_t status) {
     mavlink_message_t msg;

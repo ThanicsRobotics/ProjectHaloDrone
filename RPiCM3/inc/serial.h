@@ -1,16 +1,23 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
-extern volatile int throttleInput;
+#include <pthread.h>
 
 class Serial {
     public:
         Serial();
+        ~Serial();
         void setupSerial(char* port, int baud);
+        void startSerialLoop();
         char *readLine();
-        void *serialLoop(void*);
+
+        bool serialConfigured;
+        int throttleInput;
     private:
-        volatile int serialFd;
+        void *serialLoop(void*);
+
+        pthread_t serialThread;
+        int serialFd;
 };
 
 #endif

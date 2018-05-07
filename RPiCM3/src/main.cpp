@@ -41,25 +41,25 @@ bool controllerConnected = false;
 bool streamEnabled = false;
 
 //Thread mutex and gyro thread function
-pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_t spiThread, serialThread;
+//pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_t spiThread;
 
 std::string projectPath = "/home/pi/ProjectHaloDrone/RPiCM3/src/";
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
 
-volatile int lastAltitude = 0;
+int lastAltitude = 0;
 
 std::string camera;
 std::string receiver;
 Stream teleStream;
 
-volatile bool keyLoopActive;
-volatile bool shuttingDown = false;
-volatile bool doneShuttingDown = false;
-volatile bool startCli = false;
-volatile int lastKey;
+bool keyLoopActive;
+bool shuttingDown = false;
+bool doneShuttingDown = false;
+bool startCli = false;
+int lastKey;
 
 //Shutting down threads and closing ports
 void shutdown() {
@@ -71,8 +71,7 @@ void shutdown() {
 
     std::cout << "\nClosing Threads and Ports...\n\n";
 
-    //Join Threads to main  
-    pthread_join(serialThread, NULL);
+    //Join Threads to main
     pthread_join(spiThread, NULL);
 
     std::cout << "Closing I2C, UART, SPI, TCP Socket...\n";
@@ -112,11 +111,6 @@ void mainLoop() {
     }
     else {
         while(run) {
-            
-            //altitude = getPressureAltitude();
-
-            //mavlinkReceivePacket(teleStream.receiveDataPacket());
-            
             readGPSSentence();
             delay(100);
             //calculatePID();
@@ -126,7 +120,7 @@ void mainLoop() {
 
 void showUsage(std::string name) {
     std::cerr << "Usage: " << name << " <option(s)>\n"
-        << "**NOTE: Must be run with root privileges\n\n"
+        << "**NOTE: Must be run with root privileges (sudo)\n\n"
         << "Options:\n"
         << "\t-h,--help\t\t\tShow this help message\n"
         << "\t-c,--controller-enabled \tRun program to connect with controller\n"
@@ -193,8 +187,6 @@ int main(int argc, char *argv[]) {
     
     //Creating threads
     //  -> spiThread
-    //  -> serialThread
-    pthread_create(&serialThread, NULL, serialLoop, NULL);
     pthread_create(&spiThread, NULL, spiLoop, NULL);
 
     //Wait for gyro calibration, reset calibration if necessary

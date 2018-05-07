@@ -22,7 +22,7 @@ void startGUI() {
         printw("Welcome to Halo -- CTRL-C to quit");
         mvprintw(1,0,"Options:");
         while(1) {
-            for(int i = 0; i < 2; i++) {
+            for(int i = 0; i < menuSize; i++) {
                 if (i == highlight) attron(A_REVERSE);
                 mvprintw(i+2, 1, options[i].c_str());
                 attroff(A_REVERSE);
@@ -33,20 +33,46 @@ void startGUI() {
                     highlight = (highlight == 0) ? 0 : highlight - 1;
                     break;
                 case KEY_DOWN:
-                    highlight = (highlight == 1) ? 1 : highlight + 1;
+                    highlight = (highlight == menuSize-1) ? menuSize-1 : highlight + 1;
                     break;
                 default:
                     break;
             }
             if (choice == 10) break;
         }
-        if (highlight == 0) motorThrottleTest();
-        if (highlight == 1) serialConsole();
+        switch (highlight) {
+            case 0:
+                motorThrottleTest();
+                break;
+            case 1:
+                openSerialConsole();
+                break;
+            case 2:
+                openSensorReadout();
+                break;
+            default:
+                openSensorReadout();
+        }
     }
     
     //keyLoopActive = false;
     //delay(1000);
     //pthread_join(keyThread, NULL);
+}
+
+WINDOW* getNewFullWindow(bool keypadEnabled) {
+    int yMax, xMax;
+    getmaxyx(stdscr, yMax, xMax);
+    WINDOW *win = newwin(yMax, xMax, 0,0);
+    if (keypadEnabled) keypad(win, true);
+    return win;
+}
+
+void openSensorReadout() {
+    WINDOW *win = getNewFullWindow(true);
+    mvwprintw(win, 0,0, "Sensors & Data:\nPressure Altitude:\nGPS Data:\n
+    -----\nAttitude Data:\nPitch:\nRoll:"\n);
+    
 }
 
 void openMotorThrottleTest() {

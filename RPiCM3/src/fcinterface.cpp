@@ -14,31 +14,29 @@
 
 #define SEL2 5
 
-char stm32_rx_buffer[100];
-char stm32_tx_buffer[100];
-volatile bool spiConfigured = false;
-volatile bool authenticated = false;
+bool spiConfigured = false;
+bool authenticated = false;
 
-volatile bool armRequest = false;
-volatile bool disarmRequest = false;
-volatile bool authRequest = false;
-volatile bool armed = false;
-volatile bool testGyro = false;
-volatile bool motorTest;
-volatile bool noMotors;
+bool armRequest = false;
+bool disarmRequest = false;
+bool authRequest = false;
+bool armed = false;
+bool testGyro = false;
+bool motorTest;
+bool noMotors;
 
 //Data received from SPI
-volatile short int FCReceivedData = 0;
+short int FCReceivedData = 0;
 
 //Gyro angle variables
-volatile signed char gyroPitch = 0;
-volatile signed char gyroRoll = 0;
+signed char gyroPitch = 0;
+signed char gyroRoll = 0;
 
-volatile bool run = true;
+bool run = true;
 
 //CS0 is barometer, CS1 is STM32 flight controller
-volatile int SPI_CS = 0;
-volatile int spiFd;
+int SPI_CS = 0;
+int spiFd;
 
 void setupSPI() {
     if ((spiFd = spiOpen(SPI_CS, 3000000, 0)) < 0) {
@@ -141,6 +139,25 @@ void sendThrottle() {
     //std::cout << " | Clock: " << clockspeed << endl;
 }
 
+// Packing message to send to Flight Controller over SPI
+// Format:
+// {0x00,0x00,...
+//  ^Two 0's always lead start of message
+// ...Pitch_H,Pitch_L,Roll_H,Roll_L,Yaw_H,Yaw_L,Throttle_H,Throttle_L}
+//    ^PWM control values, high byte followed by low byte
+char *packMessage(fcMessage) {
+    char msg[11];
+    msg[0] = 0;
+    msg[1] = 0;
+    for (int i = 2; i < 2+sizeof(fcMessage.pwm); i+=2) {
+        uint16_t pwm = fcMessage.pwm[(i-2)/2];
+        msg[i] = (pwm >> 8) & 0xFF;
+        msg[i+1] = pwm & 0xFF;
+    }
+    msg[i] = '\0';
+    return msg;
+}
+
 void *spiLoop(void*) {
     //Switch to flight controller, setup SPI @ 3MHz
     SPI_CS = 0;
@@ -168,7 +185,12 @@ void *spiLoop(void*) {
         }
         
         //Calculate new PID compensated throttle
+        char stm32_rx_buffer[2];
+        char stm32_tx_buffer[2];
         sendThrottle();
+
+        fcMessage msg;
+
         
         //Use SPI to get gyro angles, send throttle
         spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);

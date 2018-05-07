@@ -3,15 +3,14 @@
 
 #include <stdint.h>
 
-extern volatile int radioFd;
-extern volatile int rollPWM;
-extern volatile int pitchPWM;
-extern volatile int yawPWM;
-extern volatile int altitudePWM;
+extern int radioFd;
+extern int rollPWM;
+extern int pitchPWM;
+extern int yawPWM;
+extern int altitudePWM;
 
-extern volatile bool serialConfigured;
+extern bool serialConfigured;
 
-// void setupRadio();
 struct buffer {
     uint8_t *buf;
     uint16_t len;

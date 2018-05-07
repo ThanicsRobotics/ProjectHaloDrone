@@ -132,4 +132,3 @@ void Stream::closeStream() {
     printf("Closing Stream with %s\n", serverIP);
     close(sockfd);
 }
-

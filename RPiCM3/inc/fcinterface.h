@@ -15,39 +15,36 @@
 
 extern char stm32_rx_buffer[100];
 extern char stm32_tx_buffer[100];
-extern volatile bool spiConfigured;
-extern volatile bool authenticated;
+extern bool spiConfigured;
+extern bool authenticated;
 
-extern volatile bool armRequest;
-extern volatile bool authRequest;
-extern volatile bool disarmRequest;
-extern volatile bool armed;
-extern volatile bool testGyro;
-extern volatile bool motorTest;
-extern volatile bool noMotors;
+extern bool armRequest;
+extern bool authRequest;
+extern bool disarmRequest;
+extern bool armed;
+extern bool testGyro;
+extern bool motorTest;
+extern bool noMotors;
 
 //Gyro angle variables
-extern volatile signed char gyroPitch;
-extern volatile signed char gyroRoll;
-extern volatile short int FCReceivedData;
+extern signed char gyroPitch;
+extern signed char gyroRoll;
+extern short int FCReceivedData;
 
-extern volatile bool run;
+extern bool run;
 
 //CS0 is barometer, CS1 is STM32 flight controller
-extern volatile int SPI_CS;
-extern volatile int spiFd;
+extern int SPI_CS;
+extern int spiFd;
 
 extern std::string projectPath;
 
 //Mutex for STM32 communication threading
-extern pthread_mutex_t stm32_mutex;
+//extern pthread_mutex_t stm32_mutex;
 
 struct fcMessage {
     float travelAngle;
-    int pitchPWM;
-    int rollPWM;
-    int throttle;
-    int yawPWM;
+    uint16_t pwm[4]; //Pitch, Roll, Yaw, Throttle
 };
 
 void setupSPI();
@@ -56,6 +53,7 @@ void disarm();
 void resetSTM32F446();
 void authFlightController();
 void sendThrottle();
+char *packMessage(fcMessage);
 void *spiLoop(void*);
 
 #endif

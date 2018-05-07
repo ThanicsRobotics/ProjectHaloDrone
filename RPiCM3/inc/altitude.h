@@ -11,7 +11,7 @@ extern int8_t pressureLSB;
 extern int8_t tempMSB;
 extern int8_t tempLSB;
 
-extern volatile float pressureAltitude;
+extern float pressureAltitude;
 extern float surfaceAltitude;
 
 extern float loopRate;
