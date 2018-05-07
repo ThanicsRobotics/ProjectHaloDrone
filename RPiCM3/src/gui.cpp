@@ -5,6 +5,8 @@
 #include <ncurses.h>
 #include <sys/ioctl.h>
 
+bool guiActive = false;
+
 void startGUI() {
     //pthread_t keyThread;
     //pthread_create(&keyThread, NULL, keyLoop, NULL);

@@ -28,6 +28,7 @@
 #include <gps.h>
 #include <radio.h>
 #include <serial.h>
+#include <gui.h>
 
 #define GYRO_CAL 0x04
 #define BARO_DELAY 30
@@ -66,7 +67,7 @@ void shutdown() {
     //Stop threads
     run = false;
     delay(2000);
-    closeGUI();
+    if (guiActive) closeGUI();
 
     std::cout << "\nClosing Threads and Ports...\n\n";
 

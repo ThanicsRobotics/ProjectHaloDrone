@@ -8,5 +8,5 @@ void openSensorReadout();
 void closeGUI();
 
 extern int lastKey;
-
+extern bool guiActive;
 #endif
