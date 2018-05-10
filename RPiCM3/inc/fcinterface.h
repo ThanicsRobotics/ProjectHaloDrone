@@ -13,8 +13,6 @@
 #define MOTOR_TEST 0x0F
 #define NO_MOTORS 0x0E
 
-extern char stm32_rx_buffer[100];
-extern char stm32_tx_buffer[100];
 extern bool spiConfigured;
 extern bool authenticated;
 

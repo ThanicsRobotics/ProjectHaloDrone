@@ -8,16 +8,13 @@
 #include <string.h>
 #include <unistd.h>
 
-int serialFd;
 // int charCount = 0;
 // char serialBuffer[100];
 // bool wordEnd = false;
 // bool coFlag = false;
-bool serialConfigured = false;
-int throttleInput = 0;
 
 Serial::Serial() {
-
+    serialConfigured = false;
 }
 
 void Serial::setupSerial(char* port, int baud) {

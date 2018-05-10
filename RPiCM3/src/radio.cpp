@@ -76,7 +76,7 @@ void mavlinkReceiveByte(uint8_t data) {
         //         break;
         // }
     }
-    else printf("fail\n");
+    //else printf("fail\n");
 }
 
 // receivedMessage getControllerData(Stream stream) {

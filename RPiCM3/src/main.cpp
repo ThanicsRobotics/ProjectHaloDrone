@@ -45,7 +45,7 @@ bool streamEnabled = false;
 //pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_t spiThread;
 
-std::string projectPath = "/home/pi/ProjectHaloDrone/RPiCM3/src/";
+std::string projectPath = "./";
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
@@ -55,6 +55,7 @@ int lastAltitude = 0;
 std::string camera;
 std::string receiver;
 Stream teleStream;
+Serial radio;
 
 bool keyLoopActive;
 bool shuttingDown = false;
@@ -68,7 +69,7 @@ void shutdown() {
     run = false;
     delay(2000);
     if (guiActive) closeGUI();
-
+    
     std::cout << "\nClosing Threads and Ports...\n\n";
 
     //Join Threads to main
@@ -108,7 +109,6 @@ void mainLoop() {
     }
     if (!controllerConnected) {
         // startGUI();
-        Serial radio;
         radio.setupSerial("/dev/serial0", 9600);
         printf("Sending Heartbeat\n");
         buffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
@@ -249,18 +249,18 @@ int main(int argc, char *argv[]) {
     }
 
     //Manual arming process through SSH
-    // else {
-    //     std::cout << "Type 'ARM' to arm the quadcopter: ";
-    //     std::string input = "";
-    //     getline(cin, input);
-    //     if (input == "ARM") {
-    //         armRequest = true;
-    //     }
-    //     else {
-    //         shutdown();
-    //         exit(1);
-    //     }
-    // }
+    else {
+        std::cout << "Type 'ARM' to arm the quadcopter: ";
+        std::string input = "";
+        getline(std::cin, input);
+        if (input == "ARM") {
+            armRequest = true;
+        }
+        else {
+            shutdown();
+            exit(1);
+        }
+    }
 
     //Start main loop
     mainLoop();

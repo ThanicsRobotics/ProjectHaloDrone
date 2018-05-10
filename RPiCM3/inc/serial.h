@@ -14,10 +14,10 @@ class Serial {
         char readChar();
         int write(uint8_t* bytes, uint16_t len);
 
-        bool serialConfigured;
-        int throttleInput;
     private:
         pthread_t serialThread;
+        bool serialConfigured;
+        int throttleInput;
         int serialFd;
         void *serialLoop(void*);
 };
