@@ -94,7 +94,7 @@ void arm() {
 void resetSTM32F446() {
     pinMode(SEL2, OUTPUT);
     digitalWrite(SEL2, LOW);
-    system(("sudo openocd -f " + projectPath + "reset.cfg").c_str());
+    system(("sudo openocd -f " + projectPath + "src/reset.cfg").c_str());
     pinMode(SEL2, INPUT);
 }
 

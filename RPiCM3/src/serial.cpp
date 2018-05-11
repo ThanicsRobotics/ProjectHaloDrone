@@ -64,10 +64,14 @@ char Serial::readChar() {
     else return '\0';
 }
 
-int Serial::write(uint8_t* bytes, uint16_t len) {
+int Serial::write(std::unique_ptr<uint8_t[]> bytes, uint16_t len) {
     int status = 0;
     for (int i = 0; i < len; i++) {
-        if(status = serWriteByte(serialFd, bytes[i]) < 0) return status;
+        if((status = serWriteByte(serialFd, bytes[i])) < 0) {
+            printf("%d\n", status);
+            return status;
+        }
+        printf("byte %d/%d: %d\n", i+1, len, bytes[i]);
     }
     return status;
 }

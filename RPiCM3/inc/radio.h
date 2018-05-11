@@ -2,6 +2,7 @@
 #define RADIO_H
 
 #include <stdint.h>
+#include <memory>
 
 extern int radioFd;
 extern int rollPWM;
@@ -11,9 +12,10 @@ extern int altitudePWM;
 
 extern bool serialConfigured;
 
-struct buffer {
-    uint8_t *buf;
+struct buffer
+{
     uint16_t len;
+    std::unique_ptr<uint8_t[]> buf;
 };
 
 struct receivedMessage {

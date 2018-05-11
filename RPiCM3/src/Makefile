@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-Wall -Wextra -pthread
 LIBS=-lwiringPi -lrt -lpigpio -lncurses
 SOURCES=$(wildcard *.cpp)
-PROJPATH=/home/pi/ProjectHaloDrone/RPiCM3
+PROJPATH=..
 DIR1=-I$(PROJPATH)/inc/
 DIR2=-I$(PROJPATH)/libs/NemaTode/include/
 OBJ= $(SOURCES:.cpp=.o)

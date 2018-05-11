@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <inttypes.h>
+#include <memory>
 
 class Serial {
     public:
@@ -12,7 +13,7 @@ class Serial {
         void startSerialLoop();
         char *readLine();
         char readChar();
-        int write(uint8_t* bytes, uint16_t len);
+        int write(std::unique_ptr<uint8_t[]> bytes, uint16_t len);
 
     private:
         pthread_t serialThread;
