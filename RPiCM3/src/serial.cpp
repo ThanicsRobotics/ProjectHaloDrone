@@ -43,8 +43,9 @@ void Serial::startSerialLoop() {
 }
 
 char *Serial::readLine() {
-    if(!serialConfigured) return '\0';
-    char buffer[300];
+    if(!serialConfigured) return "\0";
+    static char buffer[300];
+    memset(buffer, 0, sizeof(buffer));
     int i = 0;
     for (char thisChar = (char)serReadByte(serialFd); thisChar != '\n'; 
     thisChar = (char)serReadByte(serialFd)) {
@@ -64,14 +65,17 @@ char Serial::readChar() {
     else return '\0';
 }
 
-int Serial::write(std::unique_ptr<uint8_t[]> bytes, uint16_t len) {
+int Serial::write(std::shared_ptr<uint8_t[]> bytes, uint16_t len) {
     int status = 0;
-    for (int i = 0; i < len; i++) {
-        if((status = serWriteByte(serialFd, bytes[i])) < 0) {
-            printf("%d\n", status);
-            return status;
-        }
-        printf("byte %d/%d: %d\n", i+1, len, bytes[i]);
+    // for (int i = 0; i < len; i++) {
+    //     // if((status = serWriteByte(serialFd, bytes.get()[i])) < 0) {
+    //     //     printf("%d\n", status);
+    //     //     return status;
+    //     // }
+    //     printf("byte %d/%d: %d\n", i+1, len, bytes.get()[i]);
+    // }
+    if((status = serWrite(serialFd, (char*)bytes.get(), len)) < 0) {
+        printf("%s\n", strerror(status));
     }
     return status;
 }

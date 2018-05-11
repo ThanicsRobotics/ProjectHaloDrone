@@ -1,5 +1,5 @@
-CC=g++
-CFLAGS=-Wall -Wextra -pthread
+CC=g++-8.1.0
+CFLAGS=-Wall -Wextra -pthread -std=c++17
 LIBS=-lwiringPi -lrt -lpigpio -lncurses
 SOURCES=$(wildcard *.cpp)
 PROJPATH=..

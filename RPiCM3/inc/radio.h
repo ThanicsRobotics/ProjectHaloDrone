@@ -15,7 +15,7 @@ extern bool serialConfigured;
 struct buffer
 {
     uint16_t len;
-    std::unique_ptr<uint8_t[]> buf;
+    std::shared_ptr<uint8_t[]> buf;
 };
 
 struct receivedMessage {

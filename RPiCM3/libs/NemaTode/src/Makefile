@@ -1,4 +1,5 @@
-CC=g++
+CC=g++-8.1.0
+CFLAGS=-std=c++17
 SOURCES=$(wildcard *.cpp)
 DIR1=-I../include/
 OBJ= $(SOURCES:.cpp=.o)
@@ -6,7 +7,7 @@ OBJ= $(SOURCES:.cpp=.o)
 all: $(OBJ)
 
 .cpp.o:
-	$(CC) -c $(DIR1) $< -o $@
+	$(CC) $(CFLAGS) -c $(DIR1) $< -o $@
 
 clean:
 	rm -f *.o

@@ -23,10 +23,8 @@ buffer sendHeartbeat(uint8_t mode, uint8_t status) {
     mavlink_msg_heartbeat_pack(SYSID, COMPID, &msg, MAV_TYPE_QUADROTOR, MAV_AUTOPILOT_GENERIC, mode, 0, status);
     len = mavlink_msg_to_send_buffer(buf, &msg);
 
-    std::unique_ptr<uint8_t[]> buffer_ptr = std::make_unique<uint8_t[]>(len);
-    buffer_ptr = buf;
     buffer sendBuffer;
-    sendBuffer.buf = buffer_ptr;
+    sendBuffer.buf = (std::shared_ptr<uint8_t[]>)buf;
     sendBuffer.len = len;
     return sendBuffer;
 }
@@ -49,35 +47,35 @@ void mavlinkReceiveByte(uint8_t data) {
     if(mavlink_parse_char(MAVLINK_COMM_0, data, &msg, &status)) {
         printf("Received message with ID %d, sequence: %d from component %d of system %d\n", 
         msg.msgid, msg.seq, msg.compid, msg.sysid);
-        // switch(msg.msgid) {
-        //     case MAVLINK_MSG_ID_HEARTBEAT:
-        //         mavlink_heartbeat_t hb;
-        //         mavlink_msg_heartbeat_decode(&msg, &hb);
-        //         controllerStatus = hb.system_status;
-        //         printf("Heartbeat from: %d, mode: %d, status: %d\n", 
-        //         hb.type, hb.base_mode, controllerStatus);
-        //         break;
-        //     case MAVLINK_MSG_ID_RC_CHANNELS:
-        //         mavlink_rc_channels_t channels;
-        //         mavlink_msg_rc_channels_decode(&msg, &channels);
-        //         altitudePWM = channels.chan1_raw;
-        //         rollPWM = channels.chan2_raw;
-        //         pitchPWM = channels.chan3_raw;
-        //         yawPWM = channels.chan4_raw;
-        //         break;
+        switch(msg.msgid) {
+            case MAVLINK_MSG_ID_HEARTBEAT:
+                mavlink_heartbeat_t hb;
+                mavlink_msg_heartbeat_decode(&msg, &hb);
+                controllerStatus = hb.system_status;
+                printf("Heartbeat from: %d, mode: %d, status: %d\n", 
+                    hb.type, hb.base_mode, controllerStatus);
+                break;
+            case MAVLINK_MSG_ID_RC_CHANNELS:
+                mavlink_rc_channels_t channels;
+                mavlink_msg_rc_channels_decode(&msg, &channels);
+                altitudePWM = channels.chan1_raw;
+                rollPWM = channels.chan2_raw;
+                pitchPWM = channels.chan3_raw;
+                yawPWM = channels.chan4_raw;
+                break;
 
-        //     case MAVLINK_MSG_ID_COMMAND_LONG:
-        //         mavlink_command_long_t command;
-        //         switch (command.command) {
-        //             case MAV_CMD_NAV_LAND:
-        //                 break;
-        //             case MAV_CMD_NAV_TAKEOFF:
-        //                 break;
-        //         }
-        //         break;
-        //     default:
-        //         break;
-        // }
+            case MAVLINK_MSG_ID_COMMAND_LONG:
+                mavlink_command_long_t command;
+                switch (command.command) {
+                    case MAV_CMD_NAV_LAND:
+                        break;
+                    case MAV_CMD_NAV_TAKEOFF:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
     }
     //else printf("fail\n");
 }

@@ -13,7 +13,7 @@ class Serial {
         void startSerialLoop();
         char *readLine();
         char readChar();
-        int write(std::unique_ptr<uint8_t[]> bytes, uint16_t len);
+        int write(std::shared_ptr<uint8_t[]> bytes, uint16_t len);
 
     private:
         pthread_t serialThread;
