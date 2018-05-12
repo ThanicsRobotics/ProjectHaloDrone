@@ -1,5 +1,5 @@
 #include <gui.h>
-#include <fcinterface.h>
+#include <flightcontroller.h>
 #include <pid.h>
 #include <serial.h>
 #include <ncurses.h>

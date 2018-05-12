@@ -1,27 +1,21 @@
 #include <stream.h>
-#include <fcinterface.h>
+#include <flightcontroller.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <string.h>
-#include <netdb.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <iostream>
 #include <arpa/inet.h>
 #include <pthread.h>
 
 #define MAXDATASIZE 500 // max number of bytes we can get at once 
 
-int sockfd;
-char serverIP[INET6_ADDRSTRLEN];
-bool isActive = false;
+Stream::Stream() {
+    active = false;
+}
 
 // get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
+void *Stream::get_in_addr(struct sockaddr *sa)
 {
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
@@ -78,10 +72,6 @@ void Stream::startTelemetryStream(char *ip_address, char *port) {
 
     std::string message = "Hello from drone!\n";
     this->sendData((uint8_t*)message.c_str(), sizeof(message));
-}
-
-Stream::Stream() {
-
 }
 
 void Stream::startStream(int streamType, char *ip_address, char *port, char *camera_address) {

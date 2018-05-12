@@ -1,5 +1,5 @@
 #include <radio.h>
-#include <fcinterface.h>
+#include <flightcontroller.h>
 #include <mavlink/common/mavlink.h>
 #include <pigpio.h>
 #include <iostream>
@@ -8,14 +8,13 @@
 #define SYSID 1
 #define COMPID 1
 
-int radioFd;
 int rollPWM;
 int pitchPWM;
 int yawPWM;
 int altitudePWM;
 int controllerStatus;
 
-buffer sendHeartbeat(uint8_t mode, uint8_t status) {
+buffer Radio::sendHeartbeat(uint8_t mode, uint8_t status) {
     mavlink_message_t msg;
     uint16_t len;
     uint8_t buf[MAVLINK_MAX_PACKET_LEN];
@@ -29,7 +28,16 @@ buffer sendHeartbeat(uint8_t mode, uint8_t status) {
     return sendBuffer;
 }
 
-void mavlinkReceivePacket(uint8_t *packet) {
+channels Radio::getRCChannels() {
+    channels modInputs;
+    modInputs.pitch = pwmInputs.pitch < 1000 ? 1500 : pwmInputs.pitch;
+    modInputs.roll = pwmInputs.roll < 1000 ? 1500 : pwmInputs.roll;
+    modInputs.yaw = pwmInputs.yaw < 1000 ? 1500 : pwmInputs.yaw;
+    modInputs.throttle = pwmInputs.throttle < 1000 ? 1500 : pwmInputs.throttle;
+    return modInputs;
+}
+
+void Radio::mavlinkReceivePacket(uint8_t *packet) {
     uint8_t byte = 1;
     int i = 0;
     while (byte != '\0') {
@@ -41,7 +49,7 @@ void mavlinkReceivePacket(uint8_t *packet) {
     }
 }
 
-void mavlinkReceiveByte(uint8_t data) {
+void Radio::mavlinkReceiveByte(uint8_t data) {
     mavlink_message_t msg;
     mavlink_status_t status;
     if(mavlink_parse_char(MAVLINK_COMM_0, data, &msg, &status)) {
@@ -58,12 +66,11 @@ void mavlinkReceiveByte(uint8_t data) {
             case MAVLINK_MSG_ID_RC_CHANNELS:
                 mavlink_rc_channels_t channels;
                 mavlink_msg_rc_channels_decode(&msg, &channels);
-                altitudePWM = channels.chan1_raw;
-                rollPWM = channels.chan2_raw;
-                pitchPWM = channels.chan3_raw;
-                yawPWM = channels.chan4_raw;
+                pwmInputs.pitchPWM = channels.chan1_raw;
+                pwmInputs.rollPWM = channels.chan2_raw;
+                pwmInputs.yawPWM = channels.chan3_raw;
+                pwmInputs.throttlePWM = channels.chan4_raw;
                 break;
-
             case MAVLINK_MSG_ID_COMMAND_LONG:
                 mavlink_command_long_t command;
                 switch (command.command) {

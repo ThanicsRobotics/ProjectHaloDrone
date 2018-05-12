@@ -1,5 +1,4 @@
 #include <serial.h>
-#include <fcinterface.h>
 
 #include <pigpio.h>
 #include <wiringPi.h>
@@ -7,11 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
-// int charCount = 0;
-// char serialBuffer[100];
-// bool wordEnd = false;
-// bool coFlag = false;
 
 Serial::Serial() {
     serialConfigured = false;
@@ -58,11 +52,13 @@ char *Serial::readLine() {
 }
 
 char Serial::readChar() {
-    if(!serialConfigured) return '\0';
+    if(!serialConfigured) return NULL;
+    int timer = millis();
+    while((serDataAvailable(serialFd) < 1) && (millis() - timer < 1));
     if(serDataAvailable(serialFd) > 0) {
         return (char)serReadByte(serialFd);
     }
-    else return '\0';
+    else return NULL;
 }
 
 int Serial::write(std::shared_ptr<uint8_t[]> bytes, uint16_t len) {
@@ -79,53 +75,6 @@ int Serial::write(std::shared_ptr<uint8_t[]> bytes, uint16_t len) {
     }
     return status;
 }
-
-// void readChar() {
-//     // char thisChar = serialGetchar(serialFd);
-//     char thisChar = (char)serReadByte(serialFd);
-    
-//     //Check if this character is the end of message
-//     if (thisChar == '\n') {
-//         wordEnd = true;
-//         serialBuffer[charCount] = '\0';
-//         charCount = 0;
-//         return;
-//     }
-    
-//     //If we just finished a message, start a new one in the buffer
-//     else if (wordEnd == true && (int)thisChar >= 48 && (int)thisChar <= 57) {
-//         serialBuffer[charCount] = thisChar;
-//         charCount += 1;
-//         wordEnd = false;
-//         return;
-//     }
-
-//     //Assign the next character to the current buffer
-//     else if ((int)thisChar >= 48 && (int)thisChar <= 57) {
-//         serialBuffer[charCount] = thisChar;
-//         charCount += 1;
-//         return;
-//     }
-// }
-
-// void readLine() {
-//     //while(!wordEnd) readChar();
-//     readChar();
-//     if (wordEnd) {                                                  //If we have finished a message
-//         int data = (int)strtol(serialBuffer, NULL, 10);                     //Convert hex data to decimal
-//         if (coFlag && data > 999 && data <= 2000) {                                 //If we have a coefficient and data for PWM is valid
-//             //pthread_mutex_lock(&serial_mutex);
-//             throttleInput = data;                                            //Set throttle input
-//             //pthread_mutex_unlock(&serial_mutex);
-//             coFlag = false;
-//             // std::cout << throttleInput << endl;
-//             // fflush(stdout);
-//         }
-//         else if (data == 3) coFlag = true;                                  //If data is 3 (throttle coefficient), flag the value
-//         memset(serialBuffer,0,sizeof(serialBuffer));
-//     }
-//     else return;
-// }
 
 Serial::~Serial() {
     pthread_join(serialThread, NULL);

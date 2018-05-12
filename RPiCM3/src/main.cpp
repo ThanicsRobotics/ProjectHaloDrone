@@ -22,7 +22,7 @@
 
 //Project headers
 #include <altitude.h>
-#include <fcinterface.h>
+#include <flightcontroller.h>
 #include <pid.h>
 #include <stream.h>
 #include <gps.h>
@@ -37,15 +37,14 @@
 #define d_KEY 100
 #define UP_ARROW_KEY 65
 #define DOWN_ARROW_KEY 66
+#define projectPath "./"
 
 bool controllerConnected = false;
 bool streamEnabled = false;
 
 //Thread mutex and gyro thread function
 //pthread_mutex_t stm32_mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_t spiThread;
-
-std::string projectPath = "./";
+//pthread_t spiThread;
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
@@ -54,8 +53,10 @@ int lastAltitude = 0;
 
 std::string camera;
 std::string receiver;
+
 Stream teleStream;
-Serial radio;
+Radio<Serial> radio;
+FlightController fc;
 
 bool keyLoopActive;
 bool shuttingDown = false;
@@ -65,58 +66,68 @@ bool startCli = false;
 //Shutting down threads and closing ports
 void shutdown() {
     shuttingDown = true;
+
     //Stop threads
-    run = false;
+    fc.stopFlight();
     delay(2000);
     if (guiActive) closeGUI();
     
     std::cout << "\nClosing Threads and Ports...\n\n";
 
     //Join Threads to main
-    pthread_join(spiThread, NULL);
+    //pthread_join(spiThread, NULL);
 
     std::cout << "Closing I2C, UART, SPI, TCP Socket...\n";
 
     //Close ports
-    spiClose(spiFd);
     i2cClose(baroI2cFd);
     gpioTerminate();
-    if(teleStream.isActive) teleStream.closeStream();
+    if(teleStream.isActive()) teleStream.closeStream();
 
     std::cout << "\nResetting Flight Controller...\n\n";
     delay(500);
     
     //Reset command to STM32
-    resetSTM32F446();
+    fc.requestService(FlightController::Service::RESET);
     doneShuttingDown = true;
 }
 
 void mainLoop() {
     std::cout << "Waiting for configuration...\n";
-    while(!spiConfigured || !authenticated) delay(10);
+    while(!fc.isSPIConfigured() || !fc.isAuthenticated()) delay(10);
     std::cout << "Starting main loop\n";
     if (testGyro) {
         while(run) {
-            std::cout << "Pitch: " << (int)gyroPitch << "\t| Roll: " << (int)gyroRoll << "\n";
+            std::cout << "Pitch: " << fc.getDronePosition().pitch << "\t| Roll: " << fc.getDronePosition().roll << "\n";
             delay(20);
         }
     }
-    if ((int)gyroPitch == 0 && (int)gyroRoll == 10) {
-        std::cout << "Re-arming...\n";
-        armed = false;
-        armRequest = true;
-        while(!armed);
-    }
     if (!controllerConnected) {
         // startGUI();
+        int loopTimer = millis();
         radio.setupSerial("/dev/serial0", 9600);
-        printf("Sending Heartbeat\n");
-        buffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
-        while(1) radio.write(msg.buf, msg.len);
-        printf("Reading MAVLink packets\n");
-        while(1) {
+        while(run) {
+            //Every second, send heartbeat to controller
+            if (millis() - loopTimer > 1000) {
+                buffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+                radio.write(msg.buf, msg.len);
+            }
             mavlinkReceiveByte(radio.readChar());
+            channels pwmInputs = radio.getRCChannels();
+
+            //Calculate new PID compensated throttle
+            uint16_t newThrottle = fc.calculateThrottlePID(pwmInputs.throttle);
+
+
+            loopTimer = millis();
         }
+        // printf("Sending Heartbeat\n");
+        // buffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+        // while(1) radio.write(msg.buf, msg.len);
+        // printf("Reading MAVLink packets\n");
+        // while(1) {
+        //     mavlinkReceiveByte(radio.readChar());
+        // }
 
     }
     else {
@@ -197,10 +208,11 @@ int main(int argc, char *argv[]) {
     
     //Creating threads
     //  -> spiThread
-    pthread_create(&spiThread, NULL, spiLoop, NULL);
+    //pthread_create(&spiThread, NULL, spiLoop, NULL);
+    fc.setupSPI();
 
     //Wait for gyro calibration, reset calibration if necessary
-    while(!spiConfigured || !authenticated) delay(10);
+    while(!fc.spiConfigured || !authenticated) delay(10);
     delay(200);
     std::cout << "Waiting for gyro calibration...\n";
     fflush(stdout);

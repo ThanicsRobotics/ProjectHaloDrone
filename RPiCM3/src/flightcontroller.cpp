@@ -1,4 +1,4 @@
-#include <fcinterface.h>
+#include <flightcontroller.h>
 #include <radio.h>
 #include <pid.h>
 
@@ -8,39 +8,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <pthread.h>
-#include <string.h>
 #include <unistd.h>
 
 #define SEL2 5
+#define projectPath "./"
 
-bool spiConfigured = false;
-bool authenticated = false;
+#define AUTH_KEY 0xF9
+#define STM32_ARM_TEST 0xFF9F
+#define STM32_ARM_CONF 0xFF0A
+#define STM32_DISARM_TEST 0xFF8F
+#define STM32_DISARM_CONF 0xFFFB
+#define MOTOR_TEST 0x0F
+#define NO_MOTORS 0x0E
 
-bool armRequest = false;
-bool disarmRequest = false;
-bool authRequest = false;
-bool armed = false;
-bool testGyro = false;
-bool motorTest;
-bool noMotors;
+FlightController::FlightController()
+{
+    run = true;
+    spiCS = 0;
+}
 
-//Data received from SPI
-short int FCReceivedData = 0;
-char stm32_rx_buffer[2];
-char stm32_tx_buffer[2];
-
-//Gyro angle variables
-signed char gyroPitch = 0;
-signed char gyroRoll = 0;
-
-bool run = true;
-
-//CS0 is barometer, CS1 is STM32 flight controller
-int SPI_CS = 0;
-int spiFd;
-
-void setupSPI() {
+void FlightController::setupSPI() {
+    //Switch to flight controller, setup SPI @ 3MHz
+    SPI_CS = 0;
     if ((spiFd = spiOpen(SPI_CS, 3000000, 0)) < 0) {
         std::cout << "SPI failed: " << strerror(errno) << "\n";
         exit(1);
@@ -51,7 +40,38 @@ void setupSPI() {
     }
 }
 
-void disarm() {
+void FlightController::requestService(Service serviceType) {
+    using namespace Service;
+    switch (serviceType) {
+        case ARM:
+            armRequest = true;
+            break;
+        case DISARM:
+            disarmRequest = true;
+            break;
+        case AUTH:
+            authRequest = true;
+            break;
+        case RESET:
+            this->reset();
+            break;
+        default:
+            break;
+    }
+}
+
+//Start thread
+void FlightController::startFlight() {
+    interface = std::thread(interfaceLoop);
+}
+
+//Stop threads
+void FlightController::stopFlight() {
+    run = false;
+    interface.join();
+}
+
+void FlightController::disarm() {
     int data = 0;
     while ((data != STM32_DISARM_CONF) && run) {
         int disarmCode = STM32_DISARM_TEST;
@@ -70,7 +90,7 @@ void disarm() {
     armed = false;
 }
 
-void arm() {
+void FlightController::arm() {
     int data = 0;
     while ((data != STM32_ARM_CONF) && run) {
         int armCode = STM32_ARM_TEST;
@@ -91,7 +111,7 @@ void arm() {
     armed = true;
 }
 
-void resetSTM32F446() {
+void FlightController::reset() {
     pinMode(SEL2, OUTPUT);
     digitalWrite(SEL2, LOW);
     system(("sudo openocd -f " + projectPath + "src/reset.cfg").c_str());
@@ -99,9 +119,9 @@ void resetSTM32F446() {
 }
 
 //Making sure the STM32F446 is listening...
-void authFlightController() {
+void FlightController::auth() {
     //Reset flight controller using OpenOCD
-    resetSTM32F446();
+    reset();
 
     authenticated = false;
     char buffer[100];
@@ -131,7 +151,7 @@ void authFlightController() {
 }
 
 //Send modified throttle value to STM32
-void sendThrottle() {
+void FlightController::sendData() {
     short int throttle = newThrottle;
     stm32_tx_buffer[1] = (throttle - 1000) & 0xFF;
     stm32_tx_buffer[0] = ((throttle - 1000) >> 8) & 0xFF;
@@ -147,7 +167,7 @@ void sendThrottle() {
 //  ^Two 0's always lead start of message
 // ...Pitch_H,Pitch_L,Roll_H,Roll_L,Yaw_H,Yaw_L,Throttle_H,Throttle_L}
 //    ^PWM control values, high byte followed by low byte
-char *packMessage(fcMessage info) {
+char *FlightController::packMessage(fcMessage data) {
     char msg[11];
     msg[0] = 0;
     msg[1] = 0;
@@ -161,24 +181,22 @@ char *packMessage(fcMessage info) {
     return msg;
 }
 
-void *spiLoop(void*) {
-    //Switch to flight controller, setup SPI @ 3MHz
-    SPI_CS = 0;
-    setupSPI();
-    authFlightController();
+void FlightController::interfaceLoop() {
+    if(!spiConfigured) this->setupSPI();
+    if(!authenticated) this->auth();
     while(run) {
         if (armRequest) {
             //std::cout << "Arming..." << endl;
-            arm();
+            this->arm();
             armRequest = false;
         }
         else if (disarmRequest) {
-            disarm();
+            this->disarm();
             disarmRequest = false;
         }
         else if (authRequest) {
             //std::cout << "Authenticating..." << endl;
-            authFlightController();
+            this->auth();
             authRequest = false;
         }
         else if (testGyro) {
@@ -187,19 +205,61 @@ void *spiLoop(void*) {
             gyroRoll = (signed char)stm32_rx_buffer[1];
         }
         
-        //Calculate new PID compensated throttle
-        //char stm32_rx_buffer[2];
-        //char stm32_tx_buffer[2];
-        sendThrottle();
-
-        //fcMessage msg;
-
         
+
         //Use SPI to get gyro angles, send throttle
         spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
         FCReceivedData = (short)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
         
     }
-    if (armed) disarm();
+    if (armed) this->disarm();
     return NULL;
+}
+
+dronePosition FlightController::getDronePosition() {
+    return flightPosition;
+}
+
+void FlightController::setHoverAltitude(uint8_t altitude) {
+    setAltitude = altitude;
+}
+
+static float map(int x, int in_min, int in_max, int out_min, int out_max) {
+  return (float)(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+//Calculate throttle factor for altitude management through PID loop
+uint16_t FlightController::calculateThrottlePID(uint16_t altitudePWM) {
+    //Increase or decrease set altitude proportional to stick position
+    if (altitudePWM < 1000) altitudePWM = 1500;
+    if (altitudePWM >= 1520) setAltitude += 0.2 * map(altitudePWM, 1520, 2000, 1, 20);
+    else if (altitudePWM <= 1480) setAltitude -= 0.2 * map(altitudePWM, 1000, 1480, 20, 1);
+    if (setAltitude < 0) setAltitude = 0;
+
+    //Proportional error
+    pid_error_temp = (int)setAltitude - altitude;
+
+    //Integrating error over time
+    pid_i_mem += pid_i_gain * pid_error_temp;
+    if(pid_i_mem > pid_max)pid_i_mem = pid_max;
+    else if(pid_i_mem < pid_max * -1)pid_i_mem = pid_max * -1;
+
+    //Combining all controllers into one output
+    pid_output = pid_p_gain * pid_error_temp + pid_i_mem + pid_d_gain * (pid_error_temp - pid_last_d_error);
+    if(pid_output > pid_max)pid_output = pid_max;
+    else if(pid_output < pid_max * -1)pid_output = pid_max * -1;
+
+    pid_last_d_error = pid_error_temp;
+
+    //PID compensated throttle calculation
+    uint16_t newThrottle = 1500 + pid_output;
+
+    if (newThrottle > 2000) newThrottle = 2000;
+    else if (newThrottle < 1000) newThrottle = 1000;
+    return newThrottle;
+}
+
+FlightController::~FlightController() {
+    if (armed) this->disarm();
+    if (spiConfigured) spiClose(spiFd);
 }

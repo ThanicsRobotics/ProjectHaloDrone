@@ -14,13 +14,13 @@ class Serial {
         char *readLine();
         char readChar();
         int write(std::shared_ptr<uint8_t[]> bytes, uint16_t len);
+        bool isSerialConfigured() { return serialConfigured; }
 
     private:
         pthread_t serialThread;
         bool serialConfigured;
         int throttleInput;
         int serialFd;
-        void *serialLoop(void*);
 };
 
 #endif
