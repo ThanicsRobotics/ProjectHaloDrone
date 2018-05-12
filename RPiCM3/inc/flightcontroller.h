@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <stdint.h>
+#include <memory>
 
 class FlightController {
     public:
@@ -26,21 +27,26 @@ class FlightController {
         void setupSPI();
         void startFlight();
         void stopFlight();
-        void sendMessage(fcMessage data);
-        char *packMessage(fcMessage data);
 
         bool isSPIConfigured() { return spiConfigured; }
         bool isArmed() { return armed; }
         bool isAuthenticated() { return authenticated; }
         void requestService(Service serviceType);
+        void requestSend(fcMessage data);
         void setHoverAltitude(uint8_t altitude); //in cm
         dronePosition getDronePosition();
+        uint16_t calculateThrottlePID(uint16_t throttlePWM, float altitude);
     
     private:
+        struct spiBuffer {
+            uint8_t len;
+            std::shared_ptr<uint8_t[]> buf;
+        };
+
         bool run;
         bool spiConfigured;
         bool authenticated;
-        bool armRequest, authRequest, disarmRequest;
+        bool armRequest, authRequest, disarmRequest, sendRequest;
         bool armed;
 
         bool testGyro;
@@ -63,6 +69,9 @@ class FlightController {
         void auth();
         std::thread interface;
         void interfaceLoop();
+        spiBuffer packMessage();
+        void sendMessage();
+        fcMessage currentMessage;
 
         //Throttle PID Variables and functions for hovering
         int pid_p_gain, pid_i_gain, pid_d_gain;
@@ -73,7 +82,6 @@ class FlightController {
 
         int lastAltitude;
         float currentAltitude, setAltitude;
-        uint16_t calculateThrottlePID(uint16_t throttlePWM);
 };
 
 #endif

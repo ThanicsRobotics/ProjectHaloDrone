@@ -1,4 +1,4 @@
-#include <altitude.h>
+#include <barometer.h>
 #include <pid.h>
 
 #include <wiringPi.h>
@@ -8,42 +8,39 @@
 
 #define BARO_ADDR 0x60
 
-int baroI2cFd;
+Barometer::Barometer() {
 
-int8_t pressureMSB;
-int8_t pressureCSB;
-int8_t pressureLSB;
-int8_t tempMSB;
-int8_t tempLSB;
+}
 
-float pressureAltitude = 0;
-float altitude = 0;
-float surfaceAltitude = 0;
+Barometer::~Barometer() {
+    if(i2cConfigured) i2cClose(baroI2cFd);
+}
 
-float loopRate = 0.0;
-int loopStartTime = 0;
-
-void setupBarometer() {
-    baroI2cFd = i2cOpen(1, BARO_ADDR, 0);       //Open I2C address
+void Barometer::setupI2C() {
+    if ((baroI2cFd = i2cOpen(1, BARO_ADDR, 0)) < 0) {       //Open I2C address
+        printf("%s", strerror(errno));
+    }
+    i2cConfigured = true;
     i2cWriteByteData(baroI2cFd, 0x26, 0xB8);    //Set OSR = 8         B10011000
     i2cWriteByteData(baroI2cFd, 0x13, 0x07);    //Enable Data Flags     B00000111
     i2cWriteByteData(baroI2cFd, 0x26, 0xB9);    //Set Active            B10011001
-    takeReading();
+    this->takeReading();
 
     float altitudeSum = 0;
+    const int iterations = 5;
     //Calibrate to current altitude
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < iterations; i++) {
         altitudeSum += getPressureAltitude();
         std::cout << ".";
         fflush(stdout);
     }
-    surfaceAltitude = altitudeSum/10;
+    surfaceAltitude = altitudeSum/iterations;
     std::cout << "\nSurface Alt: " << surfaceAltitude << "\n";
     delay(600);
-    i2cWriteByteData(baroI2cFd, 0x2D, 0);
+    i2cWriteByteData(baroI2cFd, 0x2D, 0); //Set offset to 0 (not working for any other number some reason?)
 }
 
-void takeReading() {
+void Barometer::takeReading() {
     unsigned char config = i2cReadByteData(baroI2cFd, 0x26);
     config &= ~(1<<1);  //Clear OST bit
     i2cWriteByteData(baroI2cFd, 0x26, config);
@@ -52,7 +49,7 @@ void takeReading() {
     i2cWriteByteData(baroI2cFd, 0x26, config);
 }
 
-float getPressureAltitude() {
+float Barometer::getPressureAltitude() {
     bool gotAltitude = false;
     while (!gotAltitude) {
         int status = i2cReadByteData(baroI2cFd, 0x00);
@@ -68,9 +65,6 @@ float getPressureAltitude() {
             gotAltitude = true;
             return pressureAltitude - surfaceAltitude;
         }
-        else {
-            //takeReading();
-        }
     }
-    takeReading();
+    this->takeReading();
 }

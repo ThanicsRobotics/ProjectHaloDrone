@@ -21,7 +21,7 @@
 #include <pthread.h>
 
 //Project headers
-#include <altitude.h>
+#include <barometer.h>
 #include <flightcontroller.h>
 #include <pid.h>
 #include <stream.h>
@@ -80,7 +80,6 @@ void shutdown() {
     std::cout << "Closing I2C, UART, SPI, TCP Socket...\n";
 
     //Close ports
-    i2cClose(baroI2cFd);
     gpioTerminate();
     if(teleStream.isActive()) teleStream.closeStream();
 
@@ -106,6 +105,8 @@ void mainLoop() {
         // startGUI();
         int loopTimer = millis();
         radio.setupSerial("/dev/serial0", 9600);
+        Barometer baro;
+        baro.setupI2C();
         while(run) {
             //Every second, send heartbeat to controller
             if (millis() - loopTimer > 1000) {
@@ -114,10 +115,11 @@ void mainLoop() {
             }
             mavlinkReceiveByte(radio.readChar());
             channels pwmInputs = radio.getRCChannels();
+            float altitude = baro.getPressureAltitude();
 
             //Calculate new PID compensated throttle
-            uint16_t newThrottle = fc.calculateThrottlePID(pwmInputs.throttle);
-
+            uint16_t newThrottle = fc.calculateThrottlePID(pwmInputs.throttle, altitude);
+            
 
             loopTimer = millis();
         }

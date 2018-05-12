@@ -1,6 +1,6 @@
 #include <pigpio.h>
 #include <gps.h>
-//#include <altitude.h>
+//#include <barometer.h>
 #include <iostream>
 #include <stdio.h>
 #include <string.h>

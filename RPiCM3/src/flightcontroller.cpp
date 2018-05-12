@@ -150,12 +150,19 @@ void FlightController::auth() {
     authenticated = true;
 }
 
+void FlightController::requestSend(fcMessage data) {
+    data = currentMessage;
+    requestSend = true;
+}
+
 //Send modified throttle value to STM32
-void FlightController::sendData() {
-    short int throttle = newThrottle;
-    stm32_tx_buffer[1] = (throttle - 1000) & 0xFF;
-    stm32_tx_buffer[0] = ((throttle - 1000) >> 8) & 0xFF;
-    
+void FlightController::sendMessage() {
+    spiBuffer buffer = this->packMessage(currentMessage);
+    for (int i = 0; i < buffer.len; i += 2) {
+        stm32_tx_buffer[1] = buffer.buf.get()[i+1];
+        stm32_tx_buffer[0] = buffer.buf.get()[i];
+        spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
+    }
     //CLOCK SPEED TEST
     //unsigned long int clockspeed = buffer[1];
     //std::cout << " | Clock: " << clockspeed << endl;
@@ -167,18 +174,22 @@ void FlightController::sendData() {
 //  ^Two 0's always lead start of message
 // ...Pitch_H,Pitch_L,Roll_H,Roll_L,Yaw_H,Yaw_L,Throttle_H,Throttle_L}
 //    ^PWM control values, high byte followed by low byte
-char *FlightController::packMessage(fcMessage data) {
-    char msg[11];
+spiBuffer FlightController::packMessage() {
+    const uint8_t msgLen = 11;
+    char msg[msgLen];
     msg[0] = 0;
     msg[1] = 0;
     int i;
-    for (i = 2; i < 2+sizeof(info.pwm); i+=2) {
-        uint16_t pwm = info.pwm[(i-2)/2];
+    for (i = 2; i < 2+sizeof(currentMessage.pwm); i+=2) {
+        uint16_t pwm = currentMessage.pwm[(i-2)/2];
         msg[i] = (pwm >> 8) & 0xFF;
         msg[i+1] = pwm & 0xFF;
     }
     msg[i] = '\0';
-    return msg;
+    spiBuffer buf;
+    buf.len = msgLen;
+    buf.buf = (std::shared_ptr<uint8_t[]>)msg;
+    return buf;
 }
 
 void FlightController::interfaceLoop() {
@@ -194,6 +205,10 @@ void FlightController::interfaceLoop() {
             this->disarm();
             disarmRequest = false;
         }
+        else if (sendRequest) {
+            this->sendMessage();
+            sendRequest = false;
+        }
         else if (authRequest) {
             //std::cout << "Authenticating..." << endl;
             this->auth();
@@ -204,13 +219,7 @@ void FlightController::interfaceLoop() {
             gyroPitch = (signed char)stm32_rx_buffer[0];
             gyroRoll = (signed char)stm32_rx_buffer[1];
         }
-        
-        
-
-        //Use SPI to get gyro angles, send throttle
-        spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
         FCReceivedData = (short)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
-        
     }
     if (armed) this->disarm();
     return NULL;
@@ -229,7 +238,7 @@ static float map(int x, int in_min, int in_max, int out_min, int out_max) {
 }
 
 //Calculate throttle factor for altitude management through PID loop
-uint16_t FlightController::calculateThrottlePID(uint16_t altitudePWM) {
+uint16_t FlightController::calculateThrottlePID(uint16_t altitudePWM, float altitude) {
     //Increase or decrease set altitude proportional to stick position
     if (altitudePWM < 1000) altitudePWM = 1500;
     if (altitudePWM >= 1520) setAltitude += 0.2 * map(altitudePWM, 1520, 2000, 1, 20);
@@ -237,7 +246,7 @@ uint16_t FlightController::calculateThrottlePID(uint16_t altitudePWM) {
     if (setAltitude < 0) setAltitude = 0;
 
     //Proportional error
-    pid_error_temp = (int)setAltitude - altitude;
+    pid_error_temp = (int)(setAltitude - altitude);
 
     //Integrating error over time
     pid_i_mem += pid_i_gain * pid_error_temp;
