@@ -23,12 +23,11 @@
 //Project headers
 #include <barometer.h>
 #include <flightcontroller.h>
-#include <pid.h>
 #include <stream.h>
 #include <gps.h>
 #include <radio.h>
 #include <serial.h>
-#include <gui.h>
+//#include <gui.h>
 
 #define GYRO_CAL 0x04
 #define BARO_DELAY 30
@@ -37,7 +36,7 @@
 #define d_KEY 100
 #define UP_ARROW_KEY 65
 #define DOWN_ARROW_KEY 66
-#define projectPath "./"
+#define projectPath std::string("./")
 
 bool controllerConnected = false;
 bool streamEnabled = false;
@@ -48,8 +47,6 @@ bool streamEnabled = false;
 
 //Terminal signal handler (for ending program via terminal)
 void signal_callback_handler(int);
-
-int lastAltitude = 0;
 
 std::string camera;
 std::string receiver;
@@ -67,20 +64,23 @@ bool startCli = false;
 void shutdown() {
     shuttingDown = true;
 
+    std::cout << "\nClosing Threads and Ports...\n\n";
+
     //Stop threads
     fc.stopFlight();
-    delay(2000);
-    if (guiActive) closeGUI();
-    
-    std::cout << "\nClosing Threads and Ports...\n\n";
+    //delay(2000);
+    //if (guiActive) closeGUI();
 
     //Join Threads to main
     //pthread_join(spiThread, NULL);
 
     std::cout << "Closing I2C, UART, SPI, TCP Socket...\n";
+    //Close all interfaces on global instances so that we
+    //can close the ports before terminating pigpio
+    if(fc.isSPIConfigured()) fc.closeSPI();
+    if(radio.isSerialConfigured()) radio.closeSerial();
 
     //Close ports
-    gpioTerminate();
     if(teleStream.isActive()) teleStream.closeStream();
 
     std::cout << "\nResetting Flight Controller...\n\n";
@@ -88,6 +88,11 @@ void shutdown() {
     
     //Reset command to STM32
     fc.requestService(FlightController::Service::RESET);
+
+    //Terminates pigpio library
+    gpioTerminate();
+
+    //signals to main() that it can return now
     doneShuttingDown = true;
 }
 
@@ -95,8 +100,8 @@ void mainLoop() {
     std::cout << "Waiting for configuration...\n";
     while(!fc.isSPIConfigured() || !fc.isAuthenticated()) delay(10);
     std::cout << "Starting main loop\n";
-    if (testGyro) {
-        while(run) {
+    if (fc.isTestGyroActive()) {
+        while(fc.isRunning()) {
             std::cout << "Pitch: " << fc.getDronePosition().pitch << "\t| Roll: " << fc.getDronePosition().roll << "\n";
             delay(20);
         }
@@ -104,22 +109,27 @@ void mainLoop() {
     if (!controllerConnected) {
         // startGUI();
         int loopTimer = millis();
+        float currentAltitude = 0;
         radio.setupSerial("/dev/serial0", 9600);
         Barometer baro;
+        printf("Calibrating barometer");
         baro.setupI2C();
-        while(run) {
+        while(fc.isRunning()) {
             //Every second, send heartbeat to controller
             if (millis() - loopTimer > 1000) {
-                buffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+                radioBuffer msg = radio.sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
                 radio.write(msg.buf, msg.len);
             }
-            mavlinkReceiveByte(radio.readChar());
+            else if (millis() - loopTimer > 600) {
+                altitude = baro.getPressureAltitude();
+                baro.takeReading();
+            }
+            radio.mavlinkReceiveByte(radio.readChar());
             channels pwmInputs = radio.getRCChannels();
-            float altitude = baro.getPressureAltitude();
 
             //Calculate new PID compensated throttle
-            uint16_t newThrottle = fc.calculateThrottlePID(pwmInputs.throttle, altitude);
-            
+            uint16_t newThrottle = fc.calculateThrottlePID(pwmInputs.throttlePWM, altitude);
+
 
             loopTimer = millis();
         }
@@ -133,7 +143,7 @@ void mainLoop() {
 
     }
     else {
-        while(run) {
+        while(fc.isRunning()) {
             readGPSSentence();
             delay(100);
             //calculatePID();
@@ -177,13 +187,13 @@ int main(int argc, char *argv[]) {
             if (std::string(argv[i]) == "-aa" || std::string(argv[i]) == "--auto-arm")
                 autoArm = true;
             if (std::string(argv[i]) == "-tg" || std::string(argv[i]) == "--test-gyro")
-                testGyro = true;
+                fc.setTestGyro(true);
             if (std::string(argv[i]) == "-mt" || std::string(argv[i]) == "--motor-test") {
                 std::cout << "\n\t\t!!!! TESTING MOTORS BEFORE ARM !!!!\n\n";
-                motorTest = true;
+                fc.setMotorTest(true);
             }
             if (std::string(argv[i]) == "-nm" || std::string(argv[i]) == "--no-motors")
-                noMotors = true;
+                fc.setNoMotors(true);
             if (std::string(argv[i]) == "-c" || std::string(argv[i]) == "--camera") {
                 camera = std::string(argv[i+1]);
             }
@@ -203,30 +213,30 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    std::cout << "Waiting for barometer calibration";
+    std::cout << "Waiting for barometer calibration\n";
     fflush(stdout);
     //setupBarometer();
-    startGPS();
+    //startGPS();
     
     //Creating threads
     //  -> spiThread
     //pthread_create(&spiThread, NULL, spiLoop, NULL);
     fc.setupSPI();
+    fc.startFlight();
 
     //Wait for gyro calibration, reset calibration if necessary
-    while(!fc.spiConfigured || !authenticated) delay(10);
+    while(!fc.isSPIConfigured() || !fc.isAuthenticated()) delay(10);
     delay(200);
     std::cout << "Waiting for gyro calibration...\n";
     fflush(stdout);
     int start = millis();
     int repeat = 1;
-    while (FCReceivedData != GYRO_CAL) {
+    while (fc.getReceivedData() != GYRO_CAL) {
         if (millis() - start > 10000) {
             std::cout << "Gyro not responding, resetting...\n";
             delay(1000);
-            authenticated = false;
-            authRequest = true;
-            while(!authenticated);
+            fc.requestService(FlightController::Service::AUTH);
+            while(!fc.isAuthenticated());
             start = millis();
             repeat += 1;
         }
@@ -241,25 +251,25 @@ int main(int argc, char *argv[]) {
 
     //Arming process depends on program parameters
     //If Controller is connected, arm through controller thumbsticks
-    if (controllerConnected) {
-        std::cout << "Arm quadcopter using thumb sticks. Throttle down, yaw left.\n";
-        start = millis();
-        while (gyroRoll == 4) {
-            if (millis() - start > 60000) {
-                std::cout << "No ARM signal, shutting down...\n";
-                shutdown();
-                exit(0);
-            }
-            delay(200);
-        }
-        armed = true;
-    }
+    // if (controllerConnected) {
+    //     std::cout << "Arm quadcopter using thumb sticks. Throttle down, yaw left.\n";
+    //     start = millis();
+    //     while (gyroRoll == 4) {
+    //         if (millis() - start > 60000) {
+    //             std::cout << "No ARM signal, shutting down...\n";
+    //             shutdown();
+    //             exit(0);
+    //         }
+    //         delay(200);
+    //     }
+    //     armed = true;
+    // }
 
     //If Auto-ARM is enabled, drone will arm itself immediately
-    else if (autoArm) {
+    if (autoArm) {
         std::cout << "Auto arming... CTRL-C to stop.\n";
         delay(500);
-        armRequest = true;
+        fc.requestService(FlightController::Service::ARM);
     }
 
     //Manual arming process through SSH
@@ -268,7 +278,7 @@ int main(int argc, char *argv[]) {
         std::string input = "";
         getline(std::cin, input);
         if (input == "ARM") {
-            armRequest = true;
+            fc.requestService(FlightController::Service::ARM);
         }
         else {
             shutdown();

@@ -1361,7 +1361,7 @@ typedef enum RC_TYPE
 #include "./mavlink_msg_att_pos_mocap.h"
 #include "./mavlink_msg_set_actuator_control_target.h"
 #include "./mavlink_msg_actuator_control_target.h"
-#include "./mavlink_msg_barometer.h"
+#include "./mavlink_msg_altitude.h"
 #include "./mavlink_msg_resource_request.h"
 #include "./mavlink_msg_scaled_pressure3.h"
 #include "./mavlink_msg_follow_target.h"

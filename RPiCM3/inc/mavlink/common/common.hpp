@@ -1290,7 +1290,7 @@ constexpr auto RC_TYPE_ENUM_END = 2;
 #include "./mavlink_msg_att_pos_mocap.hpp"
 #include "./mavlink_msg_set_actuator_control_target.hpp"
 #include "./mavlink_msg_actuator_control_target.hpp"
-#include "./mavlink_msg_barometer.hpp"
+#include "./mavlink_msg_altitude.hpp"
 #include "./mavlink_msg_resource_request.hpp"
 #include "./mavlink_msg_scaled_pressure3.hpp"
 #include "./mavlink_msg_follow_target.hpp"

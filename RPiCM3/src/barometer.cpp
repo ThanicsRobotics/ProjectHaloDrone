@@ -1,19 +1,19 @@
 #include <barometer.h>
-#include <pid.h>
-
 #include <wiringPi.h>
 #include <pigpio.h>
 #include <iostream>
 #include <bitset>
+#include <string.h>
 
 #define BARO_ADDR 0x60
+#define BARO_DELAY 500
 
 Barometer::Barometer() {
-
+    surfaceAltitude = 0;
 }
 
 Barometer::~Barometer() {
-    if(i2cConfigured) i2cClose(baroI2cFd);
+    
 }
 
 void Barometer::setupI2C() {
@@ -31,6 +31,9 @@ void Barometer::setupI2C() {
     //Calibrate to current altitude
     for(int i = 0; i < iterations; i++) {
         altitudeSum += getPressureAltitude();
+        //printf("%f\n", altitudeSum);
+        takeReading();
+        delay(BARO_DELAY);
         std::cout << ".";
         fflush(stdout);
     }
@@ -66,5 +69,4 @@ float Barometer::getPressureAltitude() {
             return pressureAltitude - surfaceAltitude;
         }
     }
-    this->takeReading();
 }

@@ -1,6 +1,5 @@
 #include <flightcontroller.h>
 #include <radio.h>
-#include <pid.h>
 
 #include <pigpio.h>
 #include <wiringPi.h>
@@ -9,9 +8,10 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <bitset>
 
 #define SEL2 5
-#define projectPath "./"
+#define projectPath std::string("./")
 
 #define AUTH_KEY 0xF9
 #define STM32_ARM_TEST 0xFF9F
@@ -29,30 +29,34 @@ FlightController::FlightController()
 
 void FlightController::setupSPI() {
     //Switch to flight controller, setup SPI @ 3MHz
-    SPI_CS = 0;
-    if ((spiFd = spiOpen(SPI_CS, 3000000, 0)) < 0) {
+    spiCS = 0;
+    if ((spiFd = spiOpen(spiCS, 3000000, 0)) < 0) {
         std::cout << "SPI failed: " << strerror(errno) << "\n";
         exit(1);
     }
     else {
-        std::cout << "Opening SPI. FD: " << spiFd << " ID: " << pthread_self() << "\n";
+        std::cout << "Opening SPI. FD: " << spiFd << " ID: " << interface.get_id() << "\n";
         spiConfigured = true;
     }
 }
 
+void FlightController::closeSPI() {
+    if (armed) this->disarm();
+    if(spiConfigured) spiClose(spiFd);
+}
+
 void FlightController::requestService(Service serviceType) {
-    using namespace Service;
     switch (serviceType) {
-        case ARM:
+        case Service::ARM:
             armRequest = true;
             break;
-        case DISARM:
+        case Service::DISARM:
             disarmRequest = true;
             break;
-        case AUTH:
+        case Service::AUTH:
             authRequest = true;
             break;
-        case RESET:
+        case Service::RESET:
             this->reset();
             break;
         default:
@@ -62,7 +66,7 @@ void FlightController::requestService(Service serviceType) {
 
 //Start thread
 void FlightController::startFlight() {
-    interface = std::thread(interfaceLoop);
+    interface = std::thread([this]{ interfaceLoop(); });
 }
 
 //Stop threads
@@ -152,17 +156,25 @@ void FlightController::auth() {
 
 void FlightController::requestSend(fcMessage data) {
     data = currentMessage;
-    requestSend = true;
+    sendRequest = true;
 }
 
 //Send modified throttle value to STM32
 void FlightController::sendMessage() {
-    spiBuffer buffer = this->packMessage(currentMessage);
+    spiBuffer buffer = packMessage();
+    // for (int i = 0; i < buffer.len; i++) {
+    //     std::bitset<8> x(buffer.buf[i]);
+    //     std::cout << x << " | ";
+    //     printf("%p\n", buffer.buf);
+    // }
+
+    //printf("test\n");
     for (int i = 0; i < buffer.len; i += 2) {
-        stm32_tx_buffer[1] = buffer.buf.get()[i+1];
-        stm32_tx_buffer[0] = buffer.buf.get()[i];
+        stm32_tx_buffer[1] = buffer.buf[i+1];
+        stm32_tx_buffer[0] = buffer.buf[i];
         spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
     }
+    //printf("test2\n");
     //CLOCK SPEED TEST
     //unsigned long int clockspeed = buffer[1];
     //std::cout << " | Clock: " << clockspeed << endl;
@@ -174,21 +186,25 @@ void FlightController::sendMessage() {
 //  ^Two 0's always lead start of message
 // ...Pitch_H,Pitch_L,Roll_H,Roll_L,Yaw_H,Yaw_L,Throttle_H,Throttle_L}
 //    ^PWM control values, high byte followed by low byte
-spiBuffer FlightController::packMessage() {
+FlightController::spiBuffer FlightController::packMessage() {
     const uint8_t msgLen = 11;
-    char msg[msgLen];
+    static uint8_t msg[msgLen];
     msg[0] = 0;
     msg[1] = 0;
     int i;
-    for (i = 2; i < 2+sizeof(currentMessage.pwm); i+=2) {
-        uint16_t pwm = currentMessage.pwm[(i-2)/2];
+    uint16_t* pwmInput = currentMessage.pwm;
+    for (i = 2; i < (msgLen-1); i+=2) {
+        uint16_t pwm = *pwmInput;
         msg[i] = (pwm >> 8) & 0xFF;
         msg[i+1] = pwm & 0xFF;
+        pwmInput++;
     }
     msg[i] = '\0';
     spiBuffer buf;
     buf.len = msgLen;
-    buf.buf = (std::shared_ptr<uint8_t[]>)msg;
+    //buf.buf = (std::shared_ptr<uint8_t[]>)msg;
+    buf.buf = (uint8_t*)msg;
+    //printf("%p\n", buf.buf);
     return buf;
 }
 
@@ -219,13 +235,14 @@ void FlightController::interfaceLoop() {
             gyroPitch = (signed char)stm32_rx_buffer[0];
             gyroRoll = (signed char)stm32_rx_buffer[1];
         }
+        sendMessage();
+        //printf("test3\n");
         FCReceivedData = (short)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
     }
     if (armed) this->disarm();
-    return NULL;
 }
 
-dronePosition FlightController::getDronePosition() {
+FlightController::dronePosition FlightController::getDronePosition() {
     return flightPosition;
 }
 
@@ -269,6 +286,4 @@ uint16_t FlightController::calculateThrottlePID(uint16_t altitudePWM, float alti
 }
 
 FlightController::~FlightController() {
-    if (armed) this->disarm();
-    if (spiConfigured) spiClose(spiFd);
 }

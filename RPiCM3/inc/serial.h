@@ -10,14 +10,16 @@ class Serial {
         Serial();
         ~Serial();
         void setupSerial(char* port, int baud);
+        void closeSerial();
         void startSerialLoop();
         char *readLine();
         char readChar();
-        int write(std::shared_ptr<uint8_t[]> bytes, uint16_t len);
+        //int write(std::shared_ptr<uint8_t[]> bytes, uint16_t len);
+        int write(uint8_t* bytes, uint16_t len);
         bool isSerialConfigured() { return serialConfigured; }
 
     private:
-        pthread_t serialThread;
+        //pthread_t serialThread;
         bool serialConfigured;
         int throttleInput;
         int serialFd;

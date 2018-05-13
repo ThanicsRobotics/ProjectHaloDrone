@@ -11,7 +11,7 @@ class FlightController {
     public:
         struct fcMessage {
             float travelAngle;
-            uint16_t pitch, roll, yaw, throttle;
+            uint16_t pwm[4]; // pitch, roll, yaw, throttle
         };
         struct dronePosition {
             int8_t pitch, roll;
@@ -25,22 +25,34 @@ class FlightController {
         FlightController();
         ~FlightController();
         void setupSPI();
+        void closeSPI();
         void startFlight();
         void stopFlight();
 
         bool isSPIConfigured() { return spiConfigured; }
         bool isArmed() { return armed; }
         bool isAuthenticated() { return authenticated; }
+        bool isTestGyroActive() { return testGyro; }
+        bool isMotorTestActive() { return motorTest; }
+        bool isNoMotorsActive() { return noMotors; }
+        bool isRunning() { return run; }
+
+        void setTestGyro(bool state) { testGyro = state; }
+        void setMotorTest(bool state) { motorTest = state; }
+        void setNoMotors(bool state) { noMotors = state; }
+
         void requestService(Service serviceType);
         void requestSend(fcMessage data);
         void setHoverAltitude(uint8_t altitude); //in cm
         dronePosition getDronePosition();
+        int16_t getReceivedData() { return FCReceivedData; }
         uint16_t calculateThrottlePID(uint16_t throttlePWM, float altitude);
     
     private:
         struct spiBuffer {
             uint8_t len;
-            std::shared_ptr<uint8_t[]> buf;
+            //std::shared_ptr<uint8_t[]> buf;
+            uint8_t* buf;
         };
 
         bool run;
