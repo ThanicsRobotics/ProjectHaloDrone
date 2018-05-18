@@ -11,6 +11,9 @@ Serial::Serial() {
     serialConfigured = false;
 }
 
+/// @brief Opens serial port at specified baud rate.
+/// @param port serial port address, i.e. "/dev/serial0".
+/// @param baud baudrate, i.e. 9600.
 void Serial::setupSerial(char* port, int baud) {
     if ((serialFd = serOpen(port, baud, 0)) < 0) {
         std::cout << "Unable to open serial interface: " << strerror(errno) << '\n';
@@ -22,10 +25,12 @@ void Serial::setupSerial(char* port, int baud) {
     }
 }
 
+/// @brief Closes serial port.
 void Serial::closeSerial() {
     if (serialConfigured) serClose(serialFd);
 }
 
+/// @brief start serial thread loop.
 void Serial::startSerialLoop() {
     //pthread_t serialThread;
     //pthread_create(&serialThread, NULL, serialLoop, NULL);

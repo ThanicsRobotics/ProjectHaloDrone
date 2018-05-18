@@ -51,7 +51,6 @@ void signal_callback_handler(int);
 std::string camera;
 std::string receiver;
 
-Stream teleStream;
 Radio<Serial> radio;
 FlightController fc;
 
@@ -213,8 +212,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     
-    std::cout << "Waiting for barometer calibration\n";
-    fflush(stdout);
     //setupBarometer();
     //startGPS();
     

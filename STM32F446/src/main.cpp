@@ -3,15 +3,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <imu.h>
 
 #define AUTH_KEY 0xF9
 #define GYRO_CAL 0x04
+
 #define STM32_ARM_TEST 0xFF9F
 #define STM32_ARM_CONF 0xFF0A
 #define STM32_DISARM_TEST 0xFF8F
 #define STM32_DISARM_CONF 0xFFFB
 #define MOTOR_TEST 0x0F
 #define NO_MOTORS 0x0E
+
+#define PITCH_COEFF 0x01
+#define ROLL_COEFF 0x02
+#define YAW_COEFF 0x03
 
 //Communication Pins
 I2C i2c(PB_9,PB_8);                         //sda,scl
@@ -64,8 +70,8 @@ int pid_max_yaw = 400;                      //Maximum output of the PID-controll
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 uint8_t last_channel_1, last_channel_2, last_channel_3, last_channel_4;
 uint8_t highByte, lowByte;
-volatile int receiver_input_roll, receiver_input_pitch, receiver_input_throttle, receiver_input_yaw;
-volatile short int mod_receiver_input_throttle;
+uint16_t receiver_input_roll, receiver_input_pitch, receiver_input_throttle, receiver_input_yaw;
+uint16_t mod_receiver_input_throttle;
 int counter_channel_1, counter_channel_2, counter_channel_3, counter_channel_4, loop_counter;
 int esc_1, esc_2, esc_3, esc_4;
 int throttle; 
@@ -89,7 +95,7 @@ float pid_i_mem_yaw, pid_yaw_setpoint, gyro_yaw_input, pid_output_yaw, pid_last_
 float angle_roll_acc, angle_pitch_acc, angle_pitch, angle_roll;
 bool gyro_angles_set;
 
-volatile bool authenticated = false;
+bool authenticated = false;
 
 // bool coFlag = false;
 // int coefficient;
@@ -580,11 +586,6 @@ int main() {
       esc_3 = throttle + pid_output_pitch - pid_output_roll - pid_output_yaw; //Calculate the pulse for esc 3 (rear-left - CCW)
       esc_4 = throttle - pid_output_pitch - pid_output_roll + pid_output_yaw; //Calculate the pulse for esc 4 (front-left - CW)
 
-      // esc_1 = 1500; //Calculate the pulse for esc 1 (front-right - CCW)
-      // esc_2 = 1500; //Calculate the pulse for esc 2 (rear-right - CW)
-      // esc_3 = 1500; //Calculate the pulse for esc 3 (rear-left - CCW)
-      // esc_4 = 1500; //Calculate the pulse for esc 4 (front-left - CW)
-
       if (esc_1 < 1100) esc_1 = 1100;                                         //Keep the motors running.
       if (esc_2 < 1100) esc_2 = 1100;                                         //Keep the motors running.
       if (esc_3 < 1100) esc_3 = 1100;                                         //Keep the motors running.
@@ -603,17 +604,25 @@ int main() {
     }
 
     //Keep these motors off
-    esc_1 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-2.
-    esc_3 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-3.
-    esc_4 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-4.
+    esc_1 = 1000;
+    esc_3 = 1000;
+    esc_4 = 1000;
     
     // We wait until 4000us are passed.
     if ((onTime.read_us() - loop_timer < 4000)) {
       if (spi.receive()) {
         unsigned short int data = spi.read();
-        if (data <= 1000) {
-          mod_receiver_input_throttle = data + 1000;
+
+        //Start of message
+        if (data == 0) {
+          receiver_input_pitch = spi.read();
+          receiver_input_roll = spi.read();
+          receiver_input_yaw = spi.read();
+          receiver_input_throttle = spi.read();
         }
+        // if (data <= 1000) {
+        //   mod_receiver_input_throttle = data + 1000;
+        // }
         else {
           switch (data) {
             case STM32_DISARM_TEST:
@@ -643,7 +652,10 @@ int main() {
       }
     }
 
-    spi.reply(((signed char)angle_pitch << 8) | ((signed char)angle_roll & 0xFF));
+    spi.reply(((signed char)PITCH_COEFF << 8) | ((signed char)angle_pitch & 0xFF));
+    spi.reply(((signed char)ROLL_COEFF << 8) | ((signed char)angle_roll & 0xFF));
+    //spi.reply(((signed char)YAW_COEFF << 8) | ((signed char)angle_yaw & 0xFF));
+
     while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 

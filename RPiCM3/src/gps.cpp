@@ -10,11 +10,9 @@
 
 #define GPS_ADDR 0x42
 
-int gpsFd;
-nmea::NMEAParser parser;
-nmea::GPSService gps(parser);
-
-void startGPS() {
+/// @brief Opens the bit-banged I2C port for the uBlox's
+/// DDC protocol. Hardware I2C did not work.
+void GPS::startGPS() {
     // gps.onUpdate += [&gps](){
 	// 	cout << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ') << gps.fix.trackingSatellites 
     //     << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " ";
@@ -42,7 +40,7 @@ void bbWriteByte(uint8_t byte) {
 
 uint8_t *bbReadGPSBlock(uint16_t size) {
     char inBuf[8] = {4,0x42,2,6,size,3,0};
-    uint8_t outBuf[6000];
+    static uint8_t outBuf[6000];
     bbI2CZip(2, inBuf, sizeof(inBuf), (char*)outBuf, sizeof(outBuf));
     return outBuf;
 }
@@ -63,7 +61,7 @@ uint8_t bbReadByte() {
     return outBuf[0];
 }
 
-void readGPSSentence() {
+void GPS::readGPSSentence() {
     char gpsSentence[100];
     bbWriteByte(0xFF);
     bool gpsSentenceComplete = false;
@@ -99,7 +97,8 @@ void readGPSSentence() {
     //cout << gps.fix.toString() << endl;
 }
 
-void readGPS() {
+/// @brief Reads 5 GPS Sentences.
+void GPS::readGPS() {
     for(int i = 0; i < 5; i++) {
         readGPSSentence();
     }
