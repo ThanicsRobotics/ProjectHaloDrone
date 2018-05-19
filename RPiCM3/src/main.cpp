@@ -53,6 +53,7 @@ std::string receiver;
 
 Radio<Serial> radio;
 FlightController fc;
+std::thread serialThread;
 
 bool keyLoopActive;
 bool shuttingDown = false;
@@ -67,6 +68,8 @@ void shutdown() {
 
     //Stop threads
     fc.stopFlight();
+    radio.stopReceiveLoop();
+    //radio.stopSerialLoop();
     //delay(2000);
     //if (guiActive) closeGUI();
 
@@ -80,7 +83,7 @@ void shutdown() {
     if(radio.isSerialConfigured()) radio.closeSerial();
 
     //Close ports
-    if(teleStream.isActive()) teleStream.closeStream();
+    //if(teleStream.isActive()) teleStream.closeStream();
 
     std::cout << "\nResetting Flight Controller...\n\n";
     delay(500);
@@ -106,31 +109,40 @@ void mainLoop() {
         }
     }
     if (!controllerConnected) {
-        // startGUI();
-        int loopTimer = millis();
+        int heartbeatTimer, baroTimer = millis();
+        int loopTimer = micros();
         float currentAltitude = 0;
         radio.setupSerial("/dev/serial0", 9600);
         Barometer baro;
         printf("Calibrating barometer");
         baro.setupI2C();
+        radio.startReceiveLoop();
         while(fc.isRunning()) {
-            //Every second, send heartbeat to controller
-            if (millis() - loopTimer > 1000) {
-                radioBuffer msg = radio.sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
-                radio.write(msg.buf, msg.len);
-            }
-            else if (millis() - loopTimer > 600) {
-                altitude = baro.getPressureAltitude();
+            // //Every second, send heartbeat to controller
+            // if (millis() - heartbeatTimer > 1000) {
+            //     radioBuffer msg = radio.sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+            //     radio.write(msg.buf, msg.len);
+            //     heartbeatTimer = millis();
+            // }
+
+            //Every 600ms, get pressure altitude
+            if (millis() - baroTimer > 600) {
+                currentAltitude = baro.getPressureAltitude();
                 baro.takeReading();
+                baroTimer = millis();
             }
-            radio.mavlinkReceiveByte(radio.readChar());
-            channels pwmInputs = radio.getRCChannels();
+            // radio.mavlinkReceiveByte(radio.readChar());
+            // channels pwmInputs = radio.getRCChannels();
+            // std::cout << "Pitch: " << pwmInputs.pitchPWM
+            //     << "\nRoll: " << pwmInputs.rollPWM
+            //     << "\nYaw: " << pwmInputs.yawPWM
+            //     << "\nthrottle: " << pwmInputs.throttlePWM
+            //     << "\ntime: " << micros() - loopTimer << "\n----\n";
 
             //Calculate new PID compensated throttle
-            uint16_t newThrottle = fc.calculateThrottlePID(pwmInputs.throttlePWM, altitude);
-
-
-            loopTimer = millis();
+            //uint16_t newThrottle = fc.calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude);
+            
+            loopTimer = micros();
         }
         // printf("Sending Heartbeat\n");
         // buffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
@@ -143,8 +155,7 @@ void mainLoop() {
     }
     else {
         while(fc.isRunning()) {
-            readGPSSentence();
-            delay(100);
+            //delay(100);
             //calculatePID();
         }
     }

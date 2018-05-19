@@ -5,4 +5,6 @@
 .pioenvs/nucleo_f446re/longcmd-9e8f303bf9c50747ab2f96b468759b11
 .pioenvs/nucleo_f446re/STM32F446XE.ld.link_script.ld
 
-.pioenvs
+.vscode/.browse.c_cpp.db*
+.vscode/c_cpp_properties.json
+.vscode/launch.json

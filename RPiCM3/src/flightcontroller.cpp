@@ -5,7 +5,6 @@
 /// the interfacing between the Raspberry Pi CM3 and the STM32F446.
 
 #include <flightcontroller.h>
-#include <radio.h>
 
 #include <pigpio.h>
 #include <wiringPi.h>
@@ -289,7 +288,7 @@ FlightController::dronePosition FlightController::getDronePosition() {
 /// @brief Sets the target altitude for takeoff hover.
 /// @param hoverAltitude Hover altitude in centimeters (max 255 cm)
 void FlightController::setHoverAltitude(uint8_t hoverAltitude) {
-    setAltitude = altitude;
+    setAltitude = hoverAltitude;
 }
 
 static float map(int x, int in_min, int in_max, int out_min, int out_max) {

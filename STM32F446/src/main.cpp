@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <imu.h>
 
 #define AUTH_KEY 0xF9
 #define GYRO_CAL 0x04

@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <inttypes.h>
 #include <memory>
+#include <thread>
 
 /// @brief Contains functions for opening, writing, 
 /// and reading serial port
@@ -27,7 +28,9 @@ public:
     void closeSerial();
 
     /// @brief start serial thread loop. (currently not used).
-    void startSerialLoop();
+    // void startSerialLoop();
+
+    // void stopSerialLoop();
 
     /// 
     char *readLine();
@@ -38,9 +41,12 @@ public:
 
 private:
     //pthread_t serialThread;
+    std::thread serialThread;
     bool serialConfigured;
     int throttleInput;
     int serialFd;
+
+    // void serialLoop();
 };
 
 #endif

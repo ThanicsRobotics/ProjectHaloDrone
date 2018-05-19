@@ -30,11 +30,33 @@ void Serial::closeSerial() {
     if (serialConfigured) serClose(serialFd);
 }
 
-/// @brief start serial thread loop.
-void Serial::startSerialLoop() {
-    //pthread_t serialThread;
-    //pthread_create(&serialThread, NULL, serialLoop, NULL);
-}
+// void Serial::serialLoop() {
+//     int heartbeatTimer = millis();
+//     while (serialThreadActive) {
+//         mavlinkReceiveByte(readChar());
+//         //Every second, send heartbeat to controller
+//         if (millis() - heartbeatTimer > 1000) {
+//             radioBuffer msg = radio.sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+//             radio.write(msg.buf, msg.len);
+//             heartbeatTimer = millis();
+//         }
+//     }
+// }
+
+// /// @brief start serial thread loop.
+// void Serial::startSerialLoop() {
+//     serialThreadActive = true;
+//     serialThread = std::thread([this]{ serialLoop(); })
+//     //pthread_t serialThread;
+//     //pthread_create(&serialThread, NULL, serialLoop, NULL);
+// }
+
+// void Serial::stopSerialLoop() {
+//     if (serialThreadActive) {
+//         serialThreadActive = false;
+//         serialThread.join();
+//     }
+// }
 
 char *Serial::readLine() {
     if(!serialConfigured) return "\0";

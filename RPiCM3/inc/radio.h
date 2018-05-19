@@ -35,11 +35,65 @@ public:
     void mavlinkReceiveByte(uint8_t data);
     void mavlinkReceivePacket(uint8_t *packet);
     channels& getRCChannels();
+    bool isReceiveThreadActive() const { return receiveThreadActive; }
+
+    void setReceiveThreadActive(bool state) { receiveThreadActive = state; }
+    void startReceiveLoop();
+    void stopReceiveLoop();
 
 private:
     channels pwmInputs;
     uint8_t controllerStatus;
+    std::thread receiveThread;
+    bool receiveThreadActive;
+
+    void receiveLoop();
 };
+
+template<>
+void Radio<Serial>::receiveLoop() {
+    std::cout << "in thread\n";
+    int heartbeatTimer = millis();
+    while (receiveThreadActive) {
+        mavlinkReceiveByte(readChar());
+        //Every second, send heartbeat to controller
+        if (millis() - heartbeatTimer > 1000) {
+            radioBuffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+            this->write(msg.buf, msg.len);
+            heartbeatTimer = millis();
+        }
+    }
+}
+
+template<>
+void Radio<Stream>::receiveLoop() {
+    // int heartbeatTimer = millis();
+    // while (serialThreadActive) {
+    //     mavlinkReceiveByte(readChar());
+    //     //Every second, send heartbeat to controller
+    //     if (millis() - heartbeatTimer > 1000) {
+    //         radioBuffer msg = radio.sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+    //         radio.write(msg.buf, msg.len);
+    //         heartbeatTimer = millis();
+    //     }
+    // }
+}
+
+/// @brief start serial thread loop.
+template<typename InterfaceType>
+void Radio<InterfaceType>::startReceiveLoop() {
+    std::cout << "starting thread\n";
+    receiveThreadActive = true;
+    receiveThread = std::thread([this]{ receiveLoop(); });
+}
+
+template<typename InterfaceType>
+void Radio<InterfaceType>::stopReceiveLoop() {
+    if (receiveThreadActive) {
+        receiveThreadActive = false;
+        receiveThread.join();
+    }
+}
 
 template<typename InterfaceType>
 radioBuffer& Radio<InterfaceType>::sendHeartbeat(uint8_t mode, uint8_t status) {
@@ -87,13 +141,15 @@ void Radio<InterfaceType>::mavlinkReceiveByte(uint8_t data) {
     if(mavlink_parse_char(MAVLINK_COMM_0, data, &msg, &status)) {
         printf("Received message with ID %d, sequence: %d from component %d of system %d\n", 
         msg.msgid, msg.seq, msg.compid, msg.sysid);
+        delay(100);
         switch(msg.msgid) {
             case MAVLINK_MSG_ID_HEARTBEAT:
                 mavlink_heartbeat_t hb;
                 mavlink_msg_heartbeat_decode(&msg, &hb);
                 controllerStatus = hb.system_status;
-                printf("Heartbeat from: %d, mode: %d, status: %d\n", 
-                    hb.type, hb.base_mode, controllerStatus);
+                // printf("Heartbeat from: %d, mode: %d, status: %d\n", 
+                //     hb.type, hb.base_mode, controllerStatus);
+                //     delay(2000);
                 break;
             case MAVLINK_MSG_ID_RC_CHANNELS:
                 mavlink_rc_channels_t channels;
@@ -102,6 +158,14 @@ void Radio<InterfaceType>::mavlinkReceiveByte(uint8_t data) {
                 pwmInputs.rollPWM = channels.chan2_raw;
                 pwmInputs.yawPWM = channels.chan3_raw;
                 pwmInputs.throttlePWM = channels.chan4_raw;
+
+                std::cout << "Pitch: " << pwmInputs.pitchPWM
+                << "\nRoll: " << pwmInputs.rollPWM
+                << "\nYaw: " << pwmInputs.yawPWM
+                << "\nthrottle: " << pwmInputs.throttlePWM << "\n----\n";
+                fflush(stdout);
+                // printf("rcchannels\n");
+                // delay(2000);
                 break;
             case MAVLINK_MSG_ID_COMMAND_LONG:
                 mavlink_command_long_t command;
@@ -118,10 +182,5 @@ void Radio<InterfaceType>::mavlinkReceiveByte(uint8_t data) {
     }
     //else printf("fail\n");
 }
-
-// receivedMessage getControllerData(Stream stream) {
-//     receivedMessage msg;
-//     mavlinkReceivePacket(stream.receiveDataPacket());
-// }
 
 #endif

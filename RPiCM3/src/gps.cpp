@@ -6,13 +6,14 @@
 #include <string.h>
 #include <fstream>
 #include <iomanip>
-#include <nmeaparse/nmea.h>
+//#include <nmeaparse/nmea.h>
 
 #define GPS_ADDR 0x42
 
 /// @brief Opens the bit-banged I2C port for the uBlox's
 /// DDC protocol. Hardware I2C did not work.
 void GPS::startGPS() {
+    gps = nmea::GPSService(parser);
     // gps.onUpdate += [&gps](){
 	// 	cout << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ') << gps.fix.trackingSatellites 
     //     << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " ";

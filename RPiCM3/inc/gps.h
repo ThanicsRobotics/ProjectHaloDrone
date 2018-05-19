@@ -29,10 +29,10 @@ public:
     void startGPS();
 
     /// @brief Reads 5 GPS Sentences.
-    void readGPS() const;
+    void readGPS();
 private:
+    nmea::NMEAParser parser;
     nmea::GPSService gps;
-    nmea::GPSService gps(parser);
     int gpsFd;
 
     void readGPSSentence();
