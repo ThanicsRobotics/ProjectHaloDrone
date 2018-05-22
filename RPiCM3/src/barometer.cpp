@@ -8,7 +8,9 @@
 #include <math.h>
 
 #define BARO_ADDR 0x60
+#define BARO_ERROR 2
 
+/// @brief Initializes private variables.
 Barometer::Barometer() {
     surfaceAltitude = 0;
     calibrated = false;
@@ -18,37 +20,54 @@ Barometer::~Barometer() {
     
 }
 
+/// @brief Opens I2C port, sets up barometer registers
+/// and starts calibration/acclimation thread.
 void Barometer::setup() {
-    if ((baroI2cFd = i2cOpen(1, BARO_ADDR, 0)) < 0) {       //Open I2C address
+    // Open I2C address
+    if ((baroI2cFd = i2cOpen(1, BARO_ADDR, 0)) < 0) {
         printf("%s", strerror(errno));
     }
     i2cConfigured = true;
-    i2cWriteByteData(baroI2cFd, 0x26, 0xB0);    //Set OSR = 64         B10110000
+
+    i2cWriteByteData(baroI2cFd, 0x26, 0xB0);    //Set OSR = 64          B10110000
     i2cWriteByteData(baroI2cFd, 0x13, 0x07);    //Enable Data Flags     B00000111
     i2cWriteByteData(baroI2cFd, 0x26, 0xB1);    //Set Active            B10110001
     
     //i2cWriteByteData(baroI2cFd, 0x2D, 0); //Set offset to 0 (not working for any other number some reason?)
+
+    // Start calibration thread
     baroThread = std::thread([this]{ calibrate(); });
 }
 
+/// @brief Closes I2C port and waits for calibraton thread to join.
 void Barometer::close() {
-    printf("waiting for baro i2c to stop reading...\n");
+    // Waiting for barometer's I2C to stop reading
     while (readingI2C);
+
+    // Close I2C port
     if(i2cConfigured) i2cClose(baroI2cFd);
     i2cConfigured = false;
+
+    // Wait for baroThread to join to main thread
     closeCalibrationThread();
 }
 
+/// @brief Joins baroThread to main thread.
 void Barometer::closeCalibrationThread() {
     baroThread.join();
 }
 
+/// @brief Executed by baroThread to calibrate/acclimate the barometer.
 void Barometer::calibrate() {
     printf("Waiting for barometer to acclimate...\n");
     int timer = millis();
     int count = 0;
+
+    // In this loop until range of 30 samples is less than BARO_ERROR in meters,
+    // and repeats 2 other times in a row to make sure.
     while (count < 3) {
         float calibrationData[30];
+        // Taking 30 samples
         for (int i = 0; i < 30; i++) {
             if(!i2cConfigured) return;
             readingI2C = true;
@@ -59,15 +78,19 @@ void Barometer::calibrate() {
             calibrationData[i] = getPressureAltitude();
             
         }
+
+        // Finds range of the 30 samples, if less than BARO_ERROR, this sample is valid
+        // and barometer is acclimated
         auto minmax = std::minmax_element(std::begin(calibrationData), std::end(calibrationData));
         float range = *(minmax.second) - *(minmax.first);
         std::cout << "BARO: Range: " << range << std::endl;
-        if (range < 2 && range != 0) {
+        if (range < BARO_ERROR && range != 0) {
             printf("BARO: successful range\n");
             count++;
         }
         else count = 0;
 
+        // 80 second timout if barometer has not acclimated yet
         if(millis() - timer > 80000) {
             std::cout << "Baro error: failed to acclimate. CNTL-C to exit." << std::endl;
             while(1);
@@ -75,6 +98,9 @@ void Barometer::calibrate() {
     }
     printf("BARO: Baro acclimated in %d seconds, now calibrating...\n", (millis() - timer)/1000);
     float calibrationSum = 0;
+
+    // After barometer has acclimated, we take 30 samples from barometer and find average
+    // to calculate sea level altitude that corresponds to ground level.
     for (int i = 0; i < 30; i++) {
         if(!i2cConfigured) return;
         readingI2C = true;
@@ -91,17 +117,20 @@ void Barometer::calibrate() {
     calibrated = true;
 }
 
+/// @brief Signals to barometer to initiate measurement cycle.
 void Barometer::takeReading() {
     if (i2cConfigured) {
         unsigned char config = i2cReadByteData(baroI2cFd, 0x26);
         config &= ~(1<<1);  //Clear OST bit
         i2cWriteByteData(baroI2cFd, 0x26, config);
         config = i2cReadByteData(baroI2cFd, 0x26);
-        config |= (1<<1); //Set OST bit
+        config |= (1<<1);   //Set OST bit
         i2cWriteByteData(baroI2cFd, 0x26, config);
     }
 }
 
+/// @brief Gets the current pressure altitude from barometer.
+/// @return Current pressure altitude.
 float Barometer::getPressureAltitude() {
     if(i2cConfigured) {
         bool gotAltitude = false;
@@ -114,10 +143,12 @@ float Barometer::getPressureAltitude() {
                 tempMSB = i2cReadByteData(baroI2cFd, 0x04);
                 tempLSB = i2cReadByteData(baroI2cFd, 0x05);
 
+                // First 16 bits of 24 bit pressure value are whole numbers,
+                // next 4 bits are fractional, so we divide them by 4 bit total (16),
+                // and add to whole numbers.
                 pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
-                //bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
+
                 gotAltitude = true;
-                //std::cout << pressureAltitude << std::endl;
                 if(calibrated) return abs(pressureAltitude - surfaceAltitude) - 4;
                 else return pressureAltitude;
             }

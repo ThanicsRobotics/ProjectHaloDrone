@@ -1,3 +1,8 @@
+/// @file radio.h
+/// @author Andrew Loomis
+/// @date 5/17/2018
+/// @brief Definition of the Radio class template.
+
 #ifndef RADIO_H
 #define RADIO_H
 
@@ -17,79 +22,100 @@
 #define COMPID 1
 #define PAYLOAD_LEN 11
 
-struct radioBuffer
-{
-    uint16_t len;
-    //std::shared_ptr<uint8_t[]> buf;
-    uint8_t* buf;
-};
+
+// struct radioBuffer
+// {
+//     uint16_t len;
+//     //std::shared_ptr<uint8_t[]> buf;
+//     uint8_t* buf;
+// };
+
+/// @brief Holds all PWM control signals. All within 1000-2000.
 struct channels
 {
     uint16_t rollPWM, pitchPWM, yawPWM, throttlePWM;
 };
 
-//Message payload is exactly PAYLOAD_LEN bytes long
+/// @brief Custom message structure for communication network.
+/// Message payload is exactly PAYLOAD_LEN bytes long.
 struct receivedMessage {
-    uint8_t msgid;
-    uint8_t fromid;
-    uint8_t seqid;
-    uint16_t throttlePWM;
-    uint16_t pitchPWM;
-    uint16_t rollPWM;
-    uint16_t yawPWM;
-};
-enum MSG_STATE {
-    WAITING = 0,
-    FILLING = 1,
-    FAIL = 2,
-    DONE = 3
+    uint8_t msgid;          ///< ID of type of message.
+    uint8_t fromid;         ///< ID of sender system.
+    uint8_t seqid;          ///< Sequential message number, used for checking message continuity.
+    uint16_t throttlePWM;   ///< Throttle PWM Input (1000 - 2000).
+    uint16_t pitchPWM;      ///< Pitch PWM Input (1000 - 2000).
+    uint16_t rollPWM;       ///< Roll PWM Input (1000 - 2000).
+    uint16_t yawPWM;        ///< Yaw PWM Input (1000 - 2000).
 };
 
-//Specify "Serial" or "Stream" based Radio in template argument
-//for example: Radio<Serial> will generate a Serial-based radio object
+/// @brief Contains states of message parsing process.
+enum MSG_STATE {
+    WAITING = 0,    ///< Waiting for starting header.
+    FILLING = 1,    ///< Message has started, and filling buffer.
+    FAIL = 2,       ///< Buffer overflowed, or other error.
+    DONE = 3        ///< Message footer found, finished filing buffer.
+};
+
+/// @brief Class template for controlling the radio, whether a WLAN radio, or UART Serial.
+/// Specify "Serial" or "Stream" based Radio in template argument
+/// for example: Radio<Serial> will generate a Serial-based radio object
 template<typename InterfaceType>
 class Radio : public InterfaceType
 {
 public:
-    radioBuffer& sendHeartbeat(uint8_t mode, uint8_t status);
-    void mavlinkReceiveByte(uint8_t data);
-    void mavlinkReceivePacket(uint8_t *packet);
+    //radioBuffer& sendHeartbeat(uint8_t mode, uint8_t status);
+    //void mavlinkReceiveByte(uint8_t data);
+    //void mavlinkReceivePacket(uint8_t *packet);
+
+    /// @brief Gives access to all PWM inputs.
+    /// @return A channels structure that contains pitch, roll, yaw, throttle control PWM signals.
     channels& getRCChannels();
+
+    /// @brief Checks to see if the receiver thread is running.
+    /// @return True if running thread, false if not.
     bool isReceiveThreadActive() const { return receiveThreadActive; }
 
-    void setReceiveThreadActive(bool state) { receiveThreadActive = state; }
     void startReceiveLoop();
     void stopReceiveLoop();
+
+    /// @brief Convience function for inputing each byte received by radio and
+    /// parsing it into a completed message.
+    /// @param data Byte from radio stream.
     void customReceiveByte(uint8_t data);
 
 private:
-    channels pwmInputs;
-    uint8_t controllerStatus;
-    std::thread receiveThread;
-    bool receiveThreadActive;
+    channels pwmInputs;         ///< Current PWM control inputs.
+    uint8_t controllerStatus;   ///< Status of controller operation (currently not used). 
+    std::thread receiveThread;  ///< Thread that will independently get and parse comms data.
+    bool receiveThreadActive;   ///< True if receive thread is running, false if not.
 
+    /// @brief Loop executed by receive thread, gets data from interface and parses it.
     void receiveLoop();
+
+    /// @brief Parses incoming radio data and modifies a receivedMessage object to contain that data.
+    /// @param data Byte from radio interface.
+    /// @param msg A reference to the receivedMessage object to be modified.
+    /// @return True if message is completed, false if error or still filling buffer.
     bool customParseChar(uint8_t data, receivedMessage& msg);
 };
 
 template<>
 void Radio<Serial>::receiveLoop() {
-    //std::cout << "in thread\n";
     int heartbeatTimer = millis();
     int byteCount = 0;
     while (receiveThreadActive) {
         byteCount++;
-        mavlinkReceiveByte(readChar());
-        //printf(".\n");
+        //mavlinkReceiveByte(readChar());
+        customReceiveByte(readChar());
         
         //Every second, send heartbeat to controller
-        if (millis() - heartbeatTimer > 1000) {
-            radioBuffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
-            this->write(msg.buf, msg.len);
-            printf("rate: %dkbps\n", (byteCount*8)/1000);
-            byteCount = 0;
-            heartbeatTimer = millis();
-        }
+        // if (millis() - heartbeatTimer > 1000) {
+        //     radioBuffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+        //     this->write(msg.buf, msg.len);
+        //     printf("rate: %dkbps\n", (byteCount*8)/1000);
+        //     byteCount = 0;
+        //     heartbeatTimer = millis();
+        // }
     }
 }
 
@@ -124,22 +150,6 @@ void Radio<InterfaceType>::stopReceiveLoop() {
 }
 
 template<typename InterfaceType>
-radioBuffer& Radio<InterfaceType>::sendHeartbeat(uint8_t mode, uint8_t status) {
-    mavlink_message_t msg;
-    uint16_t len;
-    static uint8_t buf[MAVLINK_MAX_PACKET_LEN];
-
-    mavlink_msg_heartbeat_pack(SYSID, COMPID, &msg, MAV_TYPE_QUADROTOR, MAV_AUTOPILOT_GENERIC, mode, 0, status);
-    len = mavlink_msg_to_send_buffer(buf, &msg);
-
-    static radioBuffer sendBuffer;
-    //sendBuffer.buf = (std::shared_ptr<uint8_t[]>)buf;
-    sendBuffer.buf = (uint8_t*)buf;
-    sendBuffer.len = len;
-    return sendBuffer;
-}
-
-template<typename InterfaceType>
 channels& Radio<InterfaceType>::getRCChannels() {
     static channels modInputs;
     modInputs.pitchPWM = pwmInputs.pitchPWM < 1000 ? 1500 : pwmInputs.pitchPWM;
@@ -150,21 +160,7 @@ channels& Radio<InterfaceType>::getRCChannels() {
 }
 
 template<typename InterfaceType>
-void Radio<InterfaceType>::mavlinkReceivePacket(uint8_t *packet) {
-    uint8_t byte = 1;
-    int i = 0;
-    while (byte != '\0') {
-        printf("byte %d: %d\n", i, byte);
-        fflush(stdout);
-        byte = packet[i];
-        mavlinkReceiveByte(byte);
-        i += 1;
-    }
-}
-
-template<typename InterfaceType>
 void Radio<InterfaceType>::customReceiveByte(uint8_t data) {
-    //printf("here\n");
     static uint32_t timer = 0;
     static receivedMessage msg;
     if (customParseChar(data, msg)) {
@@ -257,53 +253,88 @@ bool Radio<InterfaceType>::customParseChar(uint8_t data, receivedMessage& msg) {
     return false;
 }
 
-template<typename InterfaceType>
-void Radio<InterfaceType>::mavlinkReceiveByte(uint8_t data) {
-    mavlink_message_t msg;
-    mavlink_status_t status;
-    if(mavlink_parse_char(MAVLINK_COMM_0, data, &msg, &status)) {
-        printf("Received message with ID %d, sequence: %d from component %d of system %d, len: %d\n", 
-        msg.msgid, msg.seq, msg.compid, msg.sysid, msg.len);
-        delay(100);
-        switch(msg.msgid) {
-            case MAVLINK_MSG_ID_HEARTBEAT:
-                mavlink_heartbeat_t hb;
-                mavlink_msg_heartbeat_decode(&msg, &hb);
-                controllerStatus = hb.system_status;
-                // printf("Heartbeat from: %d, mode: %d, status: %d\n", 
-                //     hb.type, hb.base_mode, controllerStatus);
-                //     delay(2000);
-                break;
-            case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
-                mavlink_rc_channels_raw_t channels;
-                mavlink_msg_rc_channels_raw_decode(&msg, &channels);
-                pwmInputs.pitchPWM = channels.chan1_raw;
-                pwmInputs.rollPWM = channels.chan2_raw;
-                pwmInputs.yawPWM = channels.chan3_raw;
-                pwmInputs.throttlePWM = channels.chan4_raw;
+///////
+///
+///  ***MAVLink Usage on hold until I can figure out why it's so slow.
+///
+///////
 
-                std::cout << "Pitch: " << pwmInputs.pitchPWM
-                << "\nRoll: " << pwmInputs.rollPWM
-                << "\nYaw: " << pwmInputs.yawPWM
-                << "\nthrottle: " << pwmInputs.throttlePWM << "\n----\n";
-                fflush(stdout);
-                // printf("rcchannels\n");
-                // delay(2000);
-                break;
-            case MAVLINK_MSG_ID_COMMAND_LONG:
-                mavlink_command_long_t command;
-                switch (command.command) {
-                    case MAV_CMD_NAV_LAND:
-                        break;
-                    case MAV_CMD_NAV_TAKEOFF:
-                        break;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-    //else printf("fail\n");
-}
+// template<typename InterfaceType>
+// radioBuffer& Radio<InterfaceType>::sendHeartbeat(uint8_t mode, uint8_t status) {
+//     mavlink_message_t msg;
+//     uint16_t len;
+//     static uint8_t buf[MAVLINK_MAX_PACKET_LEN];
+
+//     mavlink_msg_heartbeat_pack(SYSID, COMPID, &msg, MAV_TYPE_QUADROTOR, MAV_AUTOPILOT_GENERIC, mode, 0, status);
+//     len = mavlink_msg_to_send_buffer(buf, &msg);
+
+//     static radioBuffer sendBuffer;
+//     //sendBuffer.buf = (std::shared_ptr<uint8_t[]>)buf;
+//     sendBuffer.buf = (uint8_t*)buf;
+//     sendBuffer.len = len;
+//     return sendBuffer;
+// }
+
+// template<typename InterfaceType>
+// void Radio<InterfaceType>::mavlinkReceivePacket(uint8_t *packet) {
+//     uint8_t byte = 1;
+//     int i = 0;
+//     while (byte != '\0') {
+//         printf("byte %d: %d\n", i, byte);
+//         fflush(stdout);
+//         byte = packet[i];
+//         mavlinkReceiveByte(byte);
+//         i += 1;
+//     }
+// }
+
+// template<typename InterfaceType>
+// void Radio<InterfaceType>::mavlinkReceiveByte(uint8_t data) {
+//     mavlink_message_t msg;
+//     mavlink_status_t status;
+//     if(mavlink_parse_char(MAVLINK_COMM_0, data, &msg, &status)) {
+//         printf("Received message with ID %d, sequence: %d from component %d of system %d, len: %d\n", 
+//         msg.msgid, msg.seq, msg.compid, msg.sysid, msg.len);
+//         delay(100);
+//         switch(msg.msgid) {
+//             case MAVLINK_MSG_ID_HEARTBEAT:
+//                 mavlink_heartbeat_t hb;
+//                 mavlink_msg_heartbeat_decode(&msg, &hb);
+//                 controllerStatus = hb.system_status;
+//                 // printf("Heartbeat from: %d, mode: %d, status: %d\n", 
+//                 //     hb.type, hb.base_mode, controllerStatus);
+//                 //     delay(2000);
+//                 break;
+//             case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
+//                 mavlink_rc_channels_raw_t channels;
+//                 mavlink_msg_rc_channels_raw_decode(&msg, &channels);
+//                 pwmInputs.pitchPWM = channels.chan1_raw;
+//                 pwmInputs.rollPWM = channels.chan2_raw;
+//                 pwmInputs.yawPWM = channels.chan3_raw;
+//                 pwmInputs.throttlePWM = channels.chan4_raw;
+
+//                 std::cout << "Pitch: " << pwmInputs.pitchPWM
+//                 << "\nRoll: " << pwmInputs.rollPWM
+//                 << "\nYaw: " << pwmInputs.yawPWM
+//                 << "\nthrottle: " << pwmInputs.throttlePWM << "\n----\n";
+//                 fflush(stdout);
+//                 // printf("rcchannels\n");
+//                 // delay(2000);
+//                 break;
+//             case MAVLINK_MSG_ID_COMMAND_LONG:
+//                 mavlink_command_long_t command;
+//                 switch (command.command) {
+//                     case MAV_CMD_NAV_LAND:
+//                         break;
+//                     case MAV_CMD_NAV_TAKEOFF:
+//                         break;
+//                 }
+//                 break;
+//             default:
+//                 break;
+//         }
+//     }
+//     //else printf("fail\n");
+// }
 
 #endif
