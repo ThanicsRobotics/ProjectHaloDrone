@@ -10,9 +10,12 @@
 #include <pigpio.h>
 #include <iostream>
 #include <wiringPi.h>
+#include <algorithm>
+#include <array>
 
 #define SYSID 1
 #define COMPID 1
+#define PAYLOAD_LEN 11
 
 struct radioBuffer
 {
@@ -23,6 +26,23 @@ struct radioBuffer
 struct channels
 {
     uint16_t rollPWM, pitchPWM, yawPWM, throttlePWM;
+};
+
+//Message payload is exactly PAYLOAD_LEN bytes long
+struct receivedMessage {
+    uint8_t msgid;
+    uint8_t fromid;
+    uint8_t seqid;
+    uint16_t throttlePWM;
+    uint16_t pitchPWM;
+    uint16_t rollPWM;
+    uint16_t yawPWM;
+};
+enum MSG_STATE {
+    WAITING = 0,
+    FILLING = 1,
+    FAIL = 2,
+    DONE = 3
 };
 
 //Specify "Serial" or "Stream" based Radio in template argument
@@ -40,6 +60,7 @@ public:
     void setReceiveThreadActive(bool state) { receiveThreadActive = state; }
     void startReceiveLoop();
     void stopReceiveLoop();
+    void customReceiveByte(uint8_t data);
 
 private:
     channels pwmInputs;
@@ -48,18 +69,25 @@ private:
     bool receiveThreadActive;
 
     void receiveLoop();
+    bool customParseChar(uint8_t data, receivedMessage& msg);
 };
 
 template<>
 void Radio<Serial>::receiveLoop() {
-    std::cout << "in thread\n";
+    //std::cout << "in thread\n";
     int heartbeatTimer = millis();
+    int byteCount = 0;
     while (receiveThreadActive) {
+        byteCount++;
         mavlinkReceiveByte(readChar());
+        //printf(".\n");
+        
         //Every second, send heartbeat to controller
         if (millis() - heartbeatTimer > 1000) {
             radioBuffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
             this->write(msg.buf, msg.len);
+            printf("rate: %dkbps\n", (byteCount*8)/1000);
+            byteCount = 0;
             heartbeatTimer = millis();
         }
     }
@@ -82,7 +110,7 @@ void Radio<Stream>::receiveLoop() {
 /// @brief start serial thread loop.
 template<typename InterfaceType>
 void Radio<InterfaceType>::startReceiveLoop() {
-    std::cout << "starting thread\n";
+    //std::cout << "starting thread\n";
     receiveThreadActive = true;
     receiveThread = std::thread([this]{ receiveLoop(); });
 }
@@ -135,12 +163,107 @@ void Radio<InterfaceType>::mavlinkReceivePacket(uint8_t *packet) {
 }
 
 template<typename InterfaceType>
+void Radio<InterfaceType>::customReceiveByte(uint8_t data) {
+    //printf("here\n");
+    static uint32_t timer = 0;
+    static receivedMessage msg;
+    if (customParseChar(data, msg)) {
+        std::cout << "Received msg from " << (int)msg.fromid
+            << ", seq: " << (int)msg.seqid
+            << "\nThrottle: " << msg.throttlePWM
+            << "\nPitch: " << msg.pitchPWM
+            << "\nRoll: " << msg.rollPWM
+            << "\nYaw: " << msg.yawPWM
+            << "\nLast Message: " << micros() - timer << "us"
+            << "\n----------" << std::endl;
+        timer = micros();
+
+        pwmInputs.pitchPWM = msg.pitchPWM;
+        pwmInputs.rollPWM = msg.rollPWM;
+        pwmInputs.yawPWM = msg.yawPWM;
+        pwmInputs.throttlePWM = msg.throttlePWM;
+    }
+}
+
+template<typename InterfaceType>
+bool Radio<InterfaceType>::customParseChar(uint8_t data, receivedMessage& msg) {
+    //printf("here2\n");
+    static uint8_t msgCache[100];
+    static int index = 0;
+    static int startIndex = 0;
+    static MSG_STATE state = MSG_STATE::WAITING;
+    msgCache[index] = data;
+    // printf("%x\n", data);
+
+    if (index == 0) {
+        index++;
+        return false;
+    }
+
+    switch (state) {
+        case MSG_STATE::WAITING:
+            if (msgCache[index - 1] == 0xFF && msgCache[index] == 0xFE) {
+                // printf("start\n");
+                startIndex = index + 1;
+                state = MSG_STATE::FILLING;
+            }
+            break;
+        case MSG_STATE::FILLING:
+            if (msgCache[index - 1] == 0xFD && msgCache[index] == 0xFC) {
+                // printf("index: %d\n", index);
+                // printf("startindex: %d\n", startIndex);
+                // printf("range: %d\n", index - startIndex);
+                if (index - startIndex - 1 == PAYLOAD_LEN) {
+                    receivedMessage outMsg;
+                    outMsg.msgid = msgCache[startIndex];
+                    outMsg.fromid = msgCache[startIndex + 1];
+                    outMsg.seqid = msgCache[startIndex + 2];
+                    outMsg.throttlePWM = msgCache[startIndex + 3] << 8 | msgCache[startIndex + 4];
+                    outMsg.pitchPWM = msgCache[startIndex + 5] << 8 | msgCache[startIndex + 6];
+                    outMsg.rollPWM = msgCache[startIndex + 7] << 8 | msgCache[startIndex + 8];
+                    outMsg.yawPWM = msgCache[startIndex + 9] << 8 | msgCache[startIndex + 10];
+                    msg = outMsg;
+
+                    //std::copy(msgCache + startIndex, msgCache + index - 2, buf.begin());
+                    state = MSG_STATE::DONE;
+                    //printf("msgDone\n");
+                }
+                else {
+                    state = MSG_STATE::FAIL;
+                }
+            }
+            break;
+        default:
+            break;
+    }
+
+    if (index == 99) state = MSG_STATE::FAIL;
+    if (state >= MSG_STATE::FAIL) {
+        std::fill(msgCache, msgCache + 99, 0);
+        index = 0;
+        startIndex = 0;
+        
+
+        if (state == MSG_STATE::DONE) {
+            state = MSG_STATE::WAITING;
+            return true;
+        }
+        else {
+            state = MSG_STATE::WAITING;
+            return false;
+        }
+    }
+    index++;
+    return false;
+}
+
+template<typename InterfaceType>
 void Radio<InterfaceType>::mavlinkReceiveByte(uint8_t data) {
     mavlink_message_t msg;
     mavlink_status_t status;
     if(mavlink_parse_char(MAVLINK_COMM_0, data, &msg, &status)) {
-        printf("Received message with ID %d, sequence: %d from component %d of system %d\n", 
-        msg.msgid, msg.seq, msg.compid, msg.sysid);
+        printf("Received message with ID %d, sequence: %d from component %d of system %d, len: %d\n", 
+        msg.msgid, msg.seq, msg.compid, msg.sysid, msg.len);
         delay(100);
         switch(msg.msgid) {
             case MAVLINK_MSG_ID_HEARTBEAT:
@@ -151,9 +274,9 @@ void Radio<InterfaceType>::mavlinkReceiveByte(uint8_t data) {
                 //     hb.type, hb.base_mode, controllerStatus);
                 //     delay(2000);
                 break;
-            case MAVLINK_MSG_ID_RC_CHANNELS:
-                mavlink_rc_channels_t channels;
-                mavlink_msg_rc_channels_decode(&msg, &channels);
+            case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
+                mavlink_rc_channels_raw_t channels;
+                mavlink_msg_rc_channels_raw_decode(&msg, &channels);
                 pwmInputs.pitchPWM = channels.chan1_raw;
                 pwmInputs.rollPWM = channels.chan2_raw;
                 pwmInputs.yawPWM = channels.chan3_raw;

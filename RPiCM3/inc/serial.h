@@ -34,7 +34,7 @@ public:
 
     /// 
     char *readLine();
-    char readChar();
+    uint8_t readChar();
     //int write(std::shared_ptr<uint8_t[]> bytes, uint16_t len);
     int write(uint8_t* bytes, uint16_t len);
     bool isSerialConfigured() const { return serialConfigured; }

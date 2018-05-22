@@ -53,6 +53,7 @@ std::string receiver;
 
 Radio<Serial> radio;
 FlightController fc;
+Barometer baro;
 std::thread serialThread;
 
 bool keyLoopActive;
@@ -69,8 +70,8 @@ void shutdown() {
     //Stop threads
     fc.stopFlight();
     radio.stopReceiveLoop();
-    //radio.stopSerialLoop();
-    //delay(2000);
+    baro.close();
+
     //if (guiActive) closeGUI();
 
     //Join Threads to main
@@ -79,8 +80,14 @@ void shutdown() {
     std::cout << "Closing I2C, UART, SPI, TCP Socket...\n";
     //Close all interfaces on global instances so that we
     //can close the ports before terminating pigpio
-    if(fc.isSPIConfigured()) fc.closeSPI();
-    if(radio.isSerialConfigured()) radio.closeSerial();
+    if(fc.isSPIConfigured()) {
+        fc.closeSPI();
+        printf("Closing SPI\n");
+    }
+    if(radio.isSerialConfigured()) {
+        radio.closeSerial();
+        printf("Closing UART\n");
+    }
 
     //Close ports
     //if(teleStream.isActive()) teleStream.closeStream();
@@ -112,11 +119,11 @@ void mainLoop() {
         int heartbeatTimer, baroTimer = millis();
         int loopTimer = micros();
         float currentAltitude = 0;
-        radio.setupSerial("/dev/serial0", 9600);
-        Barometer baro;
-        printf("Calibrating barometer");
-        baro.setupI2C();
-        radio.startReceiveLoop();
+        radio.setupSerial("/dev/serial0", 115200);
+        
+        printf("Calibrating barometer...\n");
+        baro.setup();
+        //radio.startReceiveLoop();
         while(fc.isRunning()) {
             // //Every second, send heartbeat to controller
             // if (millis() - heartbeatTimer > 1000) {
@@ -125,12 +132,15 @@ void mainLoop() {
             //     heartbeatTimer = millis();
             // }
 
-            //Every 600ms, get pressure altitude
-            if (millis() - baroTimer > 600) {
+            //Every 260ms, get pressure altitude
+            if (baro.isCalibrated() && (millis() - baroTimer > BARO_DELAY)) {
                 currentAltitude = baro.getPressureAltitude();
+                std::cout << "BARO: Altitude: " << currentAltitude << "m\n";
                 baro.takeReading();
                 baroTimer = millis();
             }
+
+            radio.customReceiveByte(radio.readChar());
             // radio.mavlinkReceiveByte(radio.readChar());
             // channels pwmInputs = radio.getRCChannels();
             // std::cout << "Pitch: " << pwmInputs.pitchPWM
@@ -144,6 +154,7 @@ void mainLoop() {
             
             loopTimer = micros();
         }
+        
         // printf("Sending Heartbeat\n");
         // buffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
         // while(1) radio.write(msg.buf, msg.len);
@@ -289,8 +300,8 @@ int main(int argc, char *argv[]) {
             fc.requestService(FlightController::Service::ARM);
         }
         else {
-            shutdown();
-            exit(1);
+            //shutdown();
+            //exit(1);
         }
     }
 

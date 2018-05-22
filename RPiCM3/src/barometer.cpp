@@ -4,43 +4,73 @@
 #include <iostream>
 #include <bitset>
 #include <string.h>
+#include <algorithm>
+#include <math.h>
 
 #define BARO_ADDR 0x60
-#define BARO_DELAY 500
 
 Barometer::Barometer() {
     surfaceAltitude = 0;
+    calibrated = false;
 }
 
 Barometer::~Barometer() {
     
 }
 
-void Barometer::setupI2C() {
+void Barometer::setup() {
     if ((baroI2cFd = i2cOpen(1, BARO_ADDR, 0)) < 0) {       //Open I2C address
         printf("%s", strerror(errno));
     }
     i2cConfigured = true;
-    i2cWriteByteData(baroI2cFd, 0x26, 0xB8);    //Set OSR = 8         B10011000
+    i2cWriteByteData(baroI2cFd, 0x26, 0xB0);    //Set OSR = 64         B10110000
     i2cWriteByteData(baroI2cFd, 0x13, 0x07);    //Enable Data Flags     B00000111
-    i2cWriteByteData(baroI2cFd, 0x26, 0xB9);    //Set Active            B10011001
-    this->takeReading();
+    i2cWriteByteData(baroI2cFd, 0x26, 0xB1);    //Set Active            B10110001
+    
+    //i2cWriteByteData(baroI2cFd, 0x2D, 0); //Set offset to 0 (not working for any other number some reason?)
+    baroThread = std::thread([this]{ calibrate(); });
+}
 
-    float altitudeSum = 0;
-    const int iterations = 5;
-    //Calibrate to current altitude
-    for(int i = 0; i < iterations; i++) {
-        altitudeSum += getPressureAltitude();
-        //printf("%f\n", altitudeSum);
+void Barometer::close() {
+    if(i2cConfigured) i2cClose(baroI2cFd);
+}
+
+void Barometer::calibrate() {
+    printf("Waiting for barometer to acclimate...\n");
+    int timer = millis();
+    int count = 0;
+    while (count < 3) {
+        float calibrationData[30];
+        for (int i = 0; i < 30; i++) {
+            takeReading();
+            delay(BARO_DELAY);
+            calibrationData[i] = getPressureAltitude();
+        }
+        auto minmax = std::minmax_element(std::begin(calibrationData), std::end(calibrationData));
+        float range = *(minmax.second) - *(minmax.first);
+        std::cout << "BARO: Range: " << range << std::endl;
+        if (range < 2) {
+            printf("BARO: successful range\n");
+            count++;
+        }
+        else count = 0;
+
+        if(millis() - timer > 80000) {
+            std::cout << "Baro error: failed to acclimate. CNTL-C to exit." << std::endl;
+            while(1);
+        }
+    }
+    printf("BARO: Baro acclimated in %d seconds, now calibrating...\n", (millis() - timer)/1000);
+    float calibrationSum = 0;
+    for (int i = 0; i < 30; i++) {
         takeReading();
         delay(BARO_DELAY);
-        std::cout << ".";
-        fflush(stdout);
+        calibrationSum += getPressureAltitude();
     }
-    surfaceAltitude = altitudeSum/iterations;
-    std::cout << "\nSurface Alt: " << surfaceAltitude << "\n";
-    delay(600);
-    i2cWriteByteData(baroI2cFd, 0x2D, 0); //Set offset to 0 (not working for any other number some reason?)
+    surfaceAltitude = calibrationSum/30;
+    printf("BARO: Surface Altitude: %dm\n", (int)surfaceAltitude);
+    fflush(stdout);
+    calibrated = true;
 }
 
 void Barometer::takeReading() {
@@ -66,7 +96,9 @@ float Barometer::getPressureAltitude() {
             pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
             //bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
             gotAltitude = true;
-            return pressureAltitude - surfaceAltitude;
+            //std::cout << pressureAltitude << std::endl;
+            if(calibrated) return abs(pressureAltitude - surfaceAltitude) - 4;
+            else return pressureAltitude;
         }
     }
 }

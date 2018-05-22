@@ -73,12 +73,12 @@ char *Serial::readLine() {
     return buffer;
 }
 
-char Serial::readChar() {
+uint8_t Serial::readChar() {
     if(!serialConfigured) return NULL;
-    int timer = millis();
-    while((serDataAvailable(serialFd) < 1) && (millis() - timer < 1));
+    int timer = micros();
+    while((serDataAvailable(serialFd) < 1) && (micros() - timer < 1000));
     if(serDataAvailable(serialFd) > 0) {
-        return (char)serReadByte(serialFd);
+        return (uint8_t)serReadByte(serialFd);
     }
     else return NULL;
 }
