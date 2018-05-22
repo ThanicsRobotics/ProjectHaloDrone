@@ -206,8 +206,8 @@ void FlightController::sendMessage() {
 
 /// @brief Packing message to send to Flight Controller over SPI.
 /// Format:
-/// {0x00,0x00,...
-///  ^Two 0's always lead start of message
+/// {0xFF,0xFE,...
+///  ^Header of message
 /// ...Pitch_H,Pitch_L,Roll_H,Roll_L,Yaw_H,Yaw_L,Throttle_H,Throttle_L}
 ///    ^PWM control values, high byte followed by low byte
 FlightController::spiBuffer FlightController::packMessage() {

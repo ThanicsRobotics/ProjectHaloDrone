@@ -32,7 +32,15 @@ void Barometer::setup() {
 }
 
 void Barometer::close() {
+    printf("waiting for baro i2c to stop reading...\n");
+    while (readingI2C);
     if(i2cConfigured) i2cClose(baroI2cFd);
+    i2cConfigured = false;
+    closeCalibrationThread();
+}
+
+void Barometer::closeCalibrationThread() {
+    baroThread.join();
 }
 
 void Barometer::calibrate() {
@@ -42,14 +50,19 @@ void Barometer::calibrate() {
     while (count < 3) {
         float calibrationData[30];
         for (int i = 0; i < 30; i++) {
+            if(!i2cConfigured) return;
+            readingI2C = true;
             takeReading();
+            readingI2C = false;
             delay(BARO_DELAY);
+            readingI2C = true;
             calibrationData[i] = getPressureAltitude();
+            
         }
         auto minmax = std::minmax_element(std::begin(calibrationData), std::end(calibrationData));
         float range = *(minmax.second) - *(minmax.first);
         std::cout << "BARO: Range: " << range << std::endl;
-        if (range < 2) {
+        if (range < 2 && range != 0) {
             printf("BARO: successful range\n");
             count++;
         }
@@ -63,9 +76,14 @@ void Barometer::calibrate() {
     printf("BARO: Baro acclimated in %d seconds, now calibrating...\n", (millis() - timer)/1000);
     float calibrationSum = 0;
     for (int i = 0; i < 30; i++) {
+        if(!i2cConfigured) return;
+        readingI2C = true;
         takeReading();
+        readingI2C = false;
         delay(BARO_DELAY);
+        readingI2C = true;
         calibrationSum += getPressureAltitude();
+        
     }
     surfaceAltitude = calibrationSum/30;
     printf("BARO: Surface Altitude: %dm\n", (int)surfaceAltitude);
@@ -74,31 +92,35 @@ void Barometer::calibrate() {
 }
 
 void Barometer::takeReading() {
-    unsigned char config = i2cReadByteData(baroI2cFd, 0x26);
-    config &= ~(1<<1);  //Clear OST bit
-    i2cWriteByteData(baroI2cFd, 0x26, config);
-    config = i2cReadByteData(baroI2cFd, 0x26);
-    config |= (1<<1); //Set OST bit
-    i2cWriteByteData(baroI2cFd, 0x26, config);
+    if (i2cConfigured) {
+        unsigned char config = i2cReadByteData(baroI2cFd, 0x26);
+        config &= ~(1<<1);  //Clear OST bit
+        i2cWriteByteData(baroI2cFd, 0x26, config);
+        config = i2cReadByteData(baroI2cFd, 0x26);
+        config |= (1<<1); //Set OST bit
+        i2cWriteByteData(baroI2cFd, 0x26, config);
+    }
 }
 
 float Barometer::getPressureAltitude() {
-    bool gotAltitude = false;
-    while (!gotAltitude) {
-        int status = i2cReadByteData(baroI2cFd, 0x00);
-        if (status & 0x08) {
-            pressureMSB = i2cReadByteData(baroI2cFd, 0x01);
-            pressureCSB = i2cReadByteData(baroI2cFd, 0x02);
-            pressureLSB = i2cReadByteData(baroI2cFd, 0x03);
-            tempMSB = i2cReadByteData(baroI2cFd, 0x04);
-            tempLSB = i2cReadByteData(baroI2cFd, 0x05);
+    if(i2cConfigured) {
+        bool gotAltitude = false;
+        while (!gotAltitude) {
+            int status = i2cReadByteData(baroI2cFd, 0x00);
+            if (status & 0x08) {
+                pressureMSB = i2cReadByteData(baroI2cFd, 0x01);
+                pressureCSB = i2cReadByteData(baroI2cFd, 0x02);
+                pressureLSB = i2cReadByteData(baroI2cFd, 0x03);
+                tempMSB = i2cReadByteData(baroI2cFd, 0x04);
+                tempLSB = i2cReadByteData(baroI2cFd, 0x05);
 
-            pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
-            //bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
-            gotAltitude = true;
-            //std::cout << pressureAltitude << std::endl;
-            if(calibrated) return abs(pressureAltitude - surfaceAltitude) - 4;
-            else return pressureAltitude;
+                pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
+                //bitset<24> x(pressureMSB << 16 | pressureCSB << 8 | pressureLSB); 
+                gotAltitude = true;
+                //std::cout << pressureAltitude << std::endl;
+                if(calibrated) return abs(pressureAltitude - surfaceAltitude) - 4;
+                else return pressureAltitude;
+            }
         }
     }
 }

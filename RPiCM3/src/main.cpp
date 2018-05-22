@@ -69,31 +69,20 @@ void shutdown() {
 
     //Stop threads
     fc.stopFlight();
+    delay(100);
     radio.stopReceiveLoop();
     baro.close();
 
     //if (guiActive) closeGUI();
 
-    //Join Threads to main
-    //pthread_join(spiThread, NULL);
-
     std::cout << "Closing I2C, UART, SPI, TCP Socket...\n";
+
     //Close all interfaces on global instances so that we
     //can close the ports before terminating pigpio
-    if(fc.isSPIConfigured()) {
-        fc.closeSPI();
-        printf("Closing SPI\n");
-    }
-    if(radio.isSerialConfigured()) {
-        radio.closeSerial();
-        printf("Closing UART\n");
-    }
-
-    //Close ports
-    //if(teleStream.isActive()) teleStream.closeStream();
+    fc.closeSPI();
+    radio.closeSerial();
 
     std::cout << "\nResetting Flight Controller...\n\n";
-    delay(500);
     
     //Reset command to STM32
     fc.requestService(FlightController::Service::RESET);

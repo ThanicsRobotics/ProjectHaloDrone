@@ -13,6 +13,7 @@ public:
     ~Barometer();
     void setup();
     void close();
+    void closeCalibrationThread();
     void takeReading();
     float getPressureAltitude();
     bool isI2CConfigured() const { return i2cConfigured; }
@@ -22,6 +23,7 @@ private:
     int baroI2cFd;
     bool i2cConfigured;
     bool calibrated;
+    bool readingI2C;
 
     std::thread baroThread;
     void calibrate();
