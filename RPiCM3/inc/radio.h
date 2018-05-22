@@ -22,14 +22,6 @@
 #define COMPID 1
 #define PAYLOAD_LEN 11
 
-
-// struct radioBuffer
-// {
-//     uint16_t len;
-//     //std::shared_ptr<uint8_t[]> buf;
-//     uint8_t* buf;
-// };
-
 /// @brief Holds all PWM control signals. All within 1000-2000.
 struct channels
 {

@@ -6,7 +6,6 @@
 #include <string.h>
 #include <fstream>
 #include <iomanip>
-//#include <nmeaparse/nmea.h>
 
 #define GPS_ADDR 0x42
 
@@ -14,21 +13,9 @@
 /// DDC protocol. Hardware I2C did not work.
 void GPS::startGPS() {
     gps = nmea::GPSService(parser);
-    // gps.onUpdate += [&gps](){
-	// 	cout << (gps.fix.locked() ? "[*] " : "[ ] ") << setw(2) << setfill(' ') << gps.fix.trackingSatellites 
-    //     << "/" << setw(2) << setfill(' ') << gps.fix.visibleSatellites << " ";
-	// 	cout << fixed << setprecision(2) << setw(5) << setfill(' ') << gps.fix.almanac.averageSNR() << " dB   ";
-	// 	cout << fixed << setprecision(2) << setw(6) << setfill(' ') << gps.fix.speed << " km/h [" 
-    //     << GPSFix::travelAngleToCompassDirection(gps.fix.travelAngle, true) << "]  ";
-	// 	cout << fixed << setprecision(6) << gps.fix.latitude << "\xF8 " "N, " << gps.fix.longitude << "\xF8 " "E" << "  ";
-	// 	cout << "+/- " << setprecision(1) << gps.fix.horizontalAccuracy() << "m  ";
-	// 	cout << endl;
-	// };
     parser.log = false;
 
-    // if ((gpsFd = i2cOpen(1, GPS_ADDR, 0)) < 0) {
-    //     cout << "GPS Init Failed\n";
-    // }
+    // Opened bit banged I2C port.
     bbI2COpen(2,3,400000);
 }
 
@@ -36,7 +23,6 @@ void bbWriteByte(uint8_t byte) {
     char inBuf[8] = {4,0x42,2,7,1,byte,3,0};
     uint8_t outBuf[1];
     bbI2CZip(2, inBuf, sizeof(inBuf), (char*)outBuf, sizeof(outBuf));
-    //return outBuf[0];
 }
 
 uint8_t *bbReadGPSBlock(uint16_t size) {
@@ -75,10 +61,8 @@ void GPS::readGPSSentence() {
             index += 1;
             while (byte != '\n' ) {
                 byte = (char)bbReadByte();
-                // if (byte < 128 && byte > 0) {
-                    gpsSentence[index] = byte;
-                    index += 1;
-                // }
+                gpsSentence[index] = byte;
+                index += 1;
             }
             for (int i = index; i < 100; i++) {
                 gpsSentence[index] = '\0';
@@ -86,16 +70,12 @@ void GPS::readGPSSentence() {
             gpsSentenceComplete = true;
         }
     }
-    //cout << "GPS: " << gpsSentence << endl;
     try {
 			parser.readLine(gpsSentence);
     }
     catch (nmea::NMEAParseError& e) {
-        //cout << e.message << endl << endl;
-        // You can keep feeding data to the gps service...
-        // The previous data is ignored and the parser is reset.
+        std::cout << "GPS Error: " << e.message << endl << endl;
     }
-    //cout << gps.fix.toString() << endl;
 }
 
 /// @brief Reads 5 GPS Sentences.

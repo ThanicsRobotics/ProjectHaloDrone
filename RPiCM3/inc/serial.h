@@ -22,7 +22,7 @@ public:
     /// @brief Opens serial port at specified baud rate.
     /// @param port serial port address, i.e. "/dev/serial0".
     /// @param baud baudrate, i.e. 9600.
-    void setupSerial(char* port, int baud);
+    void setupSerial(const char* port, int baud);
 
     /// @brief Closes serial port.
     void closeSerial();

@@ -24,11 +24,11 @@ void *Stream::get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-void startVideoStream(char *ip_address, char *camera_address) {
-    system(("gst-launch-1.0 -v v4l2src device=" + (std::string)camera_address + " ! jpegenc ! rtpjpegpay ! udpsink host=" + (std::string)ip_address + " port=5000").c_str());
-}
+// void Stream::startVideoStream(const char *ip_address, const char *camera_address) {
+//     system(("gst-launch-1.0 -v v4l2src device=" + (std::string)camera_address + " ! jpegenc ! rtpjpegpay ! udpsink host=" + (std::string)ip_address + " port=5000").c_str());
+// }
 
-void Stream::startTelemetryStream(char *ip_address, char *port) {
+void Stream::startStream(const char *ip_address, const char *port) {
     printf("Starting telemetry stream...\n");
 
     struct addrinfo hints, *servinfo, *p;
@@ -72,19 +72,6 @@ void Stream::startTelemetryStream(char *ip_address, char *port) {
 
     std::string message = "Hello from drone!\n";
     this->sendData((uint8_t*)message.c_str(), sizeof(message));
-}
-
-void Stream::startStream(int streamType, char *ip_address, char *port, char *camera_address) {
-    switch(streamType) {
-        case VIDEO:
-            startVideoStream(ip_address, camera_address);
-            break;
-        case TELE:
-            startTelemetryStream(ip_address, port);
-            break;
-        default:
-            break;
-    }
 }
 
 int Stream::sendData(uint8_t *data, uint16_t len)

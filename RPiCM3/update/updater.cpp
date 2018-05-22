@@ -6,48 +6,46 @@
 #define SEL1 7
 #define SEL2 5
 
-using namespace std;
-
 void program() {
-    cout << "Would you like to program(p) or set fuses(f), or both(b)? (p/f/b): ";
+    std::cout << "Would you like to program(p) or set fuses(f), or both(b)? (p/f/b): ";
     string input = "";
     getline(cin, input);
     if (input == "p") {
-        cout << "Programming..." << endl;
+        std::cout << "Programming..." << std::endl;
         system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U flash:w:firmwares/simonkesc.hex:i");
     }
     if (input == "f") {
-        cout << "Setting fuses..." << endl;
+        std::cout << "Setting fuses..." << std::endl;
         system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2E:m -U hfuse:w:0xC9:m");
     }
     if (input == "b") {
-        cout << "Programming and setting fuses..." << endl;
+        std::cout << "Programming and setting fuses..." << std::endl;
         //system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2E:m -U hfuse:w:0xC9:m -U flash:w:firmwares/simonkesc.hex:i");
         system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2F:m -U hfuse:w:0xCA:m -U flash:w:firmwares/simonkesc.hex:i");
     }
 }
 
 void updateSTM32F446() {
-    cout << "Updating STM32F446..." << endl;
+    std::cout << "Updating STM32F446..." << std::endl;
     digitalWrite(SEL2, LOW);
     system("sudo openocd -f stm32f446.cfg");
 }
 
 void updateSTM32F103() {
-    cout << "Updating STM32F103..." << endl;
+    std::cout << "Updating STM32F103..." << std::endl;
     digitalWrite(SEL2, HIGH);
     system("sudo openocd -f stm32f103.cfg");
 }
 
 void updateESC1() {
-    cout << "Updating ESC1..." << endl;
+    std::cout << "Updating ESC1..." << std::endl;
     digitalWrite(SEL0, HIGH);
     digitalWrite(SEL1, LOW);
     program();
 }
 
 void updateESC2() {
-    cout << "Updating ESC2..." << endl;
+    std::cout << "Updating ESC2..." << std::endl;
     digitalWrite(SEL0, LOW);
     digitalWrite(SEL1, LOW);
     program();
@@ -55,14 +53,14 @@ void updateESC2() {
 }
 
 void updateESC3() {
-    cout << "Updating ESC3..." << endl;
+    std::cout << "Updating ESC3..." << std::endl;
     digitalWrite(SEL0, LOW);
     digitalWrite(SEL1, HIGH);
     program();
 }
 
 void updateESC4() {
-    cout << "Updating ESC4..." << endl;
+    std::cout << "Updating ESC4..." << std::endl;
     digitalWrite(SEL0, HIGH);
     digitalWrite(SEL1, HIGH);
     program();
@@ -76,7 +74,7 @@ void updateAllESCs() {
 }
 
 int main() {
-    cout << "**Make sure you have put all firmwares being updated in the firmwares/ folder**" << endl << "Type 'ok' to continue: ";
+    std::cout << "**Make sure you have put all firmwares being updated in the firmwares/ folder**" << std::endl << "Type 'ok' to continue: ";
     string input = "";
     getline(cin, input);
     if (input != "ok") exit(1);
@@ -86,12 +84,12 @@ int main() {
     pinMode(SEL1, OUTPUT);
     pinMode(SEL2, OUTPUT);
 
-    cout << "Which processor to update?\n" << "\t1 = STM32F446 (Flight Motor Controller)\n" << "\t2 = STM32F103 (Gimbal Controller)\n"
+    std::cout << "Which processor to update?\n" << "\t1 = STM32F446 (Flight Motor Controller)\n" << "\t2 = STM32F103 (Gimbal Controller)\n"
         << "\t3 = ATMEGA8 (ESC1)\n" << "\t4 = ATMEGA8 (ESC2)\n" << "\t5 = ATMEGA8 (ESC3)\n" << "\t6 = ATMEGA8 (ESC4)\n" << "\t7 = ALL ESCs\n"
         << "\t8 = ALL Processors\n" << "Choice: ";
     
     input = "";
-    getline(cin, input);
+    std::getline(std::cin, input);
     int intInput = atoi(input.c_str());
 
     switch (intInput) {
@@ -122,7 +120,7 @@ int main() {
             updateAllESCs();
             break;
         default:
-            cout << "Invalid Response. Shutting Down." << endl;
+            std::cout << "Invalid Response. Shutting Down." << std::endl;
             exit(0);
     }
     pinMode(SEL0, INPUT);
