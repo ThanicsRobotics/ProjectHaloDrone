@@ -85,8 +85,8 @@ void FlightController::requestService(Service serviceType) {
 /// @brief Requests the interfaceLoop to send data to the STM32F446.
 /// @param data A data message structured in a fcMessage struct.
 void FlightController::requestSend(fcMessage data) {
-    data = currentMessage;
-    sendRequest = true;
+    currentMessage = data;
+    //sendRequest = true;
 }
 
 /// @brief Starts a new thread executing the interfaceLoop.
@@ -236,25 +236,25 @@ FlightController::spiBuffer FlightController::packMessage() {
 /// Sends messages to STM32F446 based on requests,
 /// and decodes incoming messages from STM32F446
 void FlightController::interfaceLoop() {
-    if(!spiConfigured) this->setupSPI();
-    if(!authenticated) this->auth();
+    if(!spiConfigured) setupSPI();
+    if(!authenticated) auth();
     while(run) {
         if (armRequest) {
             //std::cout << "Arming..." << endl;
-            this->arm();
+            arm();
             armRequest = false;
         }
         else if (disarmRequest) {
-            this->disarm();
+            disarm();
             disarmRequest = false;
         }
-        else if (sendRequest) {
-            this->sendMessage();
-            sendRequest = false;
-        }
+        // else if (sendRequest) {
+        //     sendMessage();
+        //     sendRequest = false;
+        // }
         else if (authRequest) {
             //std::cout << "Authenticating..." << endl;
-            this->auth();
+            auth();
             authRequest = false;
         }
         else if (testGyro) {
@@ -276,7 +276,7 @@ void FlightController::interfaceLoop() {
                 break;
         }
     }
-    if (armed) this->disarm();
+    if (armed) disarm();
 }
 
 /// @brief Returns the drone's 3-axis angular position.

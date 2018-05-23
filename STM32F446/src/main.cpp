@@ -1,5 +1,4 @@
 #include <mbed.h>
-//#include <BufferedSerial.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -18,9 +17,10 @@
 #define ROLL_COEFF 0x02
 #define YAW_COEFF 0x03
 
-//Communication Pins
+#define GYRO_SCALE_PER_DPS 65.5
+
+// Communication Interfaces
 I2C i2c(PB_9,PB_8);                         //sda,scl
-//Serial pc(USBTX, USBRX);                    //tx,rx
 // Serial radio(PB_6, PB_7);
 SPISlave spi(PA_7, PA_6, PA_5, PA_4);       //mosi, miso, sclk, ssel
 Timer onTime;
@@ -36,15 +36,6 @@ DigitalOut motor1(PC_5);
 DigitalOut motor2(PC_4);
 DigitalOut motor3(PB_0);
 DigitalOut motor4(PB_1);
-
-//Radio Serial Buffer
-// char radioBuffer[128];
-
-//RF Protocol Coefficients
-// const int throttleCoefficient = 3;
-// const int rollCoefficient = 4;
-// const int pitchCoefficient = 5;
-// const int yawCoefficient = 6;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //PID gain and limit settings
@@ -104,18 +95,18 @@ bool authenticated = false;
 
 //Sends all motor PWM signals LOW
 void motors_off() {
-  motor1 = 0;
-  motor2 = 0;
-  motor3 = 0;
-  motor4 = 0;
+	motor1 = 0;
+	motor2 = 0;
+	motor3 = 0;
+	motor4 = 0;
 }
 
 //Sends all motor PWM signals HIGH
 void motors_on() {
-  motor1 = 1;
-  motor2 = 1;
-  motor3 = 1;
-  motor4 = 1;
+	motor1 = 1;
+	motor2 = 1;
+	motor3 = 1;
+	motor4 = 1;
 }
 
 // void readline() {
@@ -193,165 +184,195 @@ void motors_on() {
 //Subroutine for reading the gyro
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void gyro_signalen() {
-  char cmd[14];
-  cmd[0] = 0x2D;
-  i2c.write(gyro_address, cmd, 1);                                       //Write to first data I2C register
-  i2c.read(gyro_address, cmd, 14);                                       //Incremental I2C read
+	char cmd[14];
+	cmd[0] = 0x2D;
+	i2c.write(gyro_address, cmd, 1);                                       //Write to first data I2C register
+	i2c.read(gyro_address, cmd, 14);                                       //Incremental I2C read
 
-  acc_axis[1] = (short)(cmd[0]<<8|cmd[1]);                               //Add the low and high byte to the acc_x variable.
-  acc_axis[2] = (short)(cmd[2]<<8|cmd[3]);                               //Add the low and high byte to the acc_y variable.
-  acc_axis[3] = (short)(cmd[4]<<8|cmd[5]);                               //Add the low and high byte to the acc_z variable.
-  gyro_axis[1] = (short)(cmd[6]<<8|cmd[7]);                               //Add the low and high byte to the temperature variable.
-  gyro_axis[2] = (short)(cmd[8]<<8|cmd[9]);                              //Read high and low part of the angular data. x
-  gyro_axis[3] = (short)(cmd[10]<<8|cmd[11]);                            //Read high and low part of the angular data. y
-  temperature = (short)(cmd[12]<<8|cmd[13]);                            //Read high and low part of the angular data. z
-  memset(cmd,0,sizeof(cmd));
-  
-  //Only compensate after the calibration.
-  if (cal_int == 2000) {
-    gyro_axis[1] -= gyro_axis_cal[1];                                    
-    gyro_axis[2] -= gyro_axis_cal[2];                                    
-    gyro_axis[3] -= gyro_axis_cal[3];                                    
-  }
+	acc_axis[1] = (short)(cmd[0]<<8|cmd[1]);                               //Add the low and high byte to the acc_x variable.
+	acc_axis[2] = (short)(cmd[2]<<8|cmd[3]);                               //Add the low and high byte to the acc_y variable.
+	acc_axis[3] = (short)(cmd[4]<<8|cmd[5]);                               //Add the low and high byte to the acc_z variable.
+	gyro_axis[1] = (short)(cmd[6]<<8|cmd[7]);                              //Add the low and high byte to the temperature variable.
+	gyro_axis[2] = (short)(cmd[8]<<8|cmd[9]);                              //Read high and low part of the angular data. x
+	gyro_axis[3] = (short)(cmd[10]<<8|cmd[11]);                            //Read high and low part of the angular data. y
+	temperature = (short)(cmd[12]<<8|cmd[13]);                             //Read high and low part of the angular data. z
+	memset(cmd,0,sizeof(cmd));
 
-  //Assign and invert appropriate gyro and acc axis
-  gyro_roll = gyro_axis[2];                                            
-  gyro_pitch = gyro_axis[1];                    
-  gyro_yaw = gyro_axis[3] * -1;                       
-  acc_x = acc_axis[1];                           
-  acc_y = acc_axis[2];                           
-  acc_z = acc_axis[3] * -1;
+	//Only compensate after the calibration.
+	if (cal_int == 2000) {
+	gyro_axis[1] -= gyro_axis_cal[1];                                    
+	gyro_axis[2] -= gyro_axis_cal[2];                                    
+	gyro_axis[3] -= gyro_axis_cal[3];                                    
+	}
+
+	//Assign and invert appropriate gyro and acc axis
+	gyro_roll = gyro_axis[2] / GYRO_SCALE_PER_DPS;
+	gyro_pitch = gyro_axis[1] / GYRO_SCALE_PER_DPS;
+	gyro_yaw = gyro_axis[3] / GYRO_SCALE_PER_DPS * -1;
+	acc_x = acc_axis[1];
+	acc_y = acc_axis[2];
+	acc_z = acc_axis[3] * -1;
 }
 
 void calculate_angles() {
-  //65.5 = 1 deg/sec in gyro scale
-  gyro_roll_input = (gyro_roll_input * 0.7) + ((gyro_roll / 65.5) * 0.3);   //Gyro pid input is deg/sec.
-  gyro_pitch_input = (gyro_pitch_input * 0.7) + ((gyro_pitch / 65.5) * 0.3);//Gyro pid input is deg/sec.
-  gyro_yaw_input = (gyro_yaw_input * 0.7) + ((gyro_yaw / 65.5) * 0.3);      //Gyro pid input is deg/sec.
-  
-  //Gyro angle calculations
-  //0.0000611 = (0.004 / 65.5)
-  angle_pitch += gyro_pitch * 0.0000611;                                    //Calculate the traveled pitch angle and add this to the angle_pitch variable.
-  angle_roll += gyro_roll * 0.0000611;                                      //Calculate the traveled roll angle and add this to the angle_roll variable.
+	// Gyro PID input is deg/sec
+	// Complementary filter combining previous gyro input to current input
+	gyro_roll_input = (gyro_roll_input * 0.7) + (gyro_roll * 0.3);   
+	gyro_pitch_input = (gyro_pitch_input * 0.7) + (gyro_pitch * 0.3);
+	gyro_yaw_input = (gyro_yaw_input * 0.7) + (gyro_yaw * 0.3);
 
-  //0.000001066 = 0.0000611 * (3.142(PI) / 180degr) The Arduino sin function is in radians
-  angle_pitch -= angle_roll * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the roll angle to the pitch angle.
-  angle_roll += angle_pitch * sin(gyro_yaw * 0.000001066);                  //If the IMU has yawed transfer the pitch angle to the roll angle.
+	// Gyro angle calculations
+	// Integrating gyro rate over 4ms period
+	angle_pitch += gyro_pitch * 0.004;
+	angle_roll += gyro_roll * 0.004;
 
-  //Accelerometer angle calculations
-  acc_total_vector = sqrt((acc_x*acc_x)+(acc_y*acc_y)+(acc_z*acc_z));       //Calculate the total accelerometer vector.
-  
-  if (abs(acc_y) < acc_total_vector) {                                      //Prevent the asin function to produce a NaN
-    angle_pitch_acc = asin((float)acc_y/acc_total_vector)* 57.296;          //Calculate the pitch angle.
-  }
+	// If the IMU has yawed, transfer the roll component angle to the pitch angle.
+	// Integrating yaw over 4ms and converting to radians in sin() function
+	angle_pitch -= angle_roll * sin(gyro_yaw * 0.004 * (M_PI / 180));
 
-  if (abs(acc_x) < acc_total_vector) {                                      //Prevent the asin function to produce a NaN
-    angle_roll_acc = asin((float)acc_x/acc_total_vector)* -57.296;          //Calculate the roll angle.
-  }
-  
-  //Place the MPU-6050 spirit level and note the values in the following two lines for calibration.
-  angle_pitch_acc -= 0.0;                                                   //Accelerometer calibration value for pitch.
-  angle_roll_acc -= 0.0;                                                    //Accelerometer calibration value for roll.
-  
-  angle_pitch = angle_pitch * 0.9996 + angle_pitch_acc * 0.0004;            //Correct the drift of the gyro pitch angle with the accelerometer pitch angle.
-  angle_roll = angle_roll * 0.9996 + angle_roll_acc * 0.0004;               //Correct the drift of the gyro roll angle with the accelerometer roll angle.
-  
-  pitch_level_adjust = angle_pitch * 12;                                    //Calculate the pitch angle correction
-  roll_level_adjust = angle_roll * 12;                                      //Calculate the roll angle correction                         
+	// If the IMU has yawed transfer the pitch component angle to the roll angle.
+	angle_roll += angle_pitch * sin(gyro_yaw * 0.004 * (M_PI / 180));
+
+	// Calculating total 3D vector magnitude of acceleration
+	acc_total_vector = sqrt((acc_x*acc_x)+(acc_y*acc_y)+(acc_z*acc_z));
+
+	// Prevent the asin function from producing an error
+	if (abs(acc_y) < acc_total_vector) {
+		//Calculate the pitch angle.
+		angle_pitch_acc = asin((float)acc_y/acc_total_vector)* 57.296;
+	}
+
+	if (abs(acc_x) < acc_total_vector) {                                      //Prevent the asin function to produce a NaN
+		angle_roll_acc = asin((float)acc_x/acc_total_vector)* -57.296;          //Calculate the roll angle.
+	}
+
+	//Place the MPU-6050 spirit level and note the values in the following two lines for calibration.
+	angle_pitch_acc -= 0.0;                                                   //Accelerometer calibration value for pitch.
+	angle_roll_acc -= 0.0;                                                    //Accelerometer calibration value for roll.
+
+	angle_pitch = angle_pitch * 0.9996 + angle_pitch_acc * 0.0004;            //Correct the drift of the gyro pitch angle with the accelerometer pitch angle.
+	angle_roll = angle_roll * 0.9996 + angle_roll_acc * 0.0004;               //Correct the drift of the gyro roll angle with the accelerometer roll angle.
+
+	pitch_level_adjust = angle_pitch * 12;                                    //Calculate the pitch angle correction
+	roll_level_adjust = angle_roll * 12;                                      //Calculate the roll angle correction                         
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Subroutine for calculating PID outputs
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void calculate_pid() {
-  //Roll calculations
-  pid_error_temp = gyro_roll_input - pid_roll_setpoint;
-  pid_i_mem_roll += pid_i_gain_roll * pid_error_temp;
-  if(pid_i_mem_roll > pid_max_roll)pid_i_mem_roll = pid_max_roll;
-  else if(pid_i_mem_roll < pid_max_roll * -1)pid_i_mem_roll = pid_max_roll * -1;
+	// Roll calculations
+	// P-Controller calculation: current input - setpoint
+	pid_error_temp = gyro_roll_input - pid_roll_setpoint;
 
-  pid_output_roll = pid_p_gain_roll * pid_error_temp + pid_i_mem_roll + pid_d_gain_roll * (pid_error_temp - pid_last_roll_d_error);
-  if(pid_output_roll > pid_max_roll)pid_output_roll = pid_max_roll;
-  else if(pid_output_roll < pid_max_roll * -1)pid_output_roll = pid_max_roll * -1;
+	// I-Controller calculation: Adding current error to previous error (integrating)
+	pid_i_mem_roll += pid_i_gain_roll * pid_error_temp;
+	if (pid_i_mem_roll > pid_max_roll) pid_i_mem_roll = pid_max_roll;
+	else if (pid_i_mem_roll < pid_max_roll * -1) pid_i_mem_roll = pid_max_roll * -1;
 
-  pid_last_roll_d_error = pid_error_temp;
+	// Adding P,I,D controllers into full PID calculation
+	pid_output_roll = pid_p_gain_roll * pid_error_temp + pid_i_mem_roll + 
+		pid_d_gain_roll * (pid_error_temp - pid_last_roll_d_error);
+	
+	// Correcting for a PID sum out of bounds
+	if (pid_output_roll > pid_max_roll) pid_output_roll = pid_max_roll;
+	else if (pid_output_roll < pid_max_roll * -1) pid_output_roll = pid_max_roll * -1;
 
-  //Pitch calculations
-  pid_error_temp = gyro_pitch_input - pid_pitch_setpoint;
-  pid_i_mem_pitch += pid_i_gain_pitch * pid_error_temp;
-  if(pid_i_mem_pitch > pid_max_pitch)pid_i_mem_pitch = pid_max_pitch;
-  else if(pid_i_mem_pitch < pid_max_pitch * -1)pid_i_mem_pitch = pid_max_pitch * -1;
+	// Keeping track of the current pid error to use as D-controller term in next loop
+	pid_last_roll_d_error = pid_error_temp;
 
-  pid_output_pitch = pid_p_gain_pitch * pid_error_temp + pid_i_mem_pitch + pid_d_gain_pitch * (pid_error_temp - pid_last_pitch_d_error);
-  if(pid_output_pitch > pid_max_pitch)pid_output_pitch = pid_max_pitch;
-  else if(pid_output_pitch < pid_max_pitch * -1)pid_output_pitch = pid_max_pitch * -1;
 
-  pid_last_pitch_d_error = pid_error_temp;
+	// Pitch calculations (same process as previous)
+	pid_error_temp = gyro_pitch_input - pid_pitch_setpoint;
+	pid_i_mem_pitch += pid_i_gain_pitch * pid_error_temp;
+	if (pid_i_mem_pitch > pid_max_pitch) pid_i_mem_pitch = pid_max_pitch;
+	else if (pid_i_mem_pitch < pid_max_pitch * -1) pid_i_mem_pitch = pid_max_pitch * -1;
 
-  //Yaw calculations
-  pid_error_temp = gyro_yaw_input - pid_yaw_setpoint;
-  pid_i_mem_yaw += pid_i_gain_yaw * pid_error_temp;
-  if(pid_i_mem_yaw > pid_max_yaw)pid_i_mem_yaw = pid_max_yaw;
-  else if(pid_i_mem_yaw < pid_max_yaw * -1)pid_i_mem_yaw = pid_max_yaw * -1;
+	pid_output_pitch = pid_p_gain_pitch * pid_error_temp + pid_i_mem_pitch + 
+	pid_d_gain_pitch * (pid_error_temp - pid_last_pitch_d_error);
+	if(pid_output_pitch > pid_max_pitch)pid_output_pitch = pid_max_pitch;
+	else if(pid_output_pitch < pid_max_pitch * -1)pid_output_pitch = pid_max_pitch * -1;
 
-  pid_output_yaw = pid_p_gain_yaw * pid_error_temp + pid_i_mem_yaw + pid_d_gain_yaw * (pid_error_temp - pid_last_yaw_d_error);
-  if(pid_output_yaw > pid_max_yaw)pid_output_yaw = pid_max_yaw;
-  else if(pid_output_yaw < pid_max_yaw * -1)pid_output_yaw = pid_max_yaw * -1;
+	pid_last_pitch_d_error = pid_error_temp;
 
-  pid_last_yaw_d_error = pid_error_temp;
+
+	// Yaw calculations (same process as previous)
+	pid_error_temp = gyro_yaw_input - pid_yaw_setpoint;
+	pid_i_mem_yaw += pid_i_gain_yaw * pid_error_temp;
+	if(pid_i_mem_yaw > pid_max_yaw)pid_i_mem_yaw = pid_max_yaw;
+	else if(pid_i_mem_yaw < pid_max_yaw * -1)pid_i_mem_yaw = pid_max_yaw * -1;
+
+	pid_output_yaw = pid_p_gain_yaw * pid_error_temp + pid_i_mem_yaw + 
+		pid_d_gain_yaw * (pid_error_temp - pid_last_yaw_d_error);
+	if(pid_output_yaw > pid_max_yaw)pid_output_yaw = pid_max_yaw;
+	else if(pid_output_yaw < pid_max_yaw * -1)pid_output_yaw = pid_max_yaw * -1;
+
+	pid_last_yaw_d_error = pid_error_temp;
 }
 
 void set_gyro_registers(){
-  char cmd[2];
-  
-  //Changing register bank
-  cmd[0] = 0x7F;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
-  cmd[1] = 0x00;                                                                //Set the register bits as 00000000 to select USER BANK 0
-  i2c.write(gyro_address, cmd, 2);
-  memset(cmd,0,sizeof(cmd));
+	char cmd[2];
+	
+	// Changing register bank
+	// Write to the REG_BANK_SEL register (7F hex)
+	// Set the register bits as 00000000 to select USER BANK 0
+	cmd[0] = 0x7F;
+	cmd[1] = 0x00;
+	i2c.write(gyro_address, cmd, 2);
+	memset(cmd,0,sizeof(cmd));
 
-  cmd[0] = 0x06;                                                                //We want to write to the PWR_MGMT_1 register (06 hex)
-  cmd[1] = 0x01;                                                                //Set the register bits as 00000000 to activate the gyro
-  i2c.write(gyro_address, cmd, 2);
-  memset(cmd,0,sizeof(cmd));
+	// Write to the PWR_MGMT_1 register (06 hex)
+	// Set the register bits as 00000000 to activate the gyro
+	cmd[0] = 0x06;
+	cmd[1] = 0x01;
+	i2c.write(gyro_address, cmd, 2);
+	memset(cmd,0,sizeof(cmd));
 
-  //Changing register bank
-  cmd[0] = 0x7F;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
-  cmd[1] = 0x20;                                                                //Set the register bits as 00100000 to select USER BANK 2
-  i2c.write(gyro_address, cmd, 2);
-  memset(cmd,0,sizeof(cmd));
+	// Changing register bank
+	// We want to write to the REG_BANK_SEL register (7F hex)
+	// Set the register bits as 00100000 to select USER BANK 2
+	cmd[0] = 0x7F;
+	cmd[1] = 0x20;
+	i2c.write(gyro_address, cmd, 2);
+	memset(cmd,0,sizeof(cmd));
 
-  cmd[0] = 0x01;                                                                //We want to write to the GYRO_CONFIG_1 register (01 hex)
-  cmd[1] = 0x23;                                                                //Set the register bits as 00100011 (500dps full scale)
-  i2c.write(gyro_address, cmd, 2);
-  memset(cmd,0,sizeof(cmd));
-  
-  cmd[0] = 0x14;                                                                //We want to write to the ACCEL_CONFIG register (1C hex)
-  cmd[1] = 0x25;                                                                //Set the register bits as 00100101 (+/- 8g full scale range)
-  i2c.write(gyro_address, cmd, 2);
-  memset(cmd,0,sizeof(cmd));
+	// We want to write to the GYRO_CONFIG_1 register (01 hex)
+	// Set the register bits as 00100011 (500dps full scale), 65.5 points per 1 dps
+	cmd[0] = 0x01;
+	cmd[1] = 0x23;
+	i2c.write(gyro_address, cmd, 2);
+	memset(cmd,0,sizeof(cmd));
+	
+	// We want to write to the ACCEL_CONFIG register (1C hex)
+	// Set the register bits as 00100101 (+/- 8g full scale range)
+	cmd[0] = 0x14;
+	cmd[1] = 0x25;
+	i2c.write(gyro_address, cmd, 2);
+	memset(cmd,0,sizeof(cmd));
 
-  //Changing register bank
-  cmd[0] = 0x7F;                                                                //We want to write to the REG_BANK_SEL register (7F hex)
-  cmd[1] = 0x00;                                                                //Set the register bits as 00000000 to select USER BANK 0
-  i2c.write(gyro_address, cmd, 2);
-  memset(cmd,0,sizeof(cmd));
+	// Changing register bank
+	// We want to write to the REG_BANK_SEL register (7F hex)
+	// Set the register bits as 00000000 to select USER BANK 0
+	cmd[0] = 0x7F;
+	cmd[1] = 0x00;
+	i2c.write(gyro_address, cmd, 2);
+	memset(cmd,0,sizeof(cmd));
 }
 
 void testMotor(DigitalOut motor) {
   int start = onTime.read_ms();
   while(onTime.read_ms() - start < 1000) {
-    motor = 1;
-    wait(.001);
-    motor = 0;
-    wait(.003);
+	motor = 1;
+	wait(.001);
+	motor = 0;
+	wait(.003);
   }
   start = onTime.read_ms();
   while(onTime.read_ms() - start < 5000) {
-    motor = 1;
-    wait(.0012);
-    motor = 0;
-    wait(.0028);
+	motor = 1;
+	wait(.0012);
+	motor = 0;
+	wait(.0028);
   }
 }
 
@@ -369,20 +390,28 @@ void authRasPiCM3() {
 
   //Stay in this loop until the flight controller (STM32) has made contact with the Raspberry Pi
   while (authenticated == false) {
-    motors_on();                                                              //Set motor PWM signals high
-    wait(.001);                                                               //Wait 1000us
-    motors_off();                                                             //Set motor PWM signals low
-    int start = onTime.read_us();
-    while(onTime.read_us() - start < 3000) {
-      if (spi.receive()) {
-        int response = spi.read();
-        if (response == 0x01) spi.reply(AUTH_KEY);
-        if (response == AUTH_KEY) authenticated = true;
-      }
-    }
-    //wait(.003);                                                               //Wait 3 milliseconds before the next loop
+	motors_on();                                                              //Set motor PWM signals high
+	wait(.001);                                                               //Wait 1000us
+	motors_off();                                                             //Set motor PWM signals low
+	int start = onTime.read_us();
+	while(onTime.read_us() - start < 3000) {
+	  if (spi.receive()) {
+		int response = spi.read();
+		if (response == 0x01) spi.reply(AUTH_KEY);
+		if (response == AUTH_KEY) authenticated = true;
+	  }
+	}
+	//wait(.003);                                                               //Wait 3 milliseconds before the next loop
   }
 }
+
+/// @brief Contains states of message parsing process.
+enum MSG_STATE {
+	WAITING = 0,    ///< Waiting for starting header.
+	FILLING = 1,    ///< Message has started, and filling buffer.
+	FAIL = 2,       ///< Buffer overflowed, or other error.
+	DONE = 3        ///< Message footer found, finished filing buffer.
+};
 
 int main() {
   receiver_input_pitch = receiver_input_roll = receiver_input_yaw = 1500;
@@ -410,20 +439,20 @@ int main() {
   //Let's take multiple gyro data samples so we can determine the average gyro offset (calibration).
   cal_int = 0;
   while (cal_int < 2000) {                            //Take 2000 readings for calibration.
-    //We don't want the esc's to be beeping annoyingly. So let's give them a 1000us puls while calibrating the gyro.
-    motors_on();                                                              //Set motor PWM signals high
-    wait(.001);                                                               //Wait 1000us
-    motors_off();                                                             //Set motor PWM signals low
-    
-    int start = onTime.read_us();
-    while ((onTime.read_us() - start < 3000) && cal_int < 2000) {
-      gyro_signalen();                                                          //Read the gyro output.
-      gyro_axis_cal[1] += gyro_axis[1];                                         //Add roll value to gyro_roll_cal.
-      gyro_axis_cal[2] += gyro_axis[2];                                         //Add pitch value to gyro_pitch_cal.
-      gyro_axis_cal[3] += gyro_axis[3];                                         //Add yaw value to gyro_yaw_cal.
-      cal_int += 1;
-    }
-    //wait(.003);                                                               //Wait 3 milliseconds before the next loop
+	//We don't want the esc's to be beeping annoyingly. So let's give them a 1000us puls while calibrating the gyro.
+	motors_on();                                                              //Set motor PWM signals high
+	wait(.001);                                                               //Wait 1000us
+	motors_off();                                                             //Set motor PWM signals low
+	
+	int start = onTime.read_us();
+	while ((onTime.read_us() - start < 3000) && cal_int < 2000) {
+	  gyro_signalen();                                                          //Read the gyro output.
+	  gyro_axis_cal[1] += gyro_axis[1];                                         //Add roll value to gyro_roll_cal.
+	  gyro_axis_cal[2] += gyro_axis[2];                                         //Add pitch value to gyro_pitch_cal.
+	  gyro_axis_cal[3] += gyro_axis[3];                                         //Add yaw value to gyro_yaw_cal.
+	  cal_int += 1;
+	}
+	//wait(.003);                                                               //Wait 3 milliseconds before the next loop
   }
 
   //Now that we have 2000 measures, we need to divide by 2000 to get the average gyro offset.
@@ -456,30 +485,30 @@ int main() {
   volatile bool startingLoop = true;
   bool noMotors = false;
   while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) && !armed) {
-    //We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
-    motors_on();                                                              //Set motor PWM signals high
-    wait(.001);                                                               //Wait 1000us
-    motors_off();                                                             //Set motor PWM signals low
-    int start = onTime.read_us();
-    while (onTime.read_us() - start < 3000) {
-      if (spi.receive()) {
-        unsigned short int data = spi.read();
-        if (data == STM32_ARM_TEST) spi.reply(STM32_ARM_CONF);
-        if (data == STM32_ARM_CONF) armed = true;
-        if (data == MOTOR_TEST) {
-          testMotors();
-          spi.reply(STM32_ARM_CONF);
-          armed = true;
-          break;
-        }
-        if (data == NO_MOTORS) {
-          spi.reply(STM32_ARM_CONF);
-          noMotors = true;
-          armed = true;
-          break;
-        }
-      }
-    }
+	//We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
+	motors_on();                                                              //Set motor PWM signals high
+	wait(.001);                                                               //Wait 1000us
+	motors_off();                                                             //Set motor PWM signals low
+	int start = onTime.read_us();
+	while (onTime.read_us() - start < 3000) {
+	  if (spi.receive()) {
+		unsigned short int data = spi.read();
+		if (data == STM32_ARM_TEST) spi.reply(STM32_ARM_CONF);
+		if (data == STM32_ARM_CONF) armed = true;
+		if (data == MOTOR_TEST) {
+		  testMotors();
+		  spi.reply(STM32_ARM_CONF);
+		  armed = true;
+		  break;
+		}
+		if (data == NO_MOTORS) {
+		  spi.reply(STM32_ARM_CONF);
+		  noMotors = true;
+		  armed = true;
+		  break;
+		}
+	  }
+	}
   }
   start = 0;                                                                  //Set start back to 0.
 
@@ -490,198 +519,200 @@ int main() {
   
   //Infinite PID Loop
   while(1) {
-    calculate_angles();
-    //For starting the motors: throttle low and yaw left (step 1)
-    if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || startingLoop) {
-      start = 2;
+	calculate_angles();
+	//For starting the motors: throttle low and yaw left (step 1)
+	if((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 && receiver_input_yaw > 990) || startingLoop) {
+	  start = 2;
 
-      angle_pitch = angle_pitch_acc;                                         //Set the gyro pitch angle equal to the accelerometer pitch angle when the quadcopter is started.
-      angle_roll = angle_roll_acc;                                           //Set the gyro roll angle equal to the accelerometer roll angle when the quadcopter is started.
-      gyro_angles_set = true;                                                //Set the IMU started flag.
-      
-      //Reset the PID controllers for a bumpless start.
-      pid_i_mem_roll = 0;
-      pid_last_roll_d_error = 0;
-      pid_i_mem_pitch = 0;
-      pid_last_pitch_d_error = 0;
-      pid_i_mem_yaw = 0;
-      pid_last_yaw_d_error = 0;
+	  angle_pitch = angle_pitch_acc;                                         //Set the gyro pitch angle equal to the accelerometer pitch angle when the quadcopter is started.
+	  angle_roll = angle_roll_acc;                                           //Set the gyro roll angle equal to the accelerometer roll angle when the quadcopter is started.
+	  gyro_angles_set = true;                                                //Set the IMU started flag.
+	  
+	  //Reset the PID controllers for a bumpless start.
+	  pid_i_mem_roll = 0;
+	  pid_last_roll_d_error = 0;
+	  pid_i_mem_pitch = 0;
+	  pid_last_pitch_d_error = 0;
+	  pid_i_mem_yaw = 0;
+	  pid_last_yaw_d_error = 0;
 
-      startingLoop = false;
-    }
-    if (noMotors) start = 1;
-    // //When yaw stick is back in the center position start the motors (step 2)
-    // if ((start == 1 && receiver_input_throttle < 1050 && receiver_input_yaw > 1450) || armed) {
-    //   start = 2;
-    //   angle_pitch = angle_pitch_acc;                                         //Set the gyro pitch angle equal to the accelerometer pitch angle when the quadcopter is started.
-    //   angle_roll = angle_roll_acc;                                           //Set the gyro roll angle equal to the accelerometer roll angle when the quadcopter is started.
-    //   gyro_angles_set = true;                                                //Set the IMU started flag.
-      
-    //   //Reset the PID controllers for a bumpless start.
-    //   pid_i_mem_roll = 0;
-    //   pid_last_roll_d_error = 0;
-    //   pid_i_mem_pitch = 0;
-    //   pid_last_pitch_d_error = 0;
-    //   pid_i_mem_yaw = 0;
-    //   pid_last_yaw_d_error = 0;
+	  startingLoop = false;
+	}
+	if (noMotors) start = 1;
+	// //When yaw stick is back in the center position start the motors (step 2)
+	// if ((start == 1 && receiver_input_throttle < 1050 && receiver_input_yaw > 1450) || armed) {
+	//   start = 2;
+	//   angle_pitch = angle_pitch_acc;                                         //Set the gyro pitch angle equal to the accelerometer pitch angle when the quadcopter is started.
+	//   angle_roll = angle_roll_acc;                                           //Set the gyro roll angle equal to the accelerometer roll angle when the quadcopter is started.
+	//   gyro_angles_set = true;                                                //Set the IMU started flag.
+	  
+	//   //Reset the PID controllers for a bumpless start.
+	//   pid_i_mem_roll = 0;
+	//   pid_last_roll_d_error = 0;
+	//   pid_i_mem_pitch = 0;
+	//   pid_last_pitch_d_error = 0;
+	//   pid_i_mem_yaw = 0;
+	//   pid_last_yaw_d_error = 0;
 
-    //   armed = false;
-    // }
+	//   armed = false;
+	// }
 
-    //Stopping the motors: throttle low and yaw right.
-    if ((start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) || !armed) {
-      start = 0;
-    }
-    
-    //start = 2;
-    // receiver_input_roll = 1500;
-    // receiver_input_pitch = 1500;
-    // receiver_input_yaw = 1500;
+	//Stopping the motors: throttle low and yaw right.
+	if ((start == 2 && receiver_input_throttle < 1050 && receiver_input_yaw > 1950) || !armed) {
+	  start = 0;
+	}
+	
+	//start = 2;
+	// receiver_input_roll = 1500;
+	// receiver_input_pitch = 1500;
+	// receiver_input_yaw = 1500;
 
-    //The PID set point in degrees per second is determined by the roll receiver input.
-    //In the case of dividing by 3 the max roll rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
-    pid_roll_setpoint = 0;
-    
-    //We need a little dead band of 16us for better results.
-    if (receiver_input_roll > 1508) {
-      pid_roll_setpoint = receiver_input_roll - 1508;
-    }
-    else if (receiver_input_roll < 1492) {
-      pid_roll_setpoint = receiver_input_roll - 1492;
-    }
+	//The PID set point in degrees per second is determined by the roll receiver input.
+	//In the case of dividing by 3 the max roll rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
+	pid_roll_setpoint = 0;
+	
+	//We need a little dead band of 16us for better results.
+	if (receiver_input_roll > 1508) {
+	  pid_roll_setpoint = receiver_input_roll - 1508;
+	}
+	else if (receiver_input_roll < 1492) {
+	  pid_roll_setpoint = receiver_input_roll - 1492;
+	}
 
-    pid_roll_setpoint -= roll_level_adjust;                                   //Subtract the angle correction from the standardized receiver roll input value.
-    pid_roll_setpoint /= 3.0;                                                 //Divide the setpoint for the PID roll controller by 3 to get angles in degrees.
+	pid_roll_setpoint -= roll_level_adjust;                                   //Subtract the angle correction from the standardized receiver roll input value.
+	pid_roll_setpoint /= 3.0;                                                 //Divide the setpoint for the PID roll controller by 3 to get angles in degrees.
   
   
-    //The PID set point in degrees per second is determined by the pitch receiver input.
-    //In the case of dividing by 3 the max pitch rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
-    pid_pitch_setpoint = 0;
-    //We need a little dead band of 16us for better results.
-    if (receiver_input_pitch > 1508) pid_pitch_setpoint = receiver_input_pitch - 1508;
-    else if (receiver_input_pitch < 1492) pid_pitch_setpoint = receiver_input_pitch - 1492;
+	//The PID set point in degrees per second is determined by the pitch receiver input.
+	//In the case of dividing by 3 the max pitch rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
+	pid_pitch_setpoint = 0;
+	//We need a little dead band of 16us for better results.
+	if (receiver_input_pitch > 1508) pid_pitch_setpoint = receiver_input_pitch - 1508;
+	else if (receiver_input_pitch < 1492) pid_pitch_setpoint = receiver_input_pitch - 1492;
   
-    pid_pitch_setpoint -= pitch_level_adjust;                                  //Subtract the angle correction from the standardized receiver pitch input value.
-    pid_pitch_setpoint /= 3.0;                                                 //Divide the setpoint for the PID pitch controller by 3 to get angles in degrees.
+	pid_pitch_setpoint -= pitch_level_adjust;                                  //Subtract the angle correction from the standardized receiver pitch input value.
+	pid_pitch_setpoint /= 3.0;                                                 //Divide the setpoint for the PID pitch controller by 3 to get angles in degrees.
   
-    //The PID set point in degrees per second is determined by the yaw receiver input.
-    //In the case of deviding by 3 the max yaw rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
-    pid_yaw_setpoint = 0;
-    //We need a little dead band of 16us for better results.
-    if (receiver_input_throttle > 1050) { //Do not yaw when turning off the motors.
-      if (receiver_input_yaw > 1508) pid_yaw_setpoint = (receiver_input_yaw - 1508)/3.0;
-      else if (receiver_input_yaw < 1492) pid_yaw_setpoint = (receiver_input_yaw - 1492)/3.0;
-    }
-    
-    calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
+	//The PID set point in degrees per second is determined by the yaw receiver input.
+	//In the case of deviding by 3 the max yaw rate is aprox 164 degrees per second ( (500-8)/3 = 164d/s ).
+	pid_yaw_setpoint = 0;
+	//We need a little dead band of 16us for better results.
+	if (receiver_input_throttle > 1050) { //Do not yaw when turning off the motors.
+	  if (receiver_input_yaw > 1508) pid_yaw_setpoint = (receiver_input_yaw - 1508)/3.0;
+	  else if (receiver_input_yaw < 1492) pid_yaw_setpoint = (receiver_input_yaw - 1492)/3.0;
+	}
+	
+	calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
 
-    throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
-    //throttle = 1500;
+	throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
+	//throttle = 1500;
 
-    if (start == 2) {                                                          //The motors are started.
-      if (throttle > 1800) throttle = 1800;                                   //We need some room to keep full control at full throttle.
-      esc_1 = throttle - pid_output_pitch + pid_output_roll - pid_output_yaw; //Calculate the pulse for esc 1 (front-right - CCW)
-      esc_2 = throttle + pid_output_pitch + pid_output_roll + pid_output_yaw; //Calculate the pulse for esc 2 (rear-right - CW)
-      esc_3 = throttle + pid_output_pitch - pid_output_roll - pid_output_yaw; //Calculate the pulse for esc 3 (rear-left - CCW)
-      esc_4 = throttle - pid_output_pitch - pid_output_roll + pid_output_yaw; //Calculate the pulse for esc 4 (front-left - CW)
+	if (start == 2) {                                                          //The motors are started.
+	  if (throttle > 1800) throttle = 1800;                                   //We need some room to keep full control at full throttle.
+	  esc_1 = throttle - pid_output_pitch + pid_output_roll - pid_output_yaw; //Calculate the pulse for esc 1 (front-right - CCW)
+	  esc_2 = throttle + pid_output_pitch + pid_output_roll + pid_output_yaw; //Calculate the pulse for esc 2 (rear-right - CW)
+	  esc_3 = throttle + pid_output_pitch - pid_output_roll - pid_output_yaw; //Calculate the pulse for esc 3 (rear-left - CCW)
+	  esc_4 = throttle - pid_output_pitch - pid_output_roll + pid_output_yaw; //Calculate the pulse for esc 4 (front-left - CW)
 
-      if (esc_1 < 1100) esc_1 = 1100;                                         //Keep the motors running.
-      if (esc_2 < 1100) esc_2 = 1100;                                         //Keep the motors running.
-      if (esc_3 < 1100) esc_3 = 1100;                                         //Keep the motors running.
-      if (esc_4 < 1100) esc_4 = 1100;                                         //Keep the motors running.
-      
-      if (esc_1 > 2000) esc_1 = 2000;                                           //Limit the esc-1 pulse to 2000us.
-      if (esc_2 > 2000) esc_2 = 2000;                                           //Limit the esc-2 pulse to 2000us.
-      if (esc_3 > 2000) esc_3 = 2000;                                           //Limit the esc-3 pulse to 2000us.
-      if (esc_4 > 2000) esc_4 = 2000;                                           //Limit the esc-4 pulse to 2000us.  
-    }
-    else {
-      esc_1 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-1.
-      esc_2 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-2.
-      esc_3 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-3.
-      esc_4 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-4.
-    }
+	  if (esc_1 < 1100) esc_1 = 1100;                                         //Keep the motors running.
+	  if (esc_2 < 1100) esc_2 = 1100;                                         //Keep the motors running.
+	  if (esc_3 < 1100) esc_3 = 1100;                                         //Keep the motors running.
+	  if (esc_4 < 1100) esc_4 = 1100;                                         //Keep the motors running.
+	  
+	  if (esc_1 > 2000) esc_1 = 2000;                                           //Limit the esc-1 pulse to 2000us.
+	  if (esc_2 > 2000) esc_2 = 2000;                                           //Limit the esc-2 pulse to 2000us.
+	  if (esc_3 > 2000) esc_3 = 2000;                                           //Limit the esc-3 pulse to 2000us.
+	  if (esc_4 > 2000) esc_4 = 2000;                                           //Limit the esc-4 pulse to 2000us.  
+	}
+	else {
+	  esc_1 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-1.
+	  esc_2 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-2.
+	  esc_3 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-3.
+	  esc_4 = 1000;                                                           //If start is not 2 keep a 1000us pulse for esc-4.
+	}
 
-    //Keep these motors off
-    esc_1 = 1000;
-    esc_3 = 1000;
-    esc_4 = 1000;
-    
-    // We wait until 4000us are passed.
-    if ((onTime.read_us() - loop_timer < 4000)) {
-      if (spi.receive()) {
-        unsigned short int data = spi.read();
+	//Keep these motors off
+	esc_1 = 1000;
+	esc_3 = 1000;
+	esc_4 = 1000;
+	
+	// We wait until 4000us are passed.
+	if ((onTime.read_us() - loop_timer < 4000)) {
 
-        //Start of message
-        if (data == 0) {
-          receiver_input_pitch = spi.read();
-          receiver_input_roll = spi.read();
-          receiver_input_yaw = spi.read();
-          receiver_input_throttle = spi.read();
-        }
-        // if (data <= 1000) {
-        //   mod_receiver_input_throttle = data + 1000;
-        // }
-        else {
-          switch (data) {
-            case STM32_DISARM_TEST:
-              spi.reply(STM32_DISARM_CONF);
-              start = 0;
-              armed = false;
-              break;
-            case STM32_DISARM_CONF:
-              start = 0;
-              armed = false;
-              break;
-            case STM32_ARM_TEST:
-              spi.reply(STM32_ARM_CONF);
-              start = 2;
-              armed = true;
-              startingLoop = true;
-              break;
-            case STM32_ARM_CONF:
-              start = 2;
-              armed = true;
-              startingLoop = true;
-              break;
-            default:
-              break;
-          }
-        }
-      }
-    }
+	  if (spi.receive()) {
+		uint16_t data = spi.read();
+		static bool messageStarted = false;
 
-    spi.reply(((signed char)PITCH_COEFF << 8) | ((signed char)angle_pitch & 0xFF));
-    spi.reply(((signed char)ROLL_COEFF << 8) | ((signed char)angle_roll & 0xFF));
-    //spi.reply(((signed char)YAW_COEFF << 8) | ((signed char)angle_yaw & 0xFF));
+		//Start of message
+		if (((data >> 8) && 0xFF == 0xFD) && (data & 0xFF == 0xFE)) messageStarted = true;
+		if (messageStarted) {
+		  receiver_input_pitch = spi.read();
+		  receiver_input_roll = spi.read();
+		  receiver_input_yaw = spi.read();
+		  receiver_input_throttle = spi.read();
+		  messageStarted = false;
+		}
+		else {
+		  switch (data) {
+			case STM32_DISARM_TEST:
+			  spi.reply(STM32_DISARM_CONF);
+			  start = 0;
+			  armed = false;
+			  break;
+			case STM32_DISARM_CONF:
+			  start = 0;
+			  armed = false;
+			  break;
+			case STM32_ARM_TEST:
+			  spi.reply(STM32_ARM_CONF);
+			  start = 2;
+			  armed = true;
+			  startingLoop = true;
+			  break;
+			case STM32_ARM_CONF:
+			  start = 2;
+			  armed = true;
+			  startingLoop = true;
+			  break;
+			default:
+			  break;
+		  }
+		}
+	  }
+	}
 
-    while (onTime.read_us() - loop_timer < 4000);
-    loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
+	spi.reply(((signed char)PITCH_COEFF << 8) | ((signed char)angle_pitch & 0xFF));
+	spi.reply(((signed char)ROLL_COEFF << 8) | ((signed char)angle_roll & 0xFF));
+	//spi.reply(((signed char)YAW_COEFF << 8) | ((signed char)angle_yaw & 0xFF));
 
-    //RISING EDGE of PWM motor pulses (start of loop)
-    motors_on();
-    
-    timer_channel_1 = esc_1 + loop_timer;                                     //Calculate the time of the falling edge of the esc-1 pulse.
-    timer_channel_2 = esc_2 + loop_timer;                                     //Calculate the time of the falling edge of the esc-2 pulse.
-    timer_channel_3 = esc_3 + loop_timer;                                     //Calculate the time of the falling edge of the esc-3 pulse.
-    timer_channel_4 = esc_4 + loop_timer;                                     //Calculate the time of the falling edge of the esc-4 pulse.
-    
-    //There is always 1000us of spare time. So let's do something useful that is very time consuming.
-    //Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
-    
-    gyro_signalen();
-    //calculate_angles();
+	// Wait until 4 millisecond loop period is complete.
+	while (onTime.read_us() - loop_timer < 4000);
+	loop_timer = onTime.read_us();                                            //Set the timer for the next loop.
 
-    //CLOCK SPEED TEST
-    //spi.reply(SystemCoreClock/1000000);
-    
-    //FALLING EDGES of PWM motor pulses
-    while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {        //Stay in this loop until all motor PWM signals are low
-      esc_loop_timer = onTime.read_us();                                      //Read the current time.
-      if(timer_channel_1 <= esc_loop_timer) motor1 = 0;                        //Set digital output 7 to low if the time is expired.
-      if(timer_channel_2 <= esc_loop_timer) motor2 = 0;                        //Set digital output 6 to low if the time is expired.
-      if(timer_channel_3 <= esc_loop_timer) motor3 = 0;                        //Set digital output 5 to low if the time is expired.
-      if(timer_channel_4 <= esc_loop_timer) motor4 = 0;                        //Set digital output 4 to low if the time is expired.
-    }
+	//RISING EDGE of PWM motor pulses (start of loop)
+	motors_on();
+	
+	timer_channel_1 = esc_1 + loop_timer;                                     //Calculate the time of the falling edge of the esc-1 pulse.
+	timer_channel_2 = esc_2 + loop_timer;                                     //Calculate the time of the falling edge of the esc-2 pulse.
+	timer_channel_3 = esc_3 + loop_timer;                                     //Calculate the time of the falling edge of the esc-3 pulse.
+	timer_channel_4 = esc_4 + loop_timer;                                     //Calculate the time of the falling edge of the esc-4 pulse.
+	
+	//There is always 1000us of spare time. So let's do something useful that is very time consuming.
+	//Get the current gyro and receiver data and scale it to degrees per second for the pid calculations.
+	
+	gyro_signalen();
+	//calculate_angles();
+
+	//CLOCK SPEED TEST
+	//spi.reply(SystemCoreClock/1000000);
+	
+	//FALLING EDGES of PWM motor pulses
+	while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {        //Stay in this loop until all motor PWM signals are low
+	  esc_loop_timer = onTime.read_us();                                      //Read the current time.
+	  if(timer_channel_1 <= esc_loop_timer) motor1 = 0;                        //Set digital output 7 to low if the time is expired.
+	  if(timer_channel_2 <= esc_loop_timer) motor2 = 0;                        //Set digital output 6 to low if the time is expired.
+	  if(timer_channel_3 <= esc_loop_timer) motor3 = 0;                        //Set digital output 5 to low if the time is expired.
+	  if(timer_channel_4 <= esc_loop_timer) motor4 = 0;                        //Set digital output 4 to low if the time is expired.
+	}
   }
 }

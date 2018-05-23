@@ -152,10 +152,18 @@ channels& Radio<InterfaceType>::getRCChannels() {
 }
 
 template<typename InterfaceType>
-void Radio<InterfaceType>::customReceiveByte(uint8_t data) {
+void Radio<InterfaceType>::customReceiveByte(uint8_t data, FlightController& fc) {
     static uint32_t timer = 0;
     static receivedMessage msg;
     if (customParseChar(data, msg)) {
+        fcMessage fcData;
+        fcData.travelAngle = 0;
+        fcData.pwm[0] = msg.pitchPWM;
+        fcData.pwm[1] = msg.rollPWM;
+        fcData.pwm[2] = msg.yawPWM;
+        fcData.pwm[3] = msg.throttlePWM;
+        fc.requestSend(fcData);
+
         std::cout << "Received msg from " << (int)msg.fromid
             << ", seq: " << (int)msg.seqid
             << "\nThrottle: " << msg.throttlePWM

@@ -29,7 +29,7 @@ void showUsage(std::string name) {
         << "\t-s,--stream \t\t\tEnable streaming\n\n";
 }
 
-/// @brief 
+/// @brief Terminal signal handler (for ending program via terminal).
 void signal_callback_handler(int signum) {
     if (!shuttingDown) shutdown();
     while (!doneShuttingDown);
@@ -55,7 +55,7 @@ void mainLoop() {
         }
     }
 
-    // If there drone is not being controlled by handheld controller.
+    // If the drone is not being controlled by handheld controller.
     if (!controllerConnected) {
         int heartbeatTimer, baroTimer = millis();
         int loopTimer = micros();
@@ -73,7 +73,7 @@ void mainLoop() {
             //     heartbeatTimer = millis();
             // }
 
-            //Every 260ms, get pressure altitude
+            //Every 260ms, get pressure altitude, if barometer is calibrated
             if (baro.isCalibrated() && (millis() - baroTimer > BARO_DELAY)) {
                 currentAltitude = baro.getPressureAltitude();
                 std::cout << "BARO: Altitude: " << currentAltitude << "m\n";
@@ -135,7 +135,9 @@ void shutdown() {
     doneShuttingDown = true;
 }
 
-// Filtering command line options
+/// @brief Filtering command line options.
+/// @param _argc Pass in argc from main() here.
+/// @param _argv Pass in argv from main() here.
 void filterCommandLineOptions(int _argc, char *_argv[]) {
     if (_argc > 1) {
         for (int i = 1; i < _argc; i++) {
@@ -170,7 +172,7 @@ void filterCommandLineOptions(int _argc, char *_argv[]) {
     }
 }
 
-// Wait for gyro calibration, reset calibration if necessary
+/// @brief Waiting for gyro calibration on STM32F446 to finish.
 void waitForGyroCalibration() {
     while(!fc.isSPIConfigured() || !fc.isAuthenticated()) delay(10);
     delay(200);
