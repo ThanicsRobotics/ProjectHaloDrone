@@ -74,7 +74,7 @@ void GPS::readGPSSentence() {
 			parser.readLine(gpsSentence);
     }
     catch (nmea::NMEAParseError& e) {
-        std::cout << "GPS Error: " << e.message << endl << endl;
+        std::cout << "GPS Error: " << e.message << "\n" << std::endl;
     }
 }
 

@@ -1,5 +1,20 @@
 #include <helper.h>
 
+bool controllerConnected = false;
+
+std::string camera;
+std::string receiver;
+
+Radio<Serial> radio;
+FlightController fc;
+Barometer baro;
+std::thread serialThread;
+
+bool keyLoopActive;
+bool shuttingDown = false;
+bool doneShuttingDown = false;
+bool startCli = false;
+
 /// @brief Displays message showing how to type options in command line.
 /// @param name Name of program, i.e. First string of argv[].
 void showUsage(std::string name) {
@@ -121,34 +136,37 @@ void shutdown() {
 }
 
 // Filtering command line options
-void filterCommandLineOptions() {
-    if (argc > 1) {
-        for (int i = 1; i < argc; i++) {
-            if (std::string(argv[i]) == "-c" || std::string(argv[i]) == "--controller-enabled") 
+void filterCommandLineOptions(int _argc, char *_argv[]) {
+    if (_argc > 1) {
+        for (int i = 1; i < _argc; i++) {
+            if (std::string (_argv[i]) == "-c" || std::string (_argv[i]) == "--controller-enabled") 
                 controllerConnected = true;
-            else if (std::string(argv[i]) == "-nc" || std::string(argv[i]) == "--no-controller") 
+            else if (std::string (_argv[i]) == "-nc" || std::string (_argv[i]) == "--no-controller") 
                 controllerConnected = false;
-            if (std::string(argv[i]) == "-tg" || std::string(argv[i]) == "--test-gyro")
+            if (std::string (_argv[i]) == "-tg" || std::string (_argv[i]) == "--test-gyro")
                 fc.setTestGyro(true);
-            if (std::string(argv[i]) == "-mt" || std::string(argv[i]) == "--motor-test") {
+            if (std::string (_argv[i]) == "-mt" || std::string (_argv[i]) == "--motor-test") {
                 std::cout << "\n\t\t!!!! TESTING MOTORS BEFORE ARM !!!!\n\n";
                 fc.setMotorTest(true);
             }
-            if (std::string(argv[i]) == "-nm" || std::string(argv[i]) == "--no-motors")
+            if (std::string (_argv[i]) == "-nm" || std::string (_argv[i]) == "--no-motors")
                 fc.setNoMotors(true);
-            if (std::string(argv[i]) == "-c" || std::string(argv[i]) == "--camera") {
-                camera = std::string(argv[i+1]);
+            if (std::string (_argv[i]) == "-c" || std::string (_argv[i]) == "--camera") {
+                camera = std::string (_argv[i+1]);
             }
-            if (std::string(argv[i]) == "-r" || std::string(argv[i]) == "--receiver") {
-                receiver = std::string(argv[i+1]);
+            if (std::string (_argv[i]) == "-r" || std::string (_argv[i]) == "--receiver") {
+                receiver = std::string (_argv[i+1]);
             }
-            if (std::string(argv[i]) == "-s" || std::string(argv[i]) == "--stream")
-                streamEnabled = true;
-            if (std::string(argv[i]) == "-h" || std::string(argv[i]) == "--help") {
-                showUsage(argv[0]);
-                return 1;
+            if (std::string (_argv[i]) == "-h" || std::string (_argv[i]) == "--help") {
+                showUsage (_argv[0]);
+                exit(0);
             }
         } 
+    }
+    // If no options are typed, show how to type them.
+    else {
+        showUsage (_argv[0]);
+        exit(0);
     }
 }
 

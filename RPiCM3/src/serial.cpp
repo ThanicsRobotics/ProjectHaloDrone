@@ -15,7 +15,7 @@ Serial::Serial() {
 /// @param port serial port address, i.e. "/dev/serial0".
 /// @param baud baudrate, i.e. 115200 for Xbee S3B radio.
 void Serial::setupSerial(const char* port, int baud) {
-    if ((serialFd = serOpen(port, baud, 0)) < 0) {
+    if ((serialFd = serOpen((char*)port, baud, 0)) < 0) {
         std::cout << "Unable to open serial interface: " << strerror(errno) << '\n';
         fflush(stdout);
     }

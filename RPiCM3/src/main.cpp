@@ -3,45 +3,7 @@
 /// @date 5/17/2018
 /// @brief Main program implementation.
 
-#include <pigpio.h>
-#include <wiringPi.h>
-#include <unistd.h>
-#include <time.h>
-#include <sys/time.h>
-#include <bits/stdc++.h>
-#include <iostream>
-#include <errno.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <signal.h>
-#include <string.h>
-#include <bitset>
-#include <pthread.h>
-
-//Project headers
-#include <barometer.h>
-#include <flightcontroller.h>
-#include <stream.h>
-#include <gps.h>
-#include <radio.h>
-#include <serial.h>
 #include <helper.h>
-
-bool controllerConnected = false;
-bool streamEnabled = false;
-
-std::string camera;
-std::string receiver;
-
-Radio<Serial> radio;
-FlightController fc;
-Barometer baro;
-std::thread serialThread;
-
-bool keyLoopActive;
-bool shuttingDown = false;
-bool doneShuttingDown = false;
-bool startCli = false;
 
 int main(int argc, char *argv[]) {
     // Setup GPIO libraries
@@ -54,14 +16,8 @@ int main(int argc, char *argv[]) {
     // Override pigpio SIGINT handling
     signal(SIGINT, signal_callback_handler);
 
-    filterCommandLineOptions();
+    filterCommandLineOptions(argc, argv);
 
-    // If no options are typed, show how to type them.
-    else {
-        showUsage(argv[0]);
-        return 1;
-    }
-    
     // Setup Flight Controller and start SPI comms thread.
     fc.setupSPI();
     fc.startFlight();
