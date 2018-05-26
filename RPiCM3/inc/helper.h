@@ -21,23 +21,10 @@
 #include <radio.h>
 #include <serial.h>
 
-#define GYRO_CAL 0x04
 #define projectPath std::string("./")
 
-extern bool controllerConnected;
-
-extern std::string camera;
-extern std::string receiver;
-
-extern Radio<Serial> radio;
-extern FlightController fc;
-extern Barometer baro;
-extern std::thread serialThread;
-
-extern bool keyLoopActive;
 extern bool shuttingDown;
 extern bool doneShuttingDown;
-extern bool startCli;
 
 /// @brief Terminal signal handler (for ending program via terminal).
 void signal_callback_handler(int signum);
@@ -48,10 +35,10 @@ void waitForGyroCalibration();
 /// @brief Filtering command line options.
 /// @param _argc Pass in argc from main() here.
 /// @param _argv Pass in argv from main() here.
-void filterCommandLineOptions(int _argc, char *_argv[]);
+void filterCommandLineOptions(int _argc, char *_argv[], FlightController& fc);
 
 /// @brief Main program loop after pre-flight checks.
-void mainLoop();
+void mainLoop(int _argc, char *_argv[]);
 
 /// @brief Displays message showing how to type options in command line.
 /// @param name Name of program, i.e. First string of argv[].

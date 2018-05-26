@@ -12,6 +12,11 @@
 #include <iostream>
 #include <stdint.h>
 #include <memory>
+#include <array>
+
+#include <types.h>
+
+#define MSG_LEN 11
 
 /// @brief Controls the interfacing between the Raspberry Pi CM3
 /// and the STM32F446, and does flight maneuver calculations.
@@ -56,6 +61,9 @@ public:
     /// @brief Requests the interfaceLoop to send data to the STM32F446.
     /// @param data A data message structured in a fcMessage struct.
     void requestSend(fcMessage data);
+
+    void setPWMInputs(const channels& rcChannels);
+    void getPWMInputs(channels& rcChannels);
 
     /// @brief Starts a new thread executing the interfaceLoop.
     void startFlight();
@@ -122,24 +130,14 @@ private:
     bool noMotors;
 
     //Gyro angle variables
-    signed char gyroPitch, gyroRoll;
+    int8_t gyroPitch, gyroRoll;
     char stm32_rx_buffer[2], stm32_tx_buffer[2];
-    short int fcReceivedData;
+    int16_t fcReceivedData;
     dronePosition flightPosition;
 
     //CS0 is barometer, CS1 is STM32 flight controller
     int spiCS;
     int spiFd;
-
-    void arm();
-    void disarm();
-    void reset();
-    void auth();
-    std::thread interface;
-    void interfaceLoop();
-    spiBuffer packMessage();
-    void sendMessage();
-    fcMessage currentMessage;
 
     //Throttle PID Variables and functions for hovering
     int pid_p_gain, pid_i_gain, pid_d_gain;         ///< PID gains.
@@ -150,6 +148,19 @@ private:
 
     int lastAltitude;
     float currentAltitude, setAltitude;
+
+    fcMessage currentMessage;
+    std::thread interface;
+
+    void arm();
+    void disarm();
+    void reset();
+    void auth();
+    void interfaceLoop();
+    void packMessage(std::array<uint8_t, MSG_LEN>& msg);
+    void sendMessage();
+    void updateMessage();
+    
 };
 
 #endif

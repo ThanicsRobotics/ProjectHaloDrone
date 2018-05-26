@@ -11,6 +11,11 @@ Serial::Serial() {
     serialConfigured = false;
 }
 
+Serial::~Serial() {
+    printf("SERIAL: Closing\n");
+    closeSerial();
+}
+
 /// @brief Opens serial port at specified baud rate.
 /// @param port serial port address, i.e. "/dev/serial0".
 /// @param baud baudrate, i.e. 115200 for Xbee S3B radio.
@@ -27,7 +32,10 @@ void Serial::setupSerial(const char* port, int baud) {
 
 /// @brief Closes serial port.
 void Serial::closeSerial() {
-    if (serialConfigured) serClose(serialFd);
+    if (serialConfigured) {
+        serClose(serialFd);
+        serialConfigured = false;
+    }
 }
 
 // void Serial::serialLoop() {
@@ -98,6 +106,3 @@ int Serial::write(uint8_t* bytes, uint16_t len) {
     return status;
 }
 
-Serial::~Serial() {
-    //pthread_join(serialThread, NULL);
-}

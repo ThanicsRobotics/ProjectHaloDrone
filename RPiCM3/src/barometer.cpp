@@ -9,6 +9,7 @@
 
 #define BARO_ADDR 0x60
 #define BARO_ERROR 2
+#define SURFACE_OFFSET -1
 
 /// @brief Initializes private variables.
 Barometer::Barometer() {
@@ -17,7 +18,7 @@ Barometer::Barometer() {
 }
 
 Barometer::~Barometer() {
-    
+    close();
 }
 
 /// @brief Opens I2C port, sets up barometer registers
@@ -41,6 +42,8 @@ void Barometer::setup() {
 
 /// @brief Closes I2C port and waits for calibraton thread to join.
 void Barometer::close() {
+    printf("BARO: Closing\n");
+
     // Waiting for barometer's I2C to stop reading
     while (readingI2C);
 
@@ -55,6 +58,7 @@ void Barometer::close() {
 /// @brief Joins baroThread to main thread.
 void Barometer::closeCalibrationThread() {
     baroThread.join();
+    printf("BARO: Thread joined\n");
 }
 
 /// @brief Executed by baroThread to calibrate/acclimate the barometer.
@@ -149,7 +153,7 @@ float Barometer::getPressureAltitude() {
                 pressureAltitude = (float)(pressureMSB << 8 | pressureCSB) + (float)((pressureLSB >> 4)/16.0);
 
                 gotAltitude = true;
-                if(calibrated) return abs(pressureAltitude - surfaceAltitude) - 4;
+                if(calibrated) return abs(pressureAltitude - surfaceAltitude) + SURFACE_OFFSET;
                 else return pressureAltitude;
             }
         }

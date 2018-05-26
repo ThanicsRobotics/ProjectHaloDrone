@@ -396,7 +396,7 @@ void authRasPiCM3() {
 	int start = onTime.read_us();
 	while(onTime.read_us() - start < 3000) {
 	  if (spi.receive()) {
-		int response = spi.read();
+		uint16_t response = spi.read();
 		if (response == 0x01) spi.reply(AUTH_KEY);
 		if (response == AUTH_KEY) authenticated = true;
 	  }
@@ -481,19 +481,21 @@ int main() {
   spi.reply(GYRO_CAL);
 
   //Wait until the receiver is active and the throttle is set to the lower position.
-  volatile bool armed = false;
-  volatile bool startingLoop = true;
+	bool armed = false;
+  	bool startingLoop = true;
   bool noMotors = false;
   while((receiver_input_throttle < 990 || receiver_input_throttle > 1020 || receiver_input_yaw < 1400) && !armed) {
-	//We don't want the ESCs to be beeping annoyingly. So let's give them a 1000us pulse while calibrating the gyro.
 	motors_on();                                                              //Set motor PWM signals high
 	wait(.001);                                                               //Wait 1000us
 	motors_off();                                                             //Set motor PWM signals low
 	int start = onTime.read_us();
-	while (onTime.read_us() - start < 3000) {
+	while (onTime.read_us() - start < 3000 && !armed) {
 	  if (spi.receive()) {
-		unsigned short int data = spi.read();
-		if (data == STM32_ARM_TEST) spi.reply(STM32_ARM_CONF);
+		uint16_t data = spi.read();
+		if (data == STM32_ARM_TEST) {
+			spi.reply(STM32_ARM_CONF);
+			armed = true;
+		}
 		if (data == STM32_ARM_CONF) armed = true;
 		if (data == MOTOR_TEST) {
 		  testMotors();
@@ -604,8 +606,8 @@ int main() {
 	
 	calculate_pid();                                                          //PID inputs are known. So we can calculate the pid output.
 
-	throttle = mod_receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
-	//throttle = 1500;
+	throttle = receiver_input_throttle;                                   //We need the throttle signal as a base signal, and add PID altitude control factor
+	//throttle = 1300;
 
 	if (start == 2) {                                                          //The motors are started.
 	  if (throttle > 1800) throttle = 1800;                                   //We need some room to keep full control at full throttle.
@@ -618,7 +620,7 @@ int main() {
 	  if (esc_2 < 1100) esc_2 = 1100;                                         //Keep the motors running.
 	  if (esc_3 < 1100) esc_3 = 1100;                                         //Keep the motors running.
 	  if (esc_4 < 1100) esc_4 = 1100;                                         //Keep the motors running.
-	  
+
 	  if (esc_1 > 2000) esc_1 = 2000;                                           //Limit the esc-1 pulse to 2000us.
 	  if (esc_2 > 2000) esc_2 = 2000;                                           //Limit the esc-2 pulse to 2000us.
 	  if (esc_3 > 2000) esc_3 = 2000;                                           //Limit the esc-3 pulse to 2000us.
@@ -632,25 +634,34 @@ int main() {
 	}
 
 	//Keep these motors off
-	esc_1 = 1000;
-	esc_3 = 1000;
-	esc_4 = 1000;
+	//esc_1 = 1000;
+	//esc_3 = 1000;
+	//esc_4 = 1000;
 	
 	// We wait until 4000us are passed.
-	if ((onTime.read_us() - loop_timer < 4000)) {
+	if (onTime.read_us() - loop_timer < 4000) {
 
 	  if (spi.receive()) {
 		uint16_t data = spi.read();
 		static bool messageStarted = false;
 
 		//Start of message
-		if (((data >> 8) && 0xFF == 0xFD) && (data & 0xFF == 0xFE)) messageStarted = true;
+		if ((((data >> 8) & 0xFF) == 0xFF) && ((data & 0xFF) == 0xFE)) {
+			messageStarted = true;
+			//while(1);
+		}
+
 		if (messageStarted) {
-		  receiver_input_pitch = spi.read();
-		  receiver_input_roll = spi.read();
-		  receiver_input_yaw = spi.read();
-		  receiver_input_throttle = spi.read();
-		  messageStarted = false;
+			receiver_input_throttle = 1700;
+			receiver_input_pitch = 1500;
+			receiver_input_roll = 1500;
+			receiver_input_yaw = 1500;
+
+			// receiver_input_pitch = spi.read();
+			// receiver_input_roll = spi.read();
+			// receiver_input_yaw = spi.read();
+			// receiver_input_throttle = spi.read();
+			messageStarted = false;
 		}
 		else {
 		  switch (data) {
@@ -681,8 +692,8 @@ int main() {
 	  }
 	}
 
-	spi.reply(((signed char)PITCH_COEFF << 8) | ((signed char)angle_pitch & 0xFF));
-	spi.reply(((signed char)ROLL_COEFF << 8) | ((signed char)angle_roll & 0xFF));
+	//spi.reply(((signed char)PITCH_COEFF << 8) | ((signed char)angle_pitch & 0xFF));
+	//spi.reply(((signed char)ROLL_COEFF << 8) | ((signed char)angle_roll & 0xFF));
 	//spi.reply(((signed char)YAW_COEFF << 8) | ((signed char)angle_yaw & 0xFF));
 
 	// Wait until 4 millisecond loop period is complete.

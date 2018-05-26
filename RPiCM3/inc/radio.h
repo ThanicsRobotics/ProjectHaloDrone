@@ -8,9 +8,6 @@
 
 #include <stdint.h>
 #include <memory>
-#include <serial.h>
-#include <stream.h>
-#include <flightcontroller.h>
 #include <mavlink/common/mavlink.h>
 #include <pigpio.h>
 #include <iostream>
@@ -18,15 +15,14 @@
 #include <algorithm>
 #include <array>
 
+#include <serial.h>
+#include <stream.h>
+#include <flightcontroller.h>
+#include <types.h>
+
 #define SYSID 1
 #define COMPID 1
 #define PAYLOAD_LEN 11
-
-/// @brief Holds all PWM control signals. All within 1000-2000.
-struct channels
-{
-    uint16_t rollPWM, pitchPWM, yawPWM, throttlePWM;
-};
 
 /// @brief Custom message structure for communication network.
 /// Message payload is exactly PAYLOAD_LEN bytes long.
@@ -34,10 +30,7 @@ struct receivedMessage {
     uint8_t msgid;          ///< ID of type of message.
     uint8_t fromid;         ///< ID of sender system.
     uint8_t seqid;          ///< Sequential message number, used for checking message continuity.
-    uint16_t throttlePWM;   ///< Throttle PWM Input (1000 - 2000).
-    uint16_t pitchPWM;      ///< Pitch PWM Input (1000 - 2000).
-    uint16_t rollPWM;       ///< Roll PWM Input (1000 - 2000).
-    uint16_t yawPWM;        ///< Yaw PWM Input (1000 - 2000).
+    channels rcChannels;
 };
 
 /// @brief Contains states of message parsing process.
@@ -59,21 +52,17 @@ public:
     //void mavlinkReceiveByte(uint8_t data);
     //void mavlinkReceivePacket(uint8_t *packet);
 
-    /// @brief Gives access to all PWM inputs.
-    /// @return A channels structure that contains pitch, roll, yaw, throttle control PWM signals.
-    channels& getRCChannels();
-
     /// @brief Checks to see if the receiver thread is running.
     /// @return True if running thread, false if not.
     bool isReceiveThreadActive() const { return receiveThreadActive; }
 
-    void startReceiveLoop();
+    //void startReceiveLoop();
     void stopReceiveLoop();
 
     /// @brief Convience function for inputing each byte received by radio and
     /// parsing it into a completed message.
     /// @param data Byte from radio stream.
-    void customReceiveByte(uint8_t data);
+    void customReceiveByte(uint8_t data, FlightController& fc);
 
 private:
     channels pwmInputs;         ///< Current PWM control inputs.
@@ -82,7 +71,7 @@ private:
     bool receiveThreadActive;   ///< True if receive thread is running, false if not.
 
     /// @brief Loop executed by receive thread, gets data from interface and parses it.
-    void receiveLoop();
+    //void receiveLoop();
 
     /// @brief Parses incoming radio data and modifies a receivedMessage object to contain that data.
     /// @param data Byte from radio interface.
@@ -91,47 +80,47 @@ private:
     bool customParseChar(uint8_t data, receivedMessage& msg);
 };
 
-template<>
-void Radio<Serial>::receiveLoop() {
-    int heartbeatTimer = millis();
-    int byteCount = 0;
-    while (receiveThreadActive) {
-        byteCount++;
-        //mavlinkReceiveByte(readChar());
-        customReceiveByte(readChar());
+// template<>
+// void Radio<Serial>::receiveLoop() {
+//     int heartbeatTimer = millis();
+//     int byteCount = 0;
+//     while (receiveThreadActive) {
+//         byteCount++;
+//         //mavlinkReceiveByte(readChar());
+//         //customReceiveByte(readChar(), fc);
         
-        //Every second, send heartbeat to controller
-        // if (millis() - heartbeatTimer > 1000) {
-        //     radioBuffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
-        //     this->write(msg.buf, msg.len);
-        //     printf("rate: %dkbps\n", (byteCount*8)/1000);
-        //     byteCount = 0;
-        //     heartbeatTimer = millis();
-        // }
-    }
-}
+//         //Every second, send heartbeat to controller
+//         // if (millis() - heartbeatTimer > 1000) {
+//         //     radioBuffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+//         //     this->write(msg.buf, msg.len);
+//         //     printf("rate: %dkbps\n", (byteCount*8)/1000);
+//         //     byteCount = 0;
+//         //     heartbeatTimer = millis();
+//         // }
+//     }
+// }
 
-template<>
-void Radio<Stream>::receiveLoop() {
-    // int heartbeatTimer = millis();
-    // while (serialThreadActive) {
-    //     mavlinkReceiveByte(readChar());
-    //     //Every second, send heartbeat to controller
-    //     if (millis() - heartbeatTimer > 1000) {
-    //         radioBuffer msg = radio.sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
-    //         radio.write(msg.buf, msg.len);
-    //         heartbeatTimer = millis();
-    //     }
-    // }
-}
+// template<>
+// void Radio<Stream>::receiveLoop() {
+//     // int heartbeatTimer = millis();
+//     // while (serialThreadActive) {
+//     //     mavlinkReceiveByte(readChar());
+//     //     //Every second, send heartbeat to controller
+//     //     if (millis() - heartbeatTimer > 1000) {
+//     //         radioBuffer msg = radio.sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
+//     //         radio.write(msg.buf, msg.len);
+//     //         heartbeatTimer = millis();
+//     //     }
+//     // }
+// }
 
 /// @brief start serial thread loop.
-template<typename InterfaceType>
-void Radio<InterfaceType>::startReceiveLoop() {
-    //std::cout << "starting thread\n";
-    receiveThreadActive = true;
-    receiveThread = std::thread([this]{ receiveLoop(); });
-}
+// template<typename InterfaceType>
+// void Radio<InterfaceType>::startReceiveLoop() {
+//     //std::cout << "starting thread\n";
+//     receiveThreadActive = true;
+//     receiveThread = std::thread([this]{ receiveLoop(); });
+// }
 
 template<typename InterfaceType>
 void Radio<InterfaceType>::stopReceiveLoop() {
@@ -142,42 +131,22 @@ void Radio<InterfaceType>::stopReceiveLoop() {
 }
 
 template<typename InterfaceType>
-channels& Radio<InterfaceType>::getRCChannels() {
-    static channels modInputs;
-    modInputs.pitchPWM = pwmInputs.pitchPWM < 1000 ? 1500 : pwmInputs.pitchPWM;
-    modInputs.rollPWM = pwmInputs.rollPWM < 1000 ? 1500 : pwmInputs.rollPWM;
-    modInputs.yawPWM = pwmInputs.yawPWM < 1000 ? 1500 : pwmInputs.yawPWM;
-    modInputs.throttlePWM = pwmInputs.throttlePWM < 1000 ? 1500 : pwmInputs.throttlePWM;
-    return modInputs;
-}
-
-template<typename InterfaceType>
 void Radio<InterfaceType>::customReceiveByte(uint8_t data, FlightController& fc) {
     static uint32_t timer = 0;
     static receivedMessage msg;
     if (customParseChar(data, msg)) {
-        fcMessage fcData;
-        fcData.travelAngle = 0;
-        fcData.pwm[0] = msg.pitchPWM;
-        fcData.pwm[1] = msg.rollPWM;
-        fcData.pwm[2] = msg.yawPWM;
-        fcData.pwm[3] = msg.throttlePWM;
-        fc.requestSend(fcData);
-
         std::cout << "Received msg from " << (int)msg.fromid
             << ", seq: " << (int)msg.seqid
-            << "\nThrottle: " << msg.throttlePWM
-            << "\nPitch: " << msg.pitchPWM
-            << "\nRoll: " << msg.rollPWM
-            << "\nYaw: " << msg.yawPWM
+            << "\nThrottle: " << msg.rcChannels.throttlePWM
+            << "\nPitch: " << msg.rcChannels.pitchPWM
+            << "\nRoll: " << msg.rcChannels.rollPWM
+            << "\nYaw: " << msg.rcChannels.yawPWM
             << "\nLast Message: " << micros() - timer << "us"
             << "\n----------" << std::endl;
         timer = micros();
 
-        pwmInputs.pitchPWM = msg.pitchPWM;
-        pwmInputs.rollPWM = msg.rollPWM;
-        pwmInputs.yawPWM = msg.yawPWM;
-        pwmInputs.throttlePWM = msg.throttlePWM;
+        // Sending incoming PWM inputs into flight controller
+        fc.setPWMInputs(msg.rcChannels);
     }
 }
 
@@ -214,10 +183,10 @@ bool Radio<InterfaceType>::customParseChar(uint8_t data, receivedMessage& msg) {
                     outMsg.msgid = msgCache[startIndex];
                     outMsg.fromid = msgCache[startIndex + 1];
                     outMsg.seqid = msgCache[startIndex + 2];
-                    outMsg.throttlePWM = msgCache[startIndex + 3] << 8 | msgCache[startIndex + 4];
-                    outMsg.pitchPWM = msgCache[startIndex + 5] << 8 | msgCache[startIndex + 6];
-                    outMsg.rollPWM = msgCache[startIndex + 7] << 8 | msgCache[startIndex + 8];
-                    outMsg.yawPWM = msgCache[startIndex + 9] << 8 | msgCache[startIndex + 10];
+                    outMsg.rcChannels.throttlePWM = msgCache[startIndex + 3] << 8 | msgCache[startIndex + 4];
+                    outMsg.rcChannels.pitchPWM = msgCache[startIndex + 5] << 8 | msgCache[startIndex + 6];
+                    outMsg.rcChannels.rollPWM = msgCache[startIndex + 7] << 8 | msgCache[startIndex + 8];
+                    outMsg.rcChannels.yawPWM = msgCache[startIndex + 9] << 8 | msgCache[startIndex + 10];
                     msg = outMsg;
 
                     //std::copy(msgCache + startIndex, msgCache + index - 2, buf.begin());

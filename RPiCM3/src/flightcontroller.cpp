@@ -5,6 +5,7 @@
 /// the interfacing between the Raspberry Pi CM3 and the STM32F446.
 
 #include <flightcontroller.h>
+#include <types.h>
 
 #include <pigpio.h>
 #include <wiringPi.h>
@@ -18,6 +19,7 @@
 #define SEL2 5
 #define projectPath std::string("./")
 
+#define GYRO_CAL 0x04
 #define AUTH_KEY 0xF9
 #define STM32_ARM_TEST 0xFF9F
 #define STM32_ARM_CONF 0xFF0A
@@ -32,8 +34,18 @@
 /// @brief Class constrcutor, initializes private variables.
 FlightController::FlightController()
 {
+    std::fill(std::begin(currentMessage.pwm), std::end(currentMessage.pwm), 0);
     run = true;
+    spiConfigured = false;
     spiCS = 0;
+}
+
+FlightController::~FlightController()
+{
+    printf("FC: Closing\n");
+    stopFlight();
+    reset();
+    closeSPI();
 }
 
 /// @brief Opens the SPI port and sets the spiConfigured flag to true.
@@ -54,7 +66,10 @@ void FlightController::setupSPI() {
 /// the motors first if not already.
 void FlightController::closeSPI() {
     if (armed) this->disarm();
-    if(spiConfigured) spiClose(spiFd);
+    if(spiConfigured) {
+        spiClose(spiFd);
+        spiConfigured = false;
+    }
 }
 
 /// @brief Requests the FlightController class to do a Service.
@@ -89,9 +104,41 @@ void FlightController::requestSend(fcMessage data) {
     //sendRequest = true;
 }
 
-/// @brief Starts a new thread executing the interfaceLoop.
+/// @brief Starts a new thread executing the interfaceLoop, and
+/// conducts pre-flight checks.
 void FlightController::startFlight() {
     interface = std::thread([this]{ interfaceLoop(); });
+
+    // Waiting for gyro on STM32 to calibrate
+    while(!spiConfigured || !authenticated) delay(10);
+    //delay(200);
+    std::cout << "Waiting for gyro calibration..." << std::endl;
+    int start = millis();
+    int repeat = 1;
+    while (fcReceivedData != GYRO_CAL) {
+        if (millis() - start > 10000) {
+            std::cout << "Gyro not responding, resetting...\n";
+            delay(1000);
+            requestService(FlightController::Service::AUTH);
+            while(!authenticated);
+            start = millis();
+            repeat += 1;
+        }
+        else if (repeat > 1) {
+            std::cout << "Gyro still not responding, press CNTL-C to shut down...\n";
+            while(1) delay(10);
+        }
+        delay(50);
+    }
+    std::cout << "Calibration complete\n";
+
+    // Manual arming process through SSH
+    std::cout << "Type 'ARM' to arm the quadcopter: ";
+    std::string input = "";
+    std::getline(std::cin, input);
+    if (input == "ARM") {
+        requestService(FlightController::Service::ARM);
+    }
 }
 
 /// @brief Stops interfaceLoop thread.
@@ -122,9 +169,9 @@ void FlightController::disarm() {
 
 /// @brief Sends arm command to STM32, which TURNS ON MOTORS.
 void FlightController::arm() {
-    int data = 0;
+    uint16_t data = 0;
     while ((data != STM32_ARM_CONF) && run) {
-        int armCode = STM32_ARM_TEST;
+        uint16_t armCode = STM32_ARM_TEST;
         if (motorTest) armCode = MOTOR_TEST;
         else if (noMotors) armCode = NO_MOTORS;
         stm32_tx_buffer[0] = (armCode >> 8) & 0xFF;
@@ -182,10 +229,26 @@ void FlightController::auth() {
     authenticated = true;
 }
 
+/// @brief Get current PWM inputs from radio and load them into currentMessage.
+void FlightController::setPWMInputs(const channels& rcChannels) {
+    currentMessage.pwm[0] = rcChannels.pitchPWM; 
+    currentMessage.pwm[1] = rcChannels.rollPWM;
+    currentMessage.pwm[2] = rcChannels.yawPWM;
+    currentMessage.pwm[3] = rcChannels.throttlePWM;
+}
+
+void FlightController::getPWMInputs(channels& rcChannels) {
+    rcChannels.pitchPWM = currentMessage.pwm[0];
+    rcChannels.rollPWM = currentMessage.pwm[1];
+    rcChannels.yawPWM = currentMessage.pwm[2];
+    rcChannels.throttlePWM = currentMessage.pwm[3];
+}
+
 /// @brief Breaks up the message packet into 16-bit packets and 
 /// sends them to STM32F446
 void FlightController::sendMessage() {
-    spiBuffer buffer = packMessage();
+    std::array<uint8_t, MSG_LEN> msg;
+    packMessage(msg);
     // for (int i = 0; i < buffer.len; i++) {
     //     std::bitset<8> x(buffer.buf[i]);
     //     std::cout << x << " | ";
@@ -193,9 +256,9 @@ void FlightController::sendMessage() {
     // }
 
     //printf("test\n");
-    for (int i = 0; i < buffer.len; i += 2) {
-        stm32_tx_buffer[1] = buffer.buf[i+1];
-        stm32_tx_buffer[0] = buffer.buf[i];
+    for (int i = 0; i < msg.size(); i += 2) {
+        stm32_tx_buffer[1] = msg[i+1];
+        stm32_tx_buffer[0] = msg[i];
         spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
     }
     //printf("test2\n");
@@ -210,26 +273,26 @@ void FlightController::sendMessage() {
 ///  ^Header of message
 /// ...Pitch_H,Pitch_L,Roll_H,Roll_L,Yaw_H,Yaw_L,Throttle_H,Throttle_L}
 ///    ^PWM control values, high byte followed by low byte
-FlightController::spiBuffer FlightController::packMessage() {
-    const uint8_t msgLen = 11;
-    static uint8_t msg[msgLen];
-    msg[0] = 0;
-    msg[1] = 0;
+void FlightController::packMessage(std::array<uint8_t, MSG_LEN>& msg) {
+    //const uint8_t msgLen = 11;
+    //static uint8_t msg[msgLen];
+    msg[0] = 0xFF;
+    msg[1] = 0xFE;
     int i;
     uint16_t* pwmInput = currentMessage.pwm;
-    for (i = 2; i < (msgLen-1); i+=2) {
+    for (i = 2; i < (MSG_LEN-1); i+=2) {
         uint16_t pwm = *pwmInput;
-        msg[i] = (pwm >> 8) & 0xFF;
-        msg[i+1] = pwm & 0xFF;
+        msg[i+1] = (pwm >> 8) & 0xFF;
+        msg[i] = pwm & 0xFF;
         pwmInput++;
     }
     msg[i] = '\0';
-    spiBuffer buf;
-    buf.len = msgLen;
+    //spiBuffer buf;
+    //buf.len = msgLen;
     //buf.buf = (std::shared_ptr<uint8_t[]>)msg;
-    buf.buf = (uint8_t*)msg;
+    //buf.buf = (uint8_t*)msg;
     //printf("%p\n", buf.buf);
-    return buf;
+    //return buf;
 }
 
 /// @brief Loop being executed by interface thread.
@@ -329,5 +392,3 @@ uint16_t FlightController::calculateThrottlePID(uint16_t altitudePWM, float alti
     return newThrottle;
 }
 
-FlightController::~FlightController() {
-}
