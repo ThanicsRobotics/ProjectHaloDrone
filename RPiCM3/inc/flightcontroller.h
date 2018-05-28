@@ -44,7 +44,7 @@ public:
     };
 
     /// @brief Class constrcutor, initializes private variables.
-    FlightController();
+    FlightController(bool* shutdown);
 
     ~FlightController();
 
@@ -94,6 +94,7 @@ public:
     void setTestGyro(bool state) { testGyro = state; }
     void setMotorTest(bool state) { motorTest = state; }
     void setNoMotors(bool state) { noMotors = state; }
+    void setSTM32Resetting(bool state) { stm32Resetting = state; }
 
     /// @brief Sets the target altitude for takeoff hover.
     /// @param hoverAltitude Hover altitude in centimeters (max 255 cm).
@@ -119,8 +120,10 @@ private:
         uint8_t* buf;
     };
 
-    bool run;
-    bool spiConfigured;
+    bool* shutdownIndicator;
+    bool stm32Resetting = true;
+    bool run = true;
+    bool spiConfigured = false;
     bool authenticated;
     bool armRequest, authRequest, disarmRequest, sendRequest;
     bool armed;
@@ -136,7 +139,7 @@ private:
     dronePosition flightPosition;
 
     //CS0 is barometer, CS1 is STM32 flight controller
-    int spiCS;
+    int spiCS = 0;
     int spiFd;
 
     //Throttle PID Variables and functions for hovering

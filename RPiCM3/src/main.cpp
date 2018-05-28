@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     // Waits for threads to end, and if interrupt hasn't been
     // triggered, shutdown threads and ports now
     //delay(2000);
-    if (!shuttingDown) shutdown();
+    //if (!shuttingDown) shutdown();
     //while (!doneShuttingDown) delay(10);
     return 0;
 }

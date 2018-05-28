@@ -8,8 +8,8 @@
 
 void program() {
     std::cout << "Would you like to program(p) or set fuses(f), or both(b)? (p/f/b): ";
-    string input = "";
-    getline(cin, input);
+    std::string input = "";
+    std::getline(std::cin, input);
     if (input == "p") {
         std::cout << "Programming..." << std::endl;
         system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U flash:w:firmwares/simonkesc.hex:i");
@@ -21,7 +21,7 @@ void program() {
     if (input == "b") {
         std::cout << "Programming and setting fuses..." << std::endl;
         //system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2E:m -U hfuse:w:0xC9:m -U flash:w:firmwares/simonkesc.hex:i");
-        system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0x2F:m -U hfuse:w:0xCA:m -U flash:w:firmwares/simonkesc.hex:i");
+        system("sudo avrdude -p m8 -C avrdude_esc.conf -c pi_1 -v -U lfuse:w:0xAF:m -U hfuse:w:0xCA:m -U flash:w:firmwares/simonkesc.hex:i");
     }
 }
 
@@ -75,8 +75,8 @@ void updateAllESCs() {
 
 int main() {
     std::cout << "**Make sure you have put all firmwares being updated in the firmwares/ folder**" << std::endl << "Type 'ok' to continue: ";
-    string input = "";
-    getline(cin, input);
+    std::string input = "";
+    std::getline(std::cin, input);
     if (input != "ok") exit(1);
 
     wiringPiSetupGpio();

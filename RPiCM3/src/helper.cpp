@@ -1,7 +1,7 @@
 #include <helper.h>
 
 bool shuttingDown = false;
-bool doneShuttingDown = false;
+//bool doneShuttingDown = false;
 
 /// @brief Displays message showing how to type options in command line.
 /// @param name Name of program, i.e. First string of argv[].
@@ -45,6 +45,9 @@ void filterCommandLineOptions(int _argc, char *_argv[], FlightController& fc) {
                 showUsage (_argv[0]);
                 exit(0);
             }
+            if (std::string (_argv[i]) == "-sd" || std::string (_argv[i]) == "--stm-debug") {
+                fc.setSTM32Resetting(false);
+            }
         }
     }
     // If no options are typed, show how to type them.
@@ -65,10 +68,10 @@ void signal_callback_handler(int signum) {
 
 /// @brief Main program loop after pre-flight checks.
 void mainLoop(int _argc, char *_argv[]) {
+
     Radio<Serial> radio;
     Barometer baro;
-    FlightController fc;
-    
+    FlightController fc(&shuttingDown);
 
     filterCommandLineOptions(_argc, _argv, fc);
 
@@ -79,7 +82,10 @@ void mainLoop(int _argc, char *_argv[]) {
     std::cout << "Waiting for configuration...\n";
     // Waits until Flight Controller is ready, after SPI port is opened,
     // and STM32F446 is authenticated.
-    while(!fc.isSPIConfigured() || !fc.isAuthenticated()) delay(10);
+    while(!fc.isSPIConfigured() || !fc.isAuthenticated()) {
+        if (shuttingDown) break;
+        delay(10);
+    }
     std::cout << "Starting main loop\n";
 
     // Checks if program is running in gyro testing mode.

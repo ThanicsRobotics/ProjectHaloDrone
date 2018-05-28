@@ -652,15 +652,15 @@ int main() {
 		}
 
 		if (messageStarted) {
-			receiver_input_throttle = 1700;
-			receiver_input_pitch = 1500;
-			receiver_input_roll = 1500;
-			receiver_input_yaw = 1500;
+			// receiver_input_throttle = 1700;
+			// receiver_input_pitch = 1500;
+			// receiver_input_roll = 1500;
+			// receiver_input_yaw = 1500;
 
-			// receiver_input_pitch = spi.read();
-			// receiver_input_roll = spi.read();
-			// receiver_input_yaw = spi.read();
-			// receiver_input_throttle = spi.read();
+			receiver_input_pitch = spi.read();
+			receiver_input_roll = spi.read();
+			receiver_input_yaw = spi.read();
+			receiver_input_throttle = spi.read();
 			messageStarted = false;
 		}
 		else {

@@ -139,6 +139,8 @@ float Barometer::getPressureAltitude() {
     if(i2cConfigured) {
         bool gotAltitude = false;
         while (!gotAltitude) {
+            if(!i2cConfigured) return 0.0;
+            readingI2C = true;
             int status = i2cReadByteData(baroI2cFd, 0x00);
             if (status & 0x08) {
                 pressureMSB = i2cReadByteData(baroI2cFd, 0x01);
@@ -146,6 +148,7 @@ float Barometer::getPressureAltitude() {
                 pressureLSB = i2cReadByteData(baroI2cFd, 0x03);
                 tempMSB = i2cReadByteData(baroI2cFd, 0x04);
                 tempLSB = i2cReadByteData(baroI2cFd, 0x05);
+                readingI2C = false;
 
                 // First 16 bits of 24 bit pressure value are whole numbers,
                 // next 4 bits are fractional, so we divide them by 4 bit total (16),

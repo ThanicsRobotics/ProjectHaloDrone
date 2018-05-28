@@ -32,18 +32,17 @@
 #define ROLL_COEFF 0x02
 
 /// @brief Class constrcutor, initializes private variables.
-FlightController::FlightController()
+FlightController::FlightController(bool* shutdown)
+    : shutdownIndicator(shutdown)
 {
     std::fill(std::begin(currentMessage.pwm), std::end(currentMessage.pwm), 0);
-    run = true;
-    spiConfigured = false;
-    spiCS = 0;
 }
 
 FlightController::~FlightController()
 {
     printf("FC: Closing\n");
     stopFlight();
+    stm32Resetting = true;
     reset();
     closeSPI();
 }
@@ -65,7 +64,7 @@ void FlightController::setupSPI() {
 /// @brief Closes the SPI port if it has been opened, and disarms
 /// the motors first if not already.
 void FlightController::closeSPI() {
-    if (armed) this->disarm();
+    if (armed) disarm();
     if(spiConfigured) {
         spiClose(spiFd);
         spiConfigured = false;
@@ -117,17 +116,18 @@ void FlightController::startFlight() {
     int repeat = 1;
     while (fcReceivedData != GYRO_CAL) {
         if (millis() - start > 10000) {
-            std::cout << "Gyro not responding, resetting...\n";
-            delay(1000);
-            requestService(FlightController::Service::AUTH);
-            while(!authenticated);
-            start = millis();
-            repeat += 1;
+            std::cout << "Gyro not responding, press CNTL-C to shut down...\n";
+            while (*shutdownIndicator);
+            std::cout << "Shutting down\n";
+            stopFlight();
+            return;
         }
-        else if (repeat > 1) {
-            std::cout << "Gyro still not responding, press CNTL-C to shut down...\n";
-            while(1) delay(10);
-        }
+
+        // else if (repeat > 1) {
+        //     std::cout << "Gyro still not responding, press CNTL-C to shut down...\n";
+        //     while(!shuttingDown) delay(10);
+        //     exit(1);
+        // }
         delay(50);
     }
     std::cout << "Calibration complete\n";
@@ -149,6 +149,7 @@ void FlightController::stopFlight() {
 
 /// @brief Sends disarm command to STM32, which disables the motors.
 void FlightController::disarm() {
+    std::cout << "Disarming...\n";
     int data = 0;
     while ((data != STM32_DISARM_CONF) && run) {
         int disarmCode = STM32_DISARM_TEST;
@@ -169,6 +170,7 @@ void FlightController::disarm() {
 
 /// @brief Sends arm command to STM32, which TURNS ON MOTORS.
 void FlightController::arm() {
+    std::cout << "Arming...\n";
     uint16_t data = 0;
     while ((data != STM32_ARM_CONF) && run) {
         uint16_t armCode = STM32_ARM_TEST;
@@ -191,10 +193,12 @@ void FlightController::arm() {
 
 /// @brief Switching Demux to STM32F446 programming pins, and sends reset command.
 void FlightController::reset() {
-    pinMode(SEL2, OUTPUT);
-    digitalWrite(SEL2, LOW);
-    system(("sudo openocd -f " + projectPath + "src/reset.cfg").c_str());
-    pinMode(SEL2, INPUT);
+    if (stm32Resetting) {
+        pinMode(SEL2, OUTPUT);
+        digitalWrite(SEL2, LOW);
+        system(("sudo openocd -f " + projectPath + "src/reset.cfg").c_str());
+        pinMode(SEL2, INPUT);
+    }
 }
 
 /// @brief Makes sure the STM32F446 is active and listening.
@@ -221,8 +225,13 @@ void FlightController::auth() {
         spiWrite(spiFd, buffer, 2);
         
         delay(50);
-        if (millis() - start > 8000) {
-            exit(1);
+        // if (millis() - start > 8000) {
+        //     exit(1);
+        // }
+        if(*shutdownIndicator) {
+            std::cout << "Shutting Down\n";
+            run = false;
+            return;
         }
     }
     std::cout << "Authenticated\n";
@@ -257,8 +266,9 @@ void FlightController::sendMessage() {
 
     //printf("test\n");
     for (int i = 0; i < msg.size(); i += 2) {
-        stm32_tx_buffer[1] = msg[i+1];
         stm32_tx_buffer[0] = msg[i];
+        stm32_tx_buffer[1] = msg[i+1];
+        //printf("0: %x, 1: %x\n", msg[i], msg[i+1]);
         spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
     }
     //printf("test2\n");
@@ -282,8 +292,10 @@ void FlightController::packMessage(std::array<uint8_t, MSG_LEN>& msg) {
     uint16_t* pwmInput = currentMessage.pwm;
     for (i = 2; i < (MSG_LEN-1); i+=2) {
         uint16_t pwm = *pwmInput;
-        msg[i+1] = (pwm >> 8) & 0xFF;
-        msg[i] = pwm & 0xFF;
+        
+        msg[i] = (pwm >> 8) & 0xFF;
+        msg[i+1] = pwm & 0xFF;
+        
         pwmInput++;
     }
     msg[i] = '\0';
