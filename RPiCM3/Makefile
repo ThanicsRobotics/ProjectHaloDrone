@@ -1,5 +1,5 @@
 CC=g++-8.1.0
-CFLAGS=-Wall -Wextra -pthread -std=c++17
+CFLAGS=-Wall -Wextra -pthread -std=c++17 -ggdb3
 LIBS=-lwiringPi -lrt -lpigpio -lncurses
 PROJPATH=.
 DIR1=$(PROJPATH)/src/

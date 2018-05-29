@@ -1,5 +1,5 @@
 CC=g++-8.1.0
-CFLAGS=-Wall -Wextra -Wno-ignored-qualifiers -pthread -std=c++17
+CFLAGS=-Wall -Wextra -Wno-ignored-qualifiers -pthread -std=c++17 -ggdb3
 LIBS=-lwiringPi -lrt -lpigpio -lncurses
 SOURCES=$(wildcard *.cpp)
 PROJPATH=..

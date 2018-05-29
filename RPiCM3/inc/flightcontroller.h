@@ -16,7 +16,7 @@
 
 #include <types.h>
 
-#define MSG_LEN 11
+#define MSG_LEN 16
 
 /// @brief Controls the interfacing between the Raspberry Pi CM3
 /// and the STM32F446, and does flight maneuver calculations.
@@ -134,8 +134,8 @@ private:
 
     //Gyro angle variables
     int8_t gyroPitch, gyroRoll;
-    char stm32_rx_buffer[2], stm32_tx_buffer[2];
-    int16_t fcReceivedData;
+    char stm32_rx_buffer[MSG_LEN], stm32_tx_buffer[MSG_LEN];
+    uint16_t fcReceivedData;
     dronePosition flightPosition;
 
     //CS0 is barometer, CS1 is STM32 flight controller

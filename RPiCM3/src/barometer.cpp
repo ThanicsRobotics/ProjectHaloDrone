@@ -82,6 +82,7 @@ void Barometer::calibrate() {
             calibrationData[i] = getPressureAltitude();
             
         }
+        readingI2C = false;
 
         // Finds range of the 30 samples, if less than BARO_ERROR, this sample is valid
         // and barometer is acclimated
@@ -115,6 +116,7 @@ void Barometer::calibrate() {
         calibrationSum += getPressureAltitude();
         
     }
+    readingI2C = false;
     surfaceAltitude = calibrationSum/30;
     printf("BARO: Surface Altitude: %dm\n", (int)surfaceAltitude);
     fflush(stdout);

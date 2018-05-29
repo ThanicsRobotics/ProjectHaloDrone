@@ -109,17 +109,28 @@ void FlightController::startFlight() {
     interface = std::thread([this]{ interfaceLoop(); });
 
     // Waiting for gyro on STM32 to calibrate
-    while(!spiConfigured || !authenticated) delay(10);
+    while(!spiConfigured || !authenticated) {
+        delay(50);
+        if(*shutdownIndicator) {
+            return;
+        }
+    }
     //delay(200);
     std::cout << "Waiting for gyro calibration..." << std::endl;
     int start = millis();
     int repeat = 1;
     while (fcReceivedData != GYRO_CAL) {
-        if (millis() - start > 10000) {
-            std::cout << "Gyro not responding, press CNTL-C to shut down...\n";
-            while (*shutdownIndicator);
-            std::cout << "Shutting down\n";
-            stopFlight();
+        // if (millis() - start > 10000) {
+        //     std::cout << "Gyro not responding, press CNTL-C to shut down...\n";
+        //     while (*shutdownIndicator);
+        //     std::cout << "Shutting down\n";
+        //     stopFlight();
+        //     return;
+        // }
+        std::cout << "Received: " << fcReceivedData << std::endl;
+        if(*shutdownIndicator) {
+            std::cout << "Shutting Down\n";
+            run = false;
             return;
         }
 
@@ -207,7 +218,7 @@ void FlightController::auth() {
     reset();
 
     authenticated = false;
-    char buffer[100];
+    char buffer[2];
     unsigned int authKey = 0;
     std::cout << "Authenticating...\n";
     int start = millis();
@@ -258,6 +269,7 @@ void FlightController::getPWMInputs(channels& rcChannels) {
 void FlightController::sendMessage() {
     std::array<uint8_t, MSG_LEN> msg;
     packMessage(msg);
+    std::copy(msg.begin(), msg.end(), stm32_tx_buffer);
     // for (int i = 0; i < buffer.len; i++) {
     //     std::bitset<8> x(buffer.buf[i]);
     //     std::cout << x << " | ";
@@ -265,16 +277,21 @@ void FlightController::sendMessage() {
     // }
 
     //printf("test\n");
-    for (int i = 0; i < msg.size(); i += 2) {
-        stm32_tx_buffer[0] = msg[i];
-        stm32_tx_buffer[1] = msg[i+1];
-        //printf("0: %x, 1: %x\n", msg[i], msg[i+1]);
-        spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, 2);
-    }
-    //printf("test2\n");
-    //CLOCK SPEED TEST
-    //unsigned long int clockspeed = buffer[1];
-    //std::cout << " | Clock: " << clockspeed << endl;
+    // for (int i = 0; i < msg.size(); i += 2) {
+    //     stm32_tx_buffer[i] = msg[i];
+    //     stm32_tx_buffer[i+1] = msg[i+1];
+    //     //printf("0: %x, 1: %x\n", msg[i], msg[i+1]);
+        
+    // }
+    
+    //for (const char& i : stm32_tx_buffer) std::cout << (int)i << '\n';
+    //delay(10);
+    // int timer1, timer2;
+    // timer1 = micros();
+    spiXfer(spiFd, stm32_tx_buffer, stm32_rx_buffer, MSG_LEN);
+    // timer2 = micros();
+    // std::cout << timer2 - timer1 << std::endl;
+    // delay(10);
 }
 
 /// @brief Packing message to send to Flight Controller over SPI.
@@ -286,19 +303,22 @@ void FlightController::sendMessage() {
 void FlightController::packMessage(std::array<uint8_t, MSG_LEN>& msg) {
     //const uint8_t msgLen = 11;
     //static uint8_t msg[msgLen];
-    msg[0] = 0xFF;
-    msg[1] = 0xFE;
-    int i;
+    //msg[0] = 0xFF;
+    //msg[1] = 0xFE;
+    //int i;
     uint16_t* pwmInput = currentMessage.pwm;
-    for (i = 2; i < (MSG_LEN-1); i+=2) {
+    for (int i = 0; i < MSG_LEN; i+=4) {
         uint16_t pwm = *pwmInput;
         
-        msg[i] = (pwm >> 8) & 0xFF;
-        msg[i+1] = pwm & 0xFF;
+        msg[i] = 0xA0 + i;
+        msg[i+1] = (pwm >> 8) & 0xFF;
+        msg[i+2] = 0xA1 + i;
+        msg[i+3] = pwm & 0xFF;
         
         pwmInput++;
     }
-    msg[i] = '\0';
+    //msg[i] = 0xFD;
+    //msg[i+1] = 0xFC;
     //spiBuffer buf;
     //buf.len = msgLen;
     //buf.buf = (std::shared_ptr<uint8_t[]>)msg;
@@ -311,6 +331,8 @@ void FlightController::packMessage(std::array<uint8_t, MSG_LEN>& msg) {
 /// Sends messages to STM32F446 based on requests,
 /// and decodes incoming messages from STM32F446
 void FlightController::interfaceLoop() {
+    static int timer = micros();
+
     if(!spiConfigured) setupSPI();
     if(!authenticated) auth();
     while(run) {
@@ -338,8 +360,13 @@ void FlightController::interfaceLoop() {
             gyroRoll = (signed char)stm32_rx_buffer[1];
         }
         sendMessage();
+        // if (armed) {
+        //     std::cout << "spitimer: " << micros() - timer << "\n";
+        //     timer = micros();
+        // }
+        
         //printf("test3\n");
-        fcReceivedData = (short)(stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1]);
+        fcReceivedData = stm32_rx_buffer[0] << 8 | stm32_rx_buffer[1];
         switch (stm32_rx_buffer[0]) {
             case PITCH_COEFF:
                 gyroPitch = stm32_rx_buffer[1];
@@ -366,7 +393,7 @@ void FlightController::setHoverAltitude(uint8_t hoverAltitude) {
     setAltitude = hoverAltitude;
 }
 
-static float map(int x, int in_min, int in_max, int out_min, int out_max) {
+float map(int x, int in_min, int in_max, int out_min, int out_max) {
   return (float)(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
