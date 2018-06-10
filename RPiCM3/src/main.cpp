@@ -16,8 +16,13 @@ int main(int argc, char *argv[]) {
     // Override pigpio SIGINT handling
     signal(SIGINT, signal_callback_handler);
 
-    // Start main loop
-    mainLoop(argc, argv);
+    // Creating flight controller and starting flight
+    FlightController fc(&shuttingDown);
+    filterCommandLineOptions(argc, argv, fc);
+
+    std::cout << "Starting main loop\n";
+    fc.startFlight();
+
     gpioTerminate();
 
     // Waits for threads to end, and if interrupt hasn't been
