@@ -707,8 +707,7 @@ download:
 			perror("write");
 			goto out;
 		}
-		image=mmap(0,oi.ObjectCompressedSize,PROT_READ|PROT_WRITE,MAP_SHARED,
-			file,0);
+		image=(char*)mmap(0,oi.ObjectCompressedSize,PROT_READ|PROT_WRITE,MAP_SHARED,file,0);
 		if (image==MAP_FAILED) {
 			perror("mmap");
 			close(file);
@@ -1196,7 +1195,7 @@ save_object(PTPParams *params, uint32_t handle, char* filename, PTPObjectInfo oi
 	    perror("write");
 	    goto out;
 	}
-	image=mmap(0,oi.ObjectCompressedSize,PROT_READ|PROT_WRITE,MAP_SHARED,
+	image=(char*)mmap(0,oi.ObjectCompressedSize,PROT_READ|PROT_WRITE,MAP_SHARED,
 		file,0);
 	if (image==MAP_FAILED) {
 		perror("mmap");

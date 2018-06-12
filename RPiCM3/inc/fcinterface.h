@@ -20,7 +20,7 @@ class FCInterface
     /// @brief Message data structure for sending to STM32F446.
     struct fcMessage
     {
-        float travelAngle; ///< Desired compass angle for the STM32F446 to fly.
+        float travelAngle = 0.0; ///< Desired compass angle for the STM32F446 to fly.
 		channels rcChannels;
         //uint16_t pwm[4];   ///< Array containing PWM inputs, in order: pitch, roll, yaw, throttle.
     };

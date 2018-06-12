@@ -20,8 +20,9 @@ struct channels
 /// @brief Structure for holding drone angular position.
 struct dronePosition
 {
-    int8_t pitch, roll; ///< Pitch and roll angles.
-    int16_t yaw;		///< Yaw angle.
+    int8_t pitch = 0;   ///< Pitch angle.
+    int8_t roll = 0;    ///< Roll angle.
+    int16_t yaw = 0;	///< Yaw angle.
 };
 
 struct FCInterfaceConfig

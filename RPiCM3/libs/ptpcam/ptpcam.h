@@ -19,7 +19,7 @@
 #ifndef __PTPCAM_H__
 #define __PTPCAM_H__
 
-#include <config.h>
+#include "config.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +33,12 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <usb.h>
-#include <libptp2/ptp.h>
+
+#include <malloc.h>
+extern "C" {
+#include "ptp.h"
+}
+
 
 #if 0	/* This is no longer needed at all */
 //#ifdef LINUX_OS
@@ -57,16 +62,18 @@ int myusb_bulk_write(usb_dev_handle *dev, int ep, char *bytes, int length,
 			uint16_t result=o;				\
 			if((result)!=PTP_RC_OK) {			\
 				ptp_perror(&params,result);		\
-				fprintf(stderr,"ERROR: "error);		\
+				fprintf(stderr,"ERROR: %s", error);		\
 				close_camera(&ptp_usb, &params, dev);   \
 				return;					\
 			}						\
 }
 
+
+
 /* Check value and Continue on error */
 #define CC(result,error) {						\
 			if((result)!=PTP_RC_OK) {			\
-				fprintf(stderr,"ERROR: "error);		\
+				fprintf(stderr,"ERROR: %s", error);		\
 				usb_release_interface(ptp_usb.handle,	\
 		dev->config->interface->altsetting->bInterfaceNumber);	\
 				continue;					\
@@ -74,7 +81,7 @@ int myusb_bulk_write(usb_dev_handle *dev, int ep, char *bytes, int length,
 }
 
 /* error reporting macro */
-#define ERROR(error) fprintf(stderr,"ERROR: "error);				
+#define ERROR(error) fprintf(stderr,"ERROR: %s", error);				
 
 /* property value printing macros */
 #define PRINT_PROPVAL_DEC(value)	\

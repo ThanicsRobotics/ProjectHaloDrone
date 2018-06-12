@@ -28,7 +28,6 @@ FCInterface::FCInterface(bool *running, channels& pwmInputs, FCInterfaceConfig& 
     : fcRunning(running), interfaceConfig(cfg)
 {
     currentMessage.rcChannels = pwmInputs;
-    std::fill(std::begin(currentMessage.pwm), std::end(currentMessage.pwm), 0);
     setupSPI();
 }
 
