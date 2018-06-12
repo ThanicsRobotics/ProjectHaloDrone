@@ -1,12 +1,10 @@
 #include <stream.h>
-#include <flightcontroller.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
 #include <arpa/inet.h>
-#include <pthread.h>
 
 #define MAXDATASIZE 500 // max number of bytes we can get at once 
 

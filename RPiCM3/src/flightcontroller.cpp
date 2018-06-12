@@ -15,11 +15,12 @@
 #include <unistd.h>
 #include <bitset>
 
-/// @brief Class constrcutor, initializes private variables.
+/// @brief Class constructor, initializes private variables.
 FlightController::FlightController(bool *shutdown)
-    : shutdownIndicator(shutdown)
+    : shutdownIndicator(shutdown), interface(shutdownIndicator, pwmInputs, fcConfig)
 {
-    
+    // shutdownIndicator = shutdown;
+    // interface = FCInterface(shutdownIndicator);
 }
 
 FlightController::~FlightController()
@@ -63,9 +64,7 @@ void FlightController::flightLoop()
             baroTimer = millis();
         }
 
-        radio.customReceiveByte(radio.readChar(), fc);
-        channels pwmInputs;
-        fc.getPWMInputs(pwmInputs);
+        radio.customReceiveByte(radio.readChar(), pwmInputs);
         std::cout << "Pitch: " << pwmInputs.pitchPWM
             << "\nRoll: " << pwmInputs.rollPWM
             << "\nYaw: " << pwmInputs.yawPWM
@@ -73,7 +72,7 @@ void FlightController::flightLoop()
             << "\ntime: " << micros() - loopTimer << "us\n----\n";
 
         //Calculate new PID compensated throttle
-        uint16_t newThrottle = fc.calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude);
+        uint16_t newThrottle = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude);
         //std::cout << "Loop Time: " << micros() - loopTimer << "us" << std::endl;
         loopTimer = micros();
     }
@@ -81,26 +80,26 @@ void FlightController::flightLoop()
 
 /// @brief Returns the drone's 3-axis angular position.
 /// @return dronePosition struct.
-FlightController::dronePosition FlightController::getDronePosition()
+dronePosition FlightController::getDronePosition()
 {
-    return flightPosition;
+    return fcConfig.flightPosition;
 }
 
 /// @brief Get current PWM inputs from radio and load them into currentMessage.
-void FCInterface::setPWMInputs(const channels &rcChannels)
+void FlightController::setPWMInputs(const channels &rcChannels)
 {
-    interface.currentMessage.pwm[0] = rcChannels.pitchPWM;
-    interface.currentMessage.pwm[1] = rcChannels.rollPWM;
-    interface.currentMessage.pwm[2] = rcChannels.yawPWM;
-    interface.currentMessage.pwm[3] = rcChannels.throttlePWM;
+    pwmInputs.pitchPWM = rcChannels.pitchPWM;
+    pwmInputs.rollPWM = rcChannels.rollPWM;
+    pwmInputs.yawPWM = rcChannels.yawPWM;
+    pwmInputs.throttlePWM = rcChannels.throttlePWM;
 }
 
-void FCInterface::getPWMInputs(channels &rcChannels)
+void FlightController::getPWMInputs(channels &rcChannels)
 {
-    rcChannels.pitchPWM = interface.currentMessage.pwm[0];
-    rcChannels.rollPWM = interface.currentMessage.pwm[1];
-    rcChannels.yawPWM = interface.currentMessage.pwm[2];
-    rcChannels.throttlePWM = interface.currentMessage.pwm[3];
+    rcChannels.pitchPWM = pwmInputs.pitchPWM;
+    rcChannels.rollPWM = pwmInputs.rollPWM;
+    rcChannels.yawPWM = pwmInputs.yawPWM;
+    rcChannels.throttlePWM = pwmInputs.throttlePWM;
 }
 
 /// @brief Sets the target altitude for takeoff hover.
@@ -110,7 +109,7 @@ void FlightController::setHoverAltitude(uint8_t hoverAltitude)
     setAltitude = hoverAltitude;
 }
 
-float map(int& x, int& in_min, int& in_max, int& out_min, int& out_max)
+float map(int x, int in_min, int in_max, int out_min, int out_max)
 {
     return (float)(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }

@@ -4,6 +4,7 @@
 /// @brief Main program implementation.
 
 #include <helper.h>
+#include <thetav.h>
 
 int main(int argc, char *argv[]) {
     // Setup GPIO libraries
@@ -17,18 +18,15 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, signal_callback_handler);
 
     // Creating flight controller and starting flight
-    FlightController fc(&shuttingDown);
-    filterCommandLineOptions(argc, argv, fc);
+    // FlightController fc(&shuttingDown);
+    // filterCommandLineOptions(argc, argv, fc);
 
-    std::cout << "Starting main loop\n";
-    fc.startFlight();
+    // std::cout << "Starting main loop\n";
+    // fc.startFlight();
+
+    ThetaV camera;
 
     gpioTerminate();
 
-    // Waits for threads to end, and if interrupt hasn't been
-    // triggered, shutdown threads and ports now
-    //delay(2000);
-    //if (!shuttingDown) shutdown();
-    //while (!doneShuttingDown) delay(10);
     return 0;
 }

@@ -6,9 +6,6 @@
 #ifndef STREAM_H
 #define STREAM_H
 
-#define VIDEO 0
-#define TELE 1
-
 #include <string.h>
 #include <iostream>
 #include <netdb.h>

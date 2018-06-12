@@ -15,9 +15,9 @@
 #include <algorithm>
 #include <array>
 
+#include <fcinterface.h>
 #include <serial.h>
 #include <stream.h>
-#include <flightcontroller.h>
 #include <types.h>
 
 #define SYSID 1
@@ -62,7 +62,7 @@ public:
     /// @brief Convience function for inputing each byte received by radio and
     /// parsing it into a completed message.
     /// @param data Byte from radio stream.
-    void customReceiveByte(uint8_t data, FlightController& fc);
+    void customReceiveByte(uint8_t data, channels& rcChannels);
 
 private:
     channels pwmInputs;         ///< Current PWM control inputs.
@@ -131,7 +131,7 @@ void Radio<InterfaceType>::stopReceiveLoop() {
 }
 
 template<typename InterfaceType>
-void Radio<InterfaceType>::customReceiveByte(uint8_t data, FlightController& fc) {
+void Radio<InterfaceType>::customReceiveByte(uint8_t data, channels& rcChannels) {
     static uint32_t timer = 0;
     static receivedMessage msg;
     if (customParseChar(data, msg)) {
@@ -146,7 +146,10 @@ void Radio<InterfaceType>::customReceiveByte(uint8_t data, FlightController& fc)
         timer = micros();
 
         // Sending incoming PWM inputs into flight controller
-        fc.setPWMInputs(msg.rcChannels);
+        rcChannels.pitchPWM = msg.rcChannels.pitchPWM;
+        rcChannels.rollPWM = msg.rcChannels.rollPWM;
+        rcChannels.yawPWM = msg.rcChannels.yawPWM;
+        rcChannels.throttlePWM = msg.rcChannels.throttlePWM;
     }
 }
 

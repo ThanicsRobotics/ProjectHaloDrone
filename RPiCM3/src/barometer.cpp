@@ -5,7 +5,7 @@
 #include <bitset>
 #include <string.h>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
 #define BARO_ADDR 0x60
 #define BARO_ERROR 2

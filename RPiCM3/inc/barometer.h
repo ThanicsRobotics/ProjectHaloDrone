@@ -3,10 +3,10 @@
 /// @date 5/17/2018
 /// @brief Definition of Barometer class.
 
-#ifndef ALTITUDE_H
-#define ALTITUDE_H
+#ifndef BAROMETER_H
+#define BAROMETER_H
 
-#include <stdint.h>
+#include <inttypes.h>
 #include <thread>
 
 #define BARO_DELAY 260

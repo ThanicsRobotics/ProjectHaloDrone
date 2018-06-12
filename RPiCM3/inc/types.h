@@ -11,7 +11,26 @@
 /// @brief Holds all PWM control signals. All within 1000-2000.
 struct channels
 {
-    uint16_t rollPWM, pitchPWM, yawPWM, throttlePWM;
+    uint16_t rollPWM = 0;
+    uint16_t pitchPWM = 0;
+    uint16_t yawPWM = 0;
+    uint16_t throttlePWM = 0;
+};
+
+/// @brief Structure for holding drone angular position.
+struct dronePosition
+{
+    int8_t pitch, roll; ///< Pitch and roll angles.
+    int16_t yaw;		///< Yaw angle.
+};
+
+struct FCInterfaceConfig
+{
+    bool testGyro = false;
+    bool motorTest = false;
+    bool noMotors = false;
+    bool stm32Resetting = true;
+    dronePosition flightPosition;
 };
 
 #endif

@@ -3,37 +3,24 @@
 /// @date 5/17/2018
 /// @brief Definition of FlightController class.
 
-#ifndef SPI_H
-#define SPI_H
+#ifndef FLIGHTCONTROLLER_H
+#define FLIGHTCONTROLLER_H
 
 #include <fcinterface.h>
 #include <barometer.h>
 #include <radio.h>
-#include <thread>
 #include <string>
 #include <string.h>
 #include <iostream>
 #include <stdint.h>
-#include <memory>
-#include <array>
 #include <types.h>
-
-#define MSG_LEN 16
 
 /// @brief Controls flight operations and calculations.
 class FlightController
 {
   public:
-	/// @brief Structure for holding drone angular position.
-	struct dronePosition
-	{
-		int8_t pitch, roll; ///< Pitch and roll angles.
-		int16_t yaw;		///< Yaw angle.
-	};
-
 	/// @brief Initializes private variables.
 	FlightController(bool *shutdown);
-
 	~FlightController();
 
 	void setPWMInputs(const channels &rcChannels);
@@ -56,6 +43,15 @@ class FlightController
 	/// @brief Gets drone's angular position (pitch, roll, yaw).
 	dronePosition getDronePosition();
 
+	bool isTestGyroActive() const { return fcConfig.testGyro; }
+    bool isMotorTestActive() const { return fcConfig.motorTest; }
+    bool isNoMotorsActive() const { return fcConfig.noMotors; }
+
+    void setTestGyro(bool state) { fcConfig.testGyro = state; }
+    void setMotorTest(bool state) { fcConfig.motorTest = state; }
+    void setNoMotors(bool state) { fcConfig.noMotors = state; }
+    void setSTM32Resetting(bool state) { fcConfig.stm32Resetting = state; }
+
 	/// @brief Calculate new throttle based on a altitude-driven PID loop.
 	/// @param altitudePWM PWM Input from controller.
 	/// @param altitude Current altitude.
@@ -63,15 +59,17 @@ class FlightController
 	uint16_t calculateThrottlePID(uint16_t altitudePWM, float altitude);
 
   private:
-  	bool *shutdownIndicator;
+  	bool *shutdownIndicator = nullptr;
 
-	FCInterface interface(shutdownIndicator);
+	FCInterfaceConfig fcConfig;
+	FCInterface interface;
 	Radio<Serial> radio;
     Barometer baro;
 	
 	bool run = true;
 
-	dronePosition flightPosition;
+	//dronePosition flightPosition;
+	channels pwmInputs;
 
 	//Throttle PID Variables and functions for hovering
 	int pid_p_gain, pid_i_gain, pid_d_gain; ///< PID gains.

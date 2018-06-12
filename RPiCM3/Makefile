@@ -4,7 +4,8 @@ LIBS=-lwiringPi -lrt -lpigpio -lncurses
 PROJPATH=.
 DIR1=$(PROJPATH)/src/
 DIR2=$(PROJPATH)/libs/NemaTode/src/
-OBJ=$(patsubst %.cpp,%.o,$(wildcard $(DIR1)*.cpp)) $(patsubst %.cpp,%.o,$(wildcard $(DIR2)*.cpp))
+DIR3=$(PROJPATH)/libs/ptpcam/
+OBJ=$(patsubst %.cpp,%.o,$(wildcard $(DIR1)*.cpp)) $(patsubst %.cpp,%.o,$(wildcard $(DIR2)*.cpp)) $(patsubst %.cpp,%.o,$(wildcard $(DIR3)*.cpp))
 EXEC=halo
 
 all:

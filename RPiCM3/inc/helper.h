@@ -1,3 +1,6 @@
+#ifndef HELPER_H
+#define HELPER_H
+
 #include <pigpio.h>
 #include <wiringPi.h>
 #include <unistd.h>
@@ -39,3 +42,5 @@ void showUsage(std::string name);
 
 /// @brief Shutting down threads and closing ports.
 void shutdown();
+
+#endif

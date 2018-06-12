@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <string.h>
 
 #define SEL2 5
 #define projectPath std::string("./")
@@ -23,16 +24,17 @@
 #define PITCH_COEFF 0x01
 #define ROLL_COEFF 0x02
 
-FCInterface::FCInterface(bool *running)
-    : fcRunning(running)
+FCInterface::FCInterface(bool *running, channels& pwmInputs, FCInterfaceConfig& cfg)
+    : fcRunning(running), interfaceConfig(cfg)
 {
+    currentMessage.rcChannels = pwmInputs;
     std::fill(std::begin(currentMessage.pwm), std::end(currentMessage.pwm), 0);
     setupSPI();
 }
 
 FCInterface::~FCInterface()
 {
-    stm32Resetting = true;
+    interfaceConfig.stm32Resetting = true;
     reset();
     closeSPI();
 }
@@ -49,7 +51,7 @@ void FCInterface::setupSPI()
     }
     else
     {
-        std::cout << "Opening SPI. FD: " << spiFd << " ID: " << interface.get_id() << "\n";
+        std::cout << "Opening SPI. FD: " << spiFd << " ID: " << interfaceThread.get_id() << "\n";
         spiConfigured = true;
     }
 }
@@ -180,9 +182,9 @@ void FCInterface::arm()
     while ((data != STM32_ARM_CONF) && *fcRunning)
     {
         uint16_t armCode = STM32_ARM_TEST;
-        if (motorTest)
+        if (interfaceConfig.motorTest)
             armCode = MOTOR_TEST;
-        else if (noMotors)
+        else if (interfaceConfig.noMotors)
             armCode = NO_MOTORS;
         stm32_tx_buffer[0] = (armCode >> 8) & 0xFF;
         stm32_tx_buffer[1] = armCode & 0xFF;
@@ -202,7 +204,7 @@ void FCInterface::arm()
 /// @brief Switching Demux to STM32F446 programming pins, and sends reset command.
 void FCInterface::reset()
 {
-    if (stm32Resetting)
+    if (interfaceConfig.stm32Resetting)
     {
         pinMode(SEL2, OUTPUT);
         digitalWrite(SEL2, LOW);
@@ -250,6 +252,8 @@ void FCInterface::auth()
     authenticated = true;
 }
 
+
+
 /// @brief Breaks up the message packet into 16-bit packets and
 /// sends them to STM32F446
 void FCInterface::sendMessage()
@@ -268,18 +272,35 @@ void FCInterface::sendMessage()
 ///    ^PWM control values, high byte followed by low byte
 void FCInterface::packMessage(std::array<uint8_t, MSG_LEN> &msg)
 {
-    uint16_t *pwmInput = currentMessage.pwm;
-    for (int i = 0; i < MSG_LEN; i += 4)
-    {
-        uint16_t pwm = *pwmInput;
+    msg[0] = 0xA0;
+    msg[1] = (currentMessage.rcChannels.pitchPWM >> 8) & 0xFF;
+    msg[2] = 0xA1;
+    msg[3] = currentMessage.rcChannels.pitchPWM & 0xFF;
+    msg[4] = 0xA2;
+    msg[5] = (currentMessage.rcChannels.rollPWM >> 8) & 0xFF;
+    msg[6] = 0xA3;
+    msg[7] = currentMessage.rcChannels.rollPWM & 0xFF;
+    msg[8] = 0xA4;
+    msg[9] = (currentMessage.rcChannels.yawPWM >> 8) & 0xFF;
+    msg[10] = 0xA5;
+    msg[11] = currentMessage.rcChannels.yawPWM & 0xFF;
+    msg[12] = 0xA6;
+    msg[13] = (currentMessage.rcChannels.throttlePWM >> 8) & 0xFF;
+    msg[14] = 0xA7;
+    msg[15] = currentMessage.rcChannels.throttlePWM & 0xFF;
 
-        msg[i] = 0xA0 + i;
-        msg[i + 1] = (pwm >> 8) & 0xFF;
-        msg[i + 2] = 0xA1 + i;
-        msg[i + 3] = pwm & 0xFF;
+    // uint16_t *pwmInput = currentMessage.pwm;
+    // for (int i = 0; i < MSG_LEN; i += 4)
+    // {
+    //     uint16_t pwm = *pwmInput;
 
-        pwmInput++;
-    }
+    //     msg[i] = 0xA0 + i;
+    //     msg[i + 1] = (pwm >> 8) & 0xFF;
+    //     msg[i + 2] = 0xA1 + i;
+    //     msg[i + 3] = pwm & 0xFF;
+
+    //     pwmInput++;
+    // }
 }
 
 /// @brief Loop being executed by interface thread.
@@ -316,11 +337,11 @@ void FCInterface::interfaceLoop()
             auth();
             authRequest = false;
         }
-        else if (testGyro)
+        else if (interfaceConfig.testGyro)
         {
             spiRead(spiFd, stm32_rx_buffer, 2);
-            flightPosition.pitch = (signed char)stm32_rx_buffer[0];
-            flightPosition.roll = (signed char)stm32_rx_buffer[1];
+            interfaceConfig.flightPosition.pitch = (signed char)stm32_rx_buffer[0];
+            interfaceConfig.flightPosition.roll = (signed char)stm32_rx_buffer[1];
         }
         sendMessage();
         // if (armed) {
@@ -333,10 +354,10 @@ void FCInterface::interfaceLoop()
         switch (stm32_rx_buffer[0])
         {
         case PITCH_COEFF:
-            flightPosition.pitch = stm32_rx_buffer[1];
+            interfaceConfig.flightPosition.pitch = stm32_rx_buffer[1];
             break;
         case ROLL_COEFF:
-            flightPosition.roll = stm32_rx_buffer[1];
+            interfaceConfig.flightPosition.roll = stm32_rx_buffer[1];
             break;
         default:
             break;

@@ -1,18 +1,28 @@
+#ifndef FCINTERFACE_H
+#define FCINTERFACE_H
+
 #include <inttypes.h>
+#include <types.h>
+
+#include <thread>
+#include <array>
+
+#define MSG_LEN 16
 
 /// @brief Controls the interfacing between the Raspberry Pi CM3
 /// and the STM32F446
 class FCInterface
 {
   public:
-    FCInterface(bool *shutdown);
+    FCInterface(bool *running, channels& pwmInputs, FCInterfaceConfig& cfg);
     ~FCInterface();
 
     /// @brief Message data structure for sending to STM32F446.
     struct fcMessage
     {
         float travelAngle; ///< Desired compass angle for the STM32F446 to fly.
-        uint16_t pwm[4];   ///< Array containing PWM inputs, in order: pitch, roll, yaw, throttle.
+		channels rcChannels;
+        //uint16_t pwm[4];   ///< Array containing PWM inputs, in order: pitch, roll, yaw, throttle.
     };
 
     /// @brief Types of services for the Flight Controller to execute.
@@ -32,6 +42,9 @@ class FCInterface
 
 	void startInterface();
 	void stopInterface();
+
+	void setPWMInputs(const channels &rcChannels);
+	void getPWMInputs(channels &rcChannels);
 
     /// @brief Requests the FlightController class to do a Service.
     /// @param serviceType A member of the Service enum
@@ -53,30 +66,19 @@ class FCInterface
     /// @return true if authenticated, false if not.
     bool isAuthenticated() const { return authenticated; }
 
-    bool isTestGyroActive() const { return testGyro; }
-    bool isMotorTestActive() const { return motorTest; }
-    bool isNoMotorsActive() const { return noMotors; }
-
-    void setTestGyro(bool state) { testGyro = state; }
-    void setMotorTest(bool state) { motorTest = state; }
-    void setNoMotors(bool state) { noMotors = state; }
-    void setSTM32Resetting(bool state) { stm32Resetting = state; }
-
     /// @brief Method to access the data received from STM32F446 SPI.
     /// @return 16-bit SPI packet.
     int16_t getReceivedData() { return fcReceivedData; }
 
   private:
 	bool *fcRunning;
-    bool stm32Resetting = true;
+
     bool spiConfigured = false;
     bool authenticated;
     bool armRequest, authRequest, disarmRequest, sendRequest;
     bool armed;
 
-    bool testGyro;
-    bool motorTest;
-    bool noMotors;
+    FCInterfaceConfig interfaceConfig;
 
     char stm32_rx_buffer[MSG_LEN], stm32_tx_buffer[MSG_LEN];
     uint16_t fcReceivedData;
@@ -97,3 +99,5 @@ class FCInterface
     void updateMessage();
 	void interfaceLoop();
 };
+
+#endif
