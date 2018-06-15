@@ -16,16 +16,23 @@ int main(int argc, char *argv[]) {
 
     // Override pigpio SIGINT handling
     signal(SIGINT, signal_callback_handler);
-
+    {
     // Creating flight controller and starting flight
-    // FlightController fc(&shuttingDown);
-    // filterCommandLineOptions(argc, argv, fc);
+    FlightController fc(&shuttingDown);
+    filterCommandLineOptions(argc, argv, fc);
 
-    // std::cout << "Starting main loop\n";
-    // fc.startFlight();
+    std::cout << "Starting main loop\n";
+    fc.startFlight();
 
-    ThetaV camera;
-
+    // ThetaV camera;
+    // delay(2000);
+    // camera.switchMode(ThetaV::Mode::PHOTO);
+    // camera.takePicture();
+    // delay(1000);
+    // camera.startVideo();
+    // delay(5000);
+    // camera.stopVideo(false);
+    }
     gpioTerminate();
 
     return 0;

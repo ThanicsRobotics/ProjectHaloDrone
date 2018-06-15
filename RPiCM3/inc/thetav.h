@@ -9,12 +9,14 @@
 class ThetaV
 {
   public:
+    ThetaV();
+
     /// Value codes for the camera modes
-    enum MODE
+    enum Mode
     {
-        LIVESTREAM = 0x8005,
-        VIDEO = 0x8002,
-        PHOTO = 0x0001
+        LIVESTREAM = 0,
+        VIDEO,
+        PHOTO
     };
 
     void takePicture();
@@ -23,13 +25,14 @@ class ThetaV
     void startVideo();
 
     /// Operation code 0x1018 with parameter 0xFFFFFFFF
-    void stopVideo();
+    void stopVideo(bool force);
 
     /// Property code 0x5013
-    void switchMode(int mode);
+    void switchMode(Mode mode);
 
   private:
     bool videoInProgress = false;
+    Mode cameraMode = Mode::PHOTO;
     PTPController ptp;
 };
 

@@ -4,16 +4,25 @@
 // and uses the libptp2 library.
 #include <libptp2/ptp.h>
 
-void PTPController::getProperty(uint16_t propertyCode)
+int PTPController::getProperty(uint16_t propertyCode)
 {
-    getset_property(busn,devn,propertyCode,0,force);
+    return getset_property(busn,devn,propertyCode,0,force);
 }
 
-void PTPController::setProperty(uint16_t propertyCode, char *value)
+int PTPController::setProperty(uint16_t propertyCode, char *value)
 {
-    getset_property(busn,devn,propertyCode,value,force);
+    return getset_property(busn,devn,propertyCode,value,force);
 }
 
+int PTPController::captureImage()
+{
+    return capture_image(busn, devn, force);
+}
+
+int PTPController::genericRequest(uint16_t requestCode, std::array<uint32_t, 5> params)
+{
+    return send_generic_request(busn, devn, requestCode, params.data(), direction, data_file);
+}
 
 
 

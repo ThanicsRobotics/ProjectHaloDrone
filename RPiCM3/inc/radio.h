@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include <memory>
-#include <mavlink/common/mavlink.h>
+//#include <mavlink/common/mavlink.h>
 #include <pigpio.h>
 #include <iostream>
 #include <wiringPi.h>

@@ -3,6 +3,7 @@
 
 #include <inttypes.h>
 #include <ptpcam.h>
+#include <array>
 
 class PTPController {
 public:
@@ -13,8 +14,10 @@ public:
     //     int intep;
     // };
 
-    void getProperty(uint16_t propertyCode);
-    void setProperty(uint16_t propertyCode, char *value);
+    int getProperty(uint16_t propertyCode);
+    int setProperty(uint16_t propertyCode, char *value);
+    int genericRequest(uint16_t requestCode, std::array<uint32_t, 5> params);
+    int captureImage();
 
 private:
     int busn = 0, devn = 0;

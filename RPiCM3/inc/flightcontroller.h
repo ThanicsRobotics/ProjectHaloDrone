@@ -14,13 +14,14 @@
 #include <iostream>
 #include <stdint.h>
 #include <types.h>
+#include <memory>
 
 /// @brief Controls flight operations and calculations.
 class FlightController
 {
   public:
 	/// @brief Initializes private variables.
-	FlightController(bool *shutdown);
+	FlightController(std::shared_ptr<bool> shutdown);
 	~FlightController();
 
 	void setPWMInputs(const channels &rcChannels);
@@ -59,7 +60,8 @@ class FlightController
 	uint16_t calculateThrottlePID(uint16_t altitudePWM, float altitude);
 
   private:
-  	bool *shutdownIndicator = nullptr;
+  	//bool *shutdownIndicator = nullptr;
+	std::shared_ptr<bool> shutdownIndicator;
 
 	FCInterfaceConfig fcConfig;
 	FCInterface interface;

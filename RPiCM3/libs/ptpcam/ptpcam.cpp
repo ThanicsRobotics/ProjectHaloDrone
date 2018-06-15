@@ -17,7 +17,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
+#include <wiringPi.h>
 
 
 #ifdef ENABLE_NLS
@@ -561,8 +561,7 @@ show_info (int busn, int devn, short force)
 	close_camera(&ptp_usb, &params, dev);
 }
 
-void
-capture_image (int busn, int devn, short force)
+int capture_image (int busn, int devn, short force)
 {
 	PTPParams params;
 	PTP_USB ptp_usb;
@@ -571,14 +570,16 @@ capture_image (int busn, int devn, short force)
 	struct usb_device *dev;
 	short ret;
 
-	printf("\nInitiating captue...\n");
+	printf("\nInitiating capture...\n");
 	if (open_camera(busn, devn, force, &ptp_usb, &params, &dev)<0)
-		return;
+		return -1;
 
 	if (!ptp_operation_issupported(&params, PTP_OC_InitiateCapture))
 	{
 	    printf ("Your camera does not support InitiateCapture operation!\nSorry, blame the %s!\n", params.deviceinfo.Manufacturer);
-	    goto out;
+	    //goto out;
+		close_camera(&ptp_usb, &params, dev);
+		return 0;
 	}
 
 	/* obtain exposure time in miliseconds */
@@ -593,33 +594,42 @@ capture_image (int busn, int devn, short force)
 	/* adjust USB timeout */
 	if (ExposureTime>USB_TIMEOUT) ptpcam_usb_timeout=ExposureTime;
 
-	CR(ptp_initiatecapture (&params, 0x0, 0), "Could not capture.\n");
-	
-	ret=ptp_usb_event_wait(&params,&event);
-	if (ret!=PTP_RC_OK) goto err;
-	if (verbose) printf ("Event received %08x, ret=%x\n", event.Code, ret);
-	if (event.Code==PTP_EC_CaptureComplete) {
-		printf ("Camera reported 'capture completed' but the object information is missing.\n");
-		goto out;
-	}
-		
-	while (event.Code==PTP_EC_ObjectAdded) {
-		printf ("Object added 0x%08lx\n", (long unsigned) event.Param1);
-		if (ptp_usb_event_wait(&params, &event)!=PTP_RC_OK)
-			goto err;
-		if (verbose) printf ("Event received %08x, ret=%x\n", event.Code, ret);
-		if (event.Code==PTP_EC_CaptureComplete) {
-			printf ("Capture completed successfully!\n");
-			goto out;
-		}
-	}
-	
-err:
-	printf("Events receiving error. Capture status unknown.\n");
-out:
+	//CR(ptp_initiatecapture (&params, 0x0, 0), "Could not capture.\n");
 
-	ptpcam_usb_timeout=USB_TIMEOUT;
+	uint16_t result = ptp_initiatecapture (&params, 0x0, 0);
+	if((result)!=PTP_RC_OK) {
+		ptp_perror(&params,result);
+		fprintf(stderr,"ERROR: Could not capture\n");
+		close_camera(&ptp_usb, &params, dev);
+		return -1;
+	}
+	delay(2000);
+// 	ret=ptp_usb_event_wait(&params,&event);
+// 	if (ret!=PTP_RC_OK) goto err;
+// 	if (verbose) printf ("Event received %08x, ret=%x\n", event.Code, ret);
+// 	if (event.Code==PTP_EC_CaptureComplete) {
+// 		printf ("Camera reported 'capture completed' but the object information is missing.\n");
+// 		goto out;
+// 	}
+		
+// 	while (event.Code==PTP_EC_ObjectAdded) {
+// 		printf ("Object added 0x%08lx\n", (long unsigned) event.Param1);
+// 		if (ptp_usb_event_wait(&params, &event)!=PTP_RC_OK)
+// 			goto err;
+// 		if (verbose) printf ("Event received %08x, ret=%x\n", event.Code, ret);
+// 		if (event.Code==PTP_EC_CaptureComplete) {
+// 			printf ("Capture completed successfully!\n");
+// 			goto out;
+// 		}
+// 	}
+	
+//err:
+// 	printf("Events receiving error. Capture status unknown.\n");
+//out:
+
+// 	ptpcam_usb_timeout=USB_TIMEOUT;
 	close_camera(&ptp_usb, &params, dev);
+	return 0;
 }
 
 static void sig_alrm(int signo)
@@ -1289,7 +1299,7 @@ get_all_files (int busn, int devn, short force, int overwrite)
 	close_camera(&ptp_usb, &params, dev);
 }
 
-void
+int
 send_generic_request (int busn, int devn, uint16_t reqCode, uint32_t *reqParams, uint32_t direction, char *data_file)
 {
 	PTPParams params;
@@ -1330,7 +1340,7 @@ send_generic_request (int busn, int devn, uint16_t reqCode, uint32_t *reqParams,
 				if (fread(data, 1, fsize, f) != fsize) {
 					fprintf(stderr, "PTP: ERROR: can't read data to send from file '%s'\n", data_file);
 					free (data);
-					return;
+					return -1;
 				}
 				else {
 					printf("--- data to send ---\n");
@@ -1339,20 +1349,20 @@ send_generic_request (int busn, int devn, uint16_t reqCode, uint32_t *reqParams,
 				}
 			} else { // error no data to send
 				fprintf(stderr, "PTP: ERROR: file not found '%s'\n", data_file);
-				return;
+				return -1;
 			}
 		}
 	}
 
 	if (open_camera(busn, devn, 0, &ptp_usb, &params, &dev)<0)
-		return;
+		return -1;
 	printf("Camera: %s\n",params.deviceinfo.Model);
 
 	printf("Sending generic request: reqCode=0x%04x, params=[0x%08x,0x%08x,0x%08x,0x%08x,0x%08x]\n",
 			(uint)reqCode, reqParams[0], reqParams[1], reqParams[2], reqParams[3], reqParams[4]);
 	uint16_t result=ptp_sendgenericrequest (&params, reqCode, reqParams, &data, direction, fsize);
 	if((result)!=PTP_RC_OK) {
-		ptp_perror(&params,result);
+		//ptp_perror(&params,result);
 		if (result > 0x2000)
 			fprintf(stderr,"PTP: ERROR: response 0x%04x\n", result);
 	} else {
@@ -1366,8 +1376,7 @@ send_generic_request (int busn, int devn, uint16_t reqCode, uint32_t *reqParams,
 		free(data);
 	}
 	close_camera(&ptp_usb, &params, dev);
-	return;
-	
+	return 0;
 }
 
 void
@@ -1508,10 +1517,8 @@ set_property (PTPParams* params,
 	free(val);
 	return 0;
 }
-void
-getset_property_internal (PTPParams* params, uint16_t property,const char* value, short force);
-void
-getset_property_internal (PTPParams* params, uint16_t property,const char* value, short force)
+
+int getset_property_internal (PTPParams* params, uint16_t property,const char* value, short force)
 {
 	PTPDevicePropDesc dpd;
 	const char* propname;
@@ -1526,7 +1533,7 @@ getset_property_internal (PTPParams* params, uint16_t property,const char* value
 		fprintf(stderr,"ERROR: "
 		"Could not get device property description!\n"
 		"Try to reset the camera.\n");
-		return ;
+		return -1;
 	}
 	/* until this point dpd has to be free()ed */
 	propdesc=ptp_prop_getdesc(params, &dpd, NULL);
@@ -1632,8 +1639,9 @@ getset_property_internal (PTPParams* params, uint16_t property,const char* value
 		if (r!=PTP_RC_OK)
 		{
 			printf ("FAILED!!!\n");
-			fflush(NULL);
-		        ptp_perror(params,r);
+			return -1;
+			//fflush(NULL);
+		    //ptp_perror(params,r);
 		}
 		else 
 			printf ("succeeded.\n");
@@ -1641,6 +1649,7 @@ getset_property_internal (PTPParams* params, uint16_t property,const char* value
 /*	out: */
 
 	ptp_free_devicepropdesc(&dpd);
+	return 0;
 }
 
 void
@@ -1711,7 +1720,7 @@ getset_propertybyname (int busn,int devn,char* property,char* value,short force)
 }
 
 
-void
+int
 getset_property (int busn,int devn,uint16_t property,char* value,short force)
 {
 	PTPParams params;
@@ -1721,7 +1730,7 @@ getset_property (int busn,int devn,uint16_t property,char* value,short force)
 	printf ("\n");
 
 	if (open_camera(busn, devn, force, &ptp_usb, &params, &dev)<0)
-		return;
+		return -1;
 
 	printf("Camera: %s",params.deviceinfo.Model);
 	if ((devn!=0)||(busn!=0)) 
@@ -1732,12 +1741,13 @@ getset_property (int busn,int devn,uint16_t property,char* value,short force)
 	{
 		fprintf(stderr,"The device does not support this property!\n");
 		close_camera(&ptp_usb, &params, dev);
-		return;
+		return -1;
 	}
 
-	getset_property_internal (&params, property,value, force);
-
+	int result = getset_property_internal (&params, property,value, force);
 	close_camera(&ptp_usb, &params, dev);
+
+	return result;
 }
 
 void

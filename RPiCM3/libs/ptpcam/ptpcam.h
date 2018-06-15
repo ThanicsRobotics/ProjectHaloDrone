@@ -165,7 +165,7 @@ void show_info (int busn, int devn, short force);
 void list_files (int busn, int devn, short force);
 void get_file (int busn, int devn, short force, uint32_t handle, char* filename, int overwrite);
 void get_all_files (int busn, int devn, short force, int overwrite);
-void capture_image (int busn, int devn, short force);
+int capture_image (int busn, int devn, short force);
 void nikon_direct_capture (int busn, int devn, short force, char* filename, int overwrite);
 void nikon_direct_capture2 (int busn, int devn, short force, char* filename, int overwrite);
 void delete_object (int busn, int devn, short force, uint32_t handle);
@@ -176,7 +176,7 @@ void list_properties (int dev, int bus, short force);
 void loop_capture (int busn, int devn, short force, int n, int interval, int overwrite);
 void save_object(PTPParams *params, uint32_t handle, char* filename, PTPObjectInfo oi, int overwrite);
 void get_save_object (PTPParams *params, uint32_t handle, char* filename, int overwrite);
-void send_generic_request (int busn, int devn, uint16_t reqCode, uint32_t *params, uint32_t direction, char *data_file);
+int send_generic_request (int busn, int devn, uint16_t reqCode, uint32_t *params, uint32_t direction, char *data_file);
 
 
 struct usb_bus* init_usb(void);
@@ -189,6 +189,6 @@ int usb_clear_stall_feature(PTP_USB* ptp_usb, int ep);
 int open_camera (int busn, int devn, short force, PTP_USB *ptp_usb, PTPParams *params, struct usb_device **dev);
 void close_camera (PTP_USB *ptp_usb, PTPParams *params, struct usb_device *dev);
 
-void getset_property (int busn,int devn,uint16_t property,char* value,short force);
+int getset_property (int busn,int devn,uint16_t property,char* value,short force);
 
 #endif /* __PTPCAM_H__ */

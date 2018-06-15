@@ -6,6 +6,7 @@
 
 #include <thread>
 #include <array>
+#include <memory>
 
 #define MSG_LEN 16
 
@@ -14,7 +15,7 @@
 class FCInterface
 {
   public:
-    FCInterface(bool *running, channels& pwmInputs, FCInterfaceConfig& cfg);
+    FCInterface(std::shared_ptr<bool> shutdownIndicator, channels& pwmInputs, FCInterfaceConfig& cfg);
     ~FCInterface();
 
     /// @brief Message data structure for sending to STM32F446.
@@ -71,17 +72,18 @@ class FCInterface
     int16_t getReceivedData() { return fcReceivedData; }
 
   private:
-	bool *fcRunning;
+	//bool *fcShuttingDown = nullptr;
+    std::shared_ptr<bool> fcShuttingDown;
 
     bool spiConfigured = false;
-    bool authenticated;
-    bool armRequest, authRequest, disarmRequest, sendRequest;
-    bool armed;
+    bool authenticated = false;
+    bool armRequest, authRequest, disarmRequest, sendRequest = false;
+    bool armed = false;
 
     FCInterfaceConfig interfaceConfig;
 
     char stm32_rx_buffer[MSG_LEN], stm32_tx_buffer[MSG_LEN];
-    uint16_t fcReceivedData;
+    uint16_t fcReceivedData = 0;
 
     //CS0 is barometer, CS1 is STM32 flight controller
     int spiCS = 0;

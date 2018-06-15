@@ -24,8 +24,9 @@
 #define PITCH_COEFF 0x01
 #define ROLL_COEFF 0x02
 
-FCInterface::FCInterface(bool *running, channels& pwmInputs, FCInterfaceConfig& cfg)
-    : fcRunning(running), interfaceConfig(cfg)
+FCInterface::FCInterface(std::shared_ptr<bool> shutdownIndicator, 
+    channels& pwmInputs, FCInterfaceConfig& cfg)
+    : fcShuttingDown(shutdownIndicator), interfaceConfig(cfg)
 {
     currentMessage.rcChannels = pwmInputs;
     setupSPI();
@@ -79,7 +80,7 @@ void FCInterface::startInterface()
         delay(50);
         // If the drone shuts down before authenticated/SPI is configured, then
         // exit loop
-        if (!(*fcRunning))
+        if (*fcShuttingDown)
         {
             return;
         }
@@ -91,7 +92,7 @@ void FCInterface::startInterface()
     while (fcReceivedData != GYRO_CAL)
     {
         std::cout << "Received: " << fcReceivedData << std::endl;
-        if (!(*fcRunning))
+        if (*fcShuttingDown)
         {
             std::cout << "Shutting Down\n";
             return;
@@ -155,7 +156,7 @@ void FCInterface::disarm()
 {
     std::cout << "Disarming...\n";
     int data = 0;
-    while ((data != STM32_DISARM_CONF) && *fcRunning)
+    while ((data != STM32_DISARM_CONF) && !(*fcShuttingDown))
     {
         int disarmCode = STM32_DISARM_TEST;
         stm32_tx_buffer[0] = (disarmCode >> 8) & 0xFF;
@@ -178,7 +179,7 @@ void FCInterface::arm()
 {
     std::cout << "Arming...\n";
     uint16_t data = 0;
-    while ((data != STM32_ARM_CONF) && *fcRunning)
+    while ((data != STM32_ARM_CONF) && !(*fcShuttingDown))
     {
         uint16_t armCode = STM32_ARM_TEST;
         if (interfaceConfig.motorTest)
@@ -241,7 +242,7 @@ void FCInterface::auth()
         // if (millis() - start > 8000) {
         //     exit(1);
         // }
-        if (!(*fcRunning))
+        if (*fcShuttingDown)
         {
             std::cout << "Shutting Down\n";
             return;
@@ -313,7 +314,7 @@ void FCInterface::interfaceLoop()
         setupSPI();
     if (!authenticated)
         auth();
-    while (*fcRunning)
+    while (!(*fcShuttingDown))
     {
         if (armRequest)
         {

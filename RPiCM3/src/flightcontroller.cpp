@@ -16,7 +16,7 @@
 #include <bitset>
 
 /// @brief Class constructor, initializes private variables.
-FlightController::FlightController(bool *shutdown)
+FlightController::FlightController(std::shared_ptr<bool> shutdown)
     : shutdownIndicator(shutdown), interface(shutdownIndicator, pwmInputs, fcConfig)
 {
     // shutdownIndicator = shutdown;
