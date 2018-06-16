@@ -17,7 +17,8 @@
 
 /// @brief Class constructor, initializes private variables.
 FlightController::FlightController(std::shared_ptr<bool> shutdown)
-    : shutdownIndicator(shutdown), interface(shutdownIndicator, pwmInputs, fcConfig)
+    : shutdownIndicator(shutdown), interface(shutdownIndicator, fcConfig), 
+    baro(shutdownIndicator)
 {
     // shutdownIndicator = shutdown;
     // interface = FCInterface(shutdownIndicator);
@@ -35,7 +36,7 @@ void FlightController::startFlight()
 {
     interface.startInterface();
     flightLoop();
-    stopFlight();
+    //stopFlight();
 }
 
 /// @brief Stops interfaceLoop thread.
@@ -65,6 +66,7 @@ void FlightController::flightLoop()
         }
 
         radio.customReceiveByte(radio.readChar(), pwmInputs);
+        interface.setPWMInputs(pwmInputs);
         std::cout << "Pitch: " << pwmInputs.pitchPWM
             << "\nRoll: " << pwmInputs.rollPWM
             << "\nYaw: " << pwmInputs.yawPWM

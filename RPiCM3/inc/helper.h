@@ -15,6 +15,7 @@
 #include <string.h>
 #include <bitset>
 #include <pthread.h>
+#include <memory>
 
 //Project headers
 #include <barometer.h>
@@ -26,7 +27,8 @@
 
 #define projectPath std::string("./")
 
-extern bool shuttingDown;
+//extern bool shuttingDown;
+extern std::shared_ptr<bool> shuttingDownPtr;
 
 /// @brief Terminal signal handler (for ending program via terminal).
 void signal_callback_handler(int signum);

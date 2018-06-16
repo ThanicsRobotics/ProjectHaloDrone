@@ -34,4 +34,11 @@ struct FCInterfaceConfig
     dronePosition flightPosition;
 };
 
+// enum ThreadStatus
+// {
+//     OFF = 0,
+//     IN_PROGRESS,
+//     DONE
+// };
+
 #endif

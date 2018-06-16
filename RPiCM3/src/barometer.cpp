@@ -1,4 +1,6 @@
 #include <barometer.h>
+#include <types.h>
+
 #include <wiringPi.h>
 #include <pigpio.h>
 #include <iostream>
@@ -12,9 +14,9 @@
 #define SURFACE_OFFSET -1
 
 /// @brief Initializes private variables.
-Barometer::Barometer() {
-    surfaceAltitude = 0;
-    calibrated = false;
+Barometer::Barometer(std::shared_ptr<bool> shutdown)
+    : shutdownIndicator(shutdown)
+{
 }
 
 Barometer::~Barometer() {
@@ -44,21 +46,26 @@ void Barometer::setup() {
 void Barometer::close() {
     printf("BARO: Closing\n");
 
+    // Wait for baroThread to join to main thread
+    closeCalibrationThread();
+
     // Waiting for barometer's I2C to stop reading
-    while (readingI2C);
+    // while (readingI2C);
 
     // Close I2C port
     if(i2cConfigured) i2cClose(baroI2cFd);
     i2cConfigured = false;
-
-    // Wait for baroThread to join to main thread
-    closeCalibrationThread();
 }
 
 /// @brief Joins baroThread to main thread.
 void Barometer::closeCalibrationThread() {
-    baroThread.join();
-    printf("BARO: Thread joined\n");
+    while (calState != CalibrationState::DONE);
+    // if (calState == CalibrationState::DONE)
+    // {
+        baroThread.join();
+        printf("BARO: Thread joined\n");
+        calState = CalibrationState::THREAD_CLOSED;
+    // }
 }
 
 /// @brief Executed by baroThread to calibrate/acclimate the barometer.
@@ -73,7 +80,10 @@ void Barometer::calibrate() {
         float calibrationData[30];
         // Taking 30 samples
         for (int i = 0; i < 30; i++) {
-            if(!i2cConfigured) return;
+            if(*shutdownIndicator) {
+                calState = CalibrationState::DONE;
+                return;
+            }
             readingI2C = true;
             takeReading();
             readingI2C = false;
@@ -107,7 +117,10 @@ void Barometer::calibrate() {
     // After barometer has acclimated, we take 30 samples from barometer and find average
     // to calculate sea level altitude that corresponds to ground level.
     for (int i = 0; i < 30; i++) {
-        if(!i2cConfigured) return;
+        if(*shutdownIndicator) {
+            calState = CalibrationState::DONE;
+            return;
+        }
         readingI2C = true;
         takeReading();
         readingI2C = false;
@@ -121,6 +134,7 @@ void Barometer::calibrate() {
     printf("BARO: Surface Altitude: %dm\n", (int)surfaceAltitude);
     fflush(stdout);
     calibrated = true;
+    calState = CalibrationState::DONE;
 }
 
 /// @brief Signals to barometer to initiate measurement cycle.
@@ -141,7 +155,7 @@ float Barometer::getPressureAltitude() {
     if(i2cConfigured) {
         bool gotAltitude = false;
         while (!gotAltitude) {
-            if(!i2cConfigured) return 0.0;
+            if(*shutdownIndicator) return 0.0;
             readingI2C = true;
             int status = i2cReadByteData(baroI2cFd, 0x00);
             if (status & 0x08) {

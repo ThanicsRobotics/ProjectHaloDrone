@@ -18,7 +18,8 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, signal_callback_handler);
     {
     // Creating flight controller and starting flight
-    FlightController fc(&shuttingDown);
+    shuttingDownPtr = std::make_shared<bool>(false);
+    FlightController fc(shuttingDownPtr);
     filterCommandLineOptions(argc, argv, fc);
 
     std::cout << "Starting main loop\n";

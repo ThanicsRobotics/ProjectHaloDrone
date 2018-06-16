@@ -1,6 +1,7 @@
 #include <helper.h>
 
-bool shuttingDown = false;
+// bool shuttingDown = false;
+std::shared_ptr<bool> shuttingDownPtr;
 //bool doneShuttingDown = false;
 
 /// @brief Displays message showing how to type options in command line.
@@ -59,10 +60,10 @@ void filterCommandLineOptions(int _argc, char *_argv[], FlightController& fc) {
 
 /// @brief Terminal signal handler (for ending program via terminal).
 void signal_callback_handler(int signum) {
-    if (!shuttingDown) shutdown();
+    shutdown();
 }
 
 /// @brief Shutting down threads and closing ports.
 void shutdown() {
-    shuttingDown = true;
+    *shuttingDownPtr = true;
 }

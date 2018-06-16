@@ -15,7 +15,7 @@
 class FCInterface
 {
   public:
-    FCInterface(std::shared_ptr<bool> shutdownIndicator, channels& pwmInputs, FCInterfaceConfig& cfg);
+    FCInterface(std::shared_ptr<bool> shutdownIndicator, FCInterfaceConfig& cfg);
     ~FCInterface();
 
     /// @brief Message data structure for sending to STM32F446.
@@ -23,6 +23,7 @@ class FCInterface
     {
         float travelAngle = 0.0; ///< Desired compass angle for the STM32F446 to fly.
 		channels rcChannels;
+        //std::shared_ptr<channels> rcChannels;
         //uint16_t pwm[4];   ///< Array containing PWM inputs, in order: pitch, roll, yaw, throttle.
     };
 
@@ -77,7 +78,10 @@ class FCInterface
 
     bool spiConfigured = false;
     bool authenticated = false;
-    bool armRequest, authRequest, disarmRequest, sendRequest = false;
+    bool armRequest = false;
+    bool authRequest = false;
+    bool disarmRequest = false;
+    bool sendRequest = false;
     bool armed = false;
 
     FCInterfaceConfig interfaceConfig;

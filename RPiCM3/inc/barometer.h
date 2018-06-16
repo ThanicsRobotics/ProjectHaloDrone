@@ -8,6 +8,7 @@
 
 #include <inttypes.h>
 #include <thread>
+#include <memory>
 
 #define BARO_DELAY 260
 
@@ -16,7 +17,7 @@ class Barometer
 {
 public:
     /// @brief Initializes private variables.
-    Barometer();
+    Barometer(std::shared_ptr<bool> shutdown);
     ~Barometer();
 
     /// @brief Opens I2C port, sets up barometer registers
@@ -42,19 +43,29 @@ public:
     bool isCalibrated() const { return calibrated; }
 
 private:
+    std::shared_ptr<bool> shutdownIndicator;
+    // std::shared_ptr<ThreadStatus> threadStatusIndicator;
+
+    enum CalibrationState {
+        NOT_CALIBRATED = 0,
+        IN_PROGRESS,
+        DONE,
+        THREAD_CLOSED
+    } calState = NOT_CALIBRATED;
+
     int baroI2cFd;      ///< File descriptor for the Barometer's I2C port.
-    bool i2cConfigured; ///< State of I2C configuration.
-    bool calibrated;    ///< State of barometer calibration/acclimation.
-    bool readingI2C;    ///< State of reading the I2C port.
+    bool i2cConfigured = false; ///< State of I2C configuration.
+    bool calibrated = false;    ///< State of barometer calibration/acclimation.
+    bool readingI2C = false;    ///< State of reading the I2C port.
 
-    int8_t pressureMSB; ///< First 8 bits of 24 bit pressure value.
-    int8_t pressureCSB; ///< Middle 8 bits of 24 bit pressure value.
-    int8_t pressureLSB; ///< Last 8 bits of 24 bit pressure value.
-    int8_t tempMSB;     ///< First 8 bits of 16 bit temperature value.
-    int8_t tempLSB;     ///< Last 8 bits of 16 bit temperature value.
+    int8_t pressureMSB = 0; ///< First 8 bits of 24 bit pressure value.
+    int8_t pressureCSB = 0; ///< Middle 8 bits of 24 bit pressure value.
+    int8_t pressureLSB = 0; ///< Last 8 bits of 24 bit pressure value.
+    int8_t tempMSB = 0;     ///< First 8 bits of 16 bit temperature value.
+    int8_t tempLSB = 0;     ///< Last 8 bits of 16 bit temperature value.
 
-    float pressureAltitude; ///< Current altitude read from barometer.
-    float surfaceAltitude;  ///< Altitude above sea level (MSL) which corresponds to ground level.
+    float pressureAltitude = 0.0; ///< Current altitude read from barometer.
+    float surfaceAltitude = 0.0;  ///< Altitude above sea level (MSL) which corresponds to ground level.
 
     std::thread baroThread; ///< Thread that calibrates and lets barometer acclimate independent of main thread.
 

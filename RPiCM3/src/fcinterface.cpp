@@ -24,11 +24,10 @@
 #define PITCH_COEFF 0x01
 #define ROLL_COEFF 0x02
 
-FCInterface::FCInterface(std::shared_ptr<bool> shutdownIndicator, 
-    channels& pwmInputs, FCInterfaceConfig& cfg)
+FCInterface::FCInterface(std::shared_ptr<bool> shutdownIndicator, FCInterfaceConfig& cfg)
     : fcShuttingDown(shutdownIndicator), interfaceConfig(cfg)
 {
-    currentMessage.rcChannels = pwmInputs;
+    //currentMessage.rcChannels = pwmInputs;
     setupSPI();
 }
 
@@ -116,6 +115,15 @@ void FCInterface::stopInterface()
     interfaceThread.join();
 }
 
+/// @brief Get current PWM inputs from radio and load them into currentMessage.
+void FCInterface::setPWMInputs(const channels &rcChannels)
+{
+    currentMessage.rcChannels.pitchPWM = rcChannels.pitchPWM;
+    currentMessage.rcChannels.rollPWM = rcChannels.rollPWM;
+    currentMessage.rcChannels.yawPWM = rcChannels.yawPWM;
+    currentMessage.rcChannels.throttlePWM = rcChannels.throttlePWM;
+}
+
 /// @brief Requests the FlightController class to do a Service.
 /// @param serviceType A member of the Service enum
 /// -> ARM: Flags the armRequest to true, to arm the drone in the next loop
@@ -136,7 +144,7 @@ void FCInterface::requestService(Service serviceType)
         authRequest = true;
         break;
     case Service::RESET:
-        this->reset();
+        reset();
         break;
     default:
         break;
@@ -272,6 +280,11 @@ void FCInterface::sendMessage()
 ///    ^PWM control values, high byte followed by low byte
 void FCInterface::packMessage(std::array<uint8_t, MSG_LEN> &msg)
 {
+    // std::cout << "2/Pitch: " << currentMessage.rcChannels.pitchPWM
+    //         << "\nRoll: " << currentMessage.rcChannels.rollPWM
+    //         << "\nYaw: " << currentMessage.rcChannels.yawPWM
+    //         << "\nthrottle: " << currentMessage.rcChannels.throttlePWM << std::endl;
+
     msg[0] = 0xA0;
     msg[1] = (currentMessage.rcChannels.pitchPWM >> 8) & 0xFF;
     msg[2] = 0xA1;
@@ -308,7 +321,7 @@ void FCInterface::packMessage(std::array<uint8_t, MSG_LEN> &msg)
 /// and decodes incoming messages from STM32F446
 void FCInterface::interfaceLoop()
 {
-    static int timer = micros();
+    //static int timer = micros();
 
     if (!spiConfigured)
         setupSPI();
@@ -318,7 +331,6 @@ void FCInterface::interfaceLoop()
     {
         if (armRequest)
         {
-            //std::cout << "Arming..." << endl;
             arm();
             armRequest = false;
         }
