@@ -24,8 +24,8 @@
 #define PITCH_COEFF 0x01
 #define ROLL_COEFF 0x02
 
-FCInterface::FCInterface(std::shared_ptr<bool> shutdownIndicator, FCInterfaceConfig& cfg)
-    : fcShuttingDown(shutdownIndicator), interfaceConfig(cfg)
+FCInterface::FCInterface(std::shared_ptr<bool> shutdownIndicator)
+    : fcShuttingDown(shutdownIndicator)
 {
     //currentMessage.rcChannels = pwmInputs;
     setupSPI();
@@ -113,6 +113,11 @@ void FCInterface::startInterface()
 void FCInterface::stopInterface()
 {
     interfaceThread.join();
+}
+
+void FCInterface::setConfig(const FCInterfaceConfig &cfg)
+{
+    interfaceConfig = cfg;
 }
 
 /// @brief Get current PWM inputs from radio and load them into currentMessage.
@@ -273,17 +278,8 @@ void FCInterface::sendMessage()
 }
 
 /// @brief Packing message to send to Flight Controller over SPI.
-/// Format:
-/// {0xFF,0xFE,...
-///  ^Header of message
-/// ...Pitch_H,Pitch_L,Roll_H,Roll_L,Yaw_H,Yaw_L,Throttle_H,Throttle_L}
-///    ^PWM control values, high byte followed by low byte
 void FCInterface::packMessage(std::array<uint8_t, MSG_LEN> &msg)
 {
-    // std::cout << "2/Pitch: " << currentMessage.rcChannels.pitchPWM
-    //         << "\nRoll: " << currentMessage.rcChannels.rollPWM
-    //         << "\nYaw: " << currentMessage.rcChannels.yawPWM
-    //         << "\nthrottle: " << currentMessage.rcChannels.throttlePWM << std::endl;
 
     msg[0] = 0xA0;
     msg[1] = (currentMessage.rcChannels.pitchPWM >> 8) & 0xFF;
@@ -301,19 +297,6 @@ void FCInterface::packMessage(std::array<uint8_t, MSG_LEN> &msg)
     msg[13] = (currentMessage.rcChannels.throttlePWM >> 8) & 0xFF;
     msg[14] = 0xA7;
     msg[15] = currentMessage.rcChannels.throttlePWM & 0xFF;
-
-    // uint16_t *pwmInput = currentMessage.pwm;
-    // for (int i = 0; i < MSG_LEN; i += 4)
-    // {
-    //     uint16_t pwm = *pwmInput;
-
-    //     msg[i] = 0xA0 + i;
-    //     msg[i + 1] = (pwm >> 8) & 0xFF;
-    //     msg[i + 2] = 0xA1 + i;
-    //     msg[i + 3] = pwm & 0xFF;
-
-    //     pwmInput++;
-    // }
 }
 
 /// @brief Loop being executed by interface thread.

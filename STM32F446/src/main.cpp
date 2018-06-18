@@ -54,12 +54,12 @@ float pid_d_gain_roll = 20.0; // Gain setting for the roll D-controller
 int pid_max_roll = 400;       // Maximum output of the PID-controller (+/-)
 
 // Gain settings for the pitch PID-controller.
-float pid_p_gain_pitch = pid_p_gain_roll; 
+float pid_p_gain_pitch = pid_p_gain_roll;
 float pid_i_gain_pitch = pid_i_gain_roll;
 float pid_d_gain_pitch = pid_d_gain_roll;
 
 // Maximum output of the PID-controller (+/-)
-int pid_max_pitch = pid_max_roll; 
+int pid_max_pitch = pid_max_roll;
 
 float pid_p_gain_yaw = 9.0; // Gain setting for the pitch P-controller. //4.0
 float pid_i_gain_yaw = 0.1; // Gain setting for the pitch I-controller. //0.02
@@ -111,7 +111,8 @@ bool authenticated = false;
 // bool wordEnd = false;
 
 // Sends all motor PWM signals LOW
-void motors_off() {
+void motors_off()
+{
   motor1 = 0;
   motor2 = 0;
   motor3 = 0;
@@ -119,7 +120,8 @@ void motors_off() {
 }
 
 // Sends all motor PWM signals HIGH
-void motors_on() {
+void motors_on()
+{
   motor1 = 1;
   motor2 = 1;
   motor3 = 1;
@@ -202,7 +204,8 @@ void motors_on() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Subroutine for reading the gyro
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void gyro_signalen() {
+void gyro_signalen()
+{
   char cmd[14];
   cmd[0] = 0x2D;
   i2c.write(gyro_address, cmd, 1); // Write to first data I2C register
@@ -219,7 +222,8 @@ void gyro_signalen() {
   memset(cmd, 0, sizeof(cmd));
 
   // Only compensate after the calibration.
-  if (cal_int == 2000) {
+  if (cal_int == 2000)
+  {
     gyro_axis[1] -= gyro_axis_cal[1];
     gyro_axis[2] -= gyro_axis_cal[2];
     gyro_axis[3] -= gyro_axis_cal[3];
@@ -234,7 +238,8 @@ void gyro_signalen() {
   acc_z = acc_axis[3] * -1;
 }
 
-void calculate_angles() {
+void calculate_angles()
+{
   // Gyro PID input is deg/sec
   // Complementary filter combining previous gyro input to current input
   gyro_roll_input = (gyro_roll_input * 0.7) + (gyro_roll * 0.3);
@@ -257,13 +262,15 @@ void calculate_angles() {
   acc_total_vector = sqrt((acc_x * acc_x) + (acc_y * acc_y) + (acc_z * acc_z));
 
   // Prevent the asin function from producing an error
-  if (abs(acc_y) < acc_total_vector) {
+  if (abs(acc_y) < acc_total_vector)
+  {
     // Calculate the pitch angle.
     angle_pitch_acc = asin((float)acc_y / acc_total_vector) * 57.296;
   }
 
   // Prevent the asin function to produce a NaN
-  if (abs(acc_x) < acc_total_vector) {
+  if (abs(acc_x) < acc_total_vector)
+  {
     // Calculate the roll angle.
     angle_roll_acc = asin((float)acc_x / acc_total_vector) * -57.296;
   }
@@ -287,7 +294,8 @@ void calculate_angles() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Subroutine for calculating PID outputs
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void calculate_pid() {
+void calculate_pid()
+{
   // Roll calculations
   // P-Controller calculation: current input - setpoint
   pid_error_temp = gyro_roll_input - pid_roll_setpoint;
@@ -350,7 +358,8 @@ void calculate_pid() {
   pid_last_yaw_d_error = pid_error_temp;
 }
 
-void set_gyro_registers() {
+void set_gyro_registers()
+{
   char cmd[2];
 
   // Changing register bank
@@ -400,16 +409,19 @@ void set_gyro_registers() {
   memset(cmd, 0, sizeof(cmd));
 }
 
-void testMotor(DigitalOut motor) {
+void testMotor(DigitalOut motor)
+{
   int start = onTime.read_ms();
-  while (onTime.read_ms() - start < 1000) {
+  while (onTime.read_ms() - start < 1000)
+  {
     motor = 1;
     wait(.001);
     motor = 0;
     wait(.003);
   }
   start = onTime.read_ms();
-  while (onTime.read_ms() - start < 5000) {
+  while (onTime.read_ms() - start < 5000)
+  {
     motor = 1;
     wait(.0012);
     motor = 0;
@@ -417,29 +429,35 @@ void testMotor(DigitalOut motor) {
   }
 }
 
-void testMotors() {
+void testMotors()
+{
   testMotor(motor1);
   testMotor(motor2);
   testMotor(motor3);
   testMotor(motor4);
 }
 
-void authRasPiCM3() {
+void authRasPiCM3()
+{
   // Load authentication key into SPI buffer
   spi.reply(0x01);
   authenticated = false;
 
   // Stay in this loop until the flight controller (STM32) has made contact with
   // the Raspberry Pi
-  while (authenticated == false) {
+  while (authenticated == false)
+  {
     motors_on();  // Set motor PWM signals high
     wait(.001);   // Wait 1000us
     motors_off(); // Set motor PWM signals low
     int start = onTime.read_us();
-    while (onTime.read_us() - start < 3000) {
-      if (spi.receive()) {
+    while (onTime.read_us() - start < 3000)
+    {
+      if (spi.receive())
+      {
         uint16_t response = spi.read();
-        if (response == 0x01) {
+        if (response == 0x01)
+        {
           spi.reply(AUTH_KEY);
           authenticated = true;
         }
@@ -450,14 +468,16 @@ void authRasPiCM3() {
 }
 
 /// @brief Contains states of message parsing process.
-enum MSG_STATE {
+enum MSG_STATE
+{
   WAITING = 0, ///< Waiting for starting header.
   FILLING = 1, ///< Message has started, and filling buffer.
   FAIL = 2,    ///< Buffer overflowed, or other error.
   DONE = 3     ///< Message footer found, finished filing buffer.
 };
 
-int main() {
+int main()
+{
   receiver_input_pitch = receiver_input_roll = receiver_input_yaw = 1500;
 
   // Configure communications
@@ -483,7 +503,8 @@ int main() {
   // Let's take multiple gyro data samples so we can determine the average gyro
   // offset (calibration).
   cal_int = 0;
-  while (cal_int < 2000) { // Take 2000 readings for calibration.
+  while (cal_int < 2000)
+  { // Take 2000 readings for calibration.
     // We don't want the esc's to be beeping annoyingly. So let's give them a
     // 1000us puls while calibrating the gyro.
     motors_on();  // Set motor PWM signals high
@@ -491,7 +512,8 @@ int main() {
     motors_off(); // Set motor PWM signals low
 
     int start = onTime.read_us();
-    while ((onTime.read_us() - start < 3000) && cal_int < 2000) {
+    while ((onTime.read_us() - start < 3000) && cal_int < 2000)
+    {
       gyro_signalen();                  // Read the gyro output.
       gyro_axis_cal[1] += gyro_axis[1]; // Add roll value to gyro_roll_cal.
       gyro_axis_cal[2] += gyro_axis[2]; // Add pitch value to gyro_pitch_cal.
@@ -516,27 +538,33 @@ int main() {
   bool noMotors = false;
   while ((receiver_input_throttle < 990 || receiver_input_throttle > 1020 ||
           receiver_input_yaw < 1400) &&
-         !armed) {
+         !armed)
+  {
     motors_on();  // Set motor PWM signals high
     wait(.001);   // Wait 1000us
     motors_off(); // Set motor PWM signals low
     int start = onTime.read_us();
-    while (onTime.read_us() - start < 3000 && !armed) {
-      if (spi.receive()) {
+    while (onTime.read_us() - start < 3000 && !armed)
+    {
+      if (spi.receive())
+      {
         uint16_t data = spi.read();
-        if (data == STM32_ARM_TEST) {
+        if (data == STM32_ARM_TEST)
+        {
           spi.reply(STM32_ARM_CONF);
           armed = true;
         }
         if (data == STM32_ARM_CONF)
           armed = true;
-        if (data == MOTOR_TEST) {
+        if (data == MOTOR_TEST)
+        {
           testMotors();
           spi.reply(STM32_ARM_CONF);
           armed = true;
           break;
         }
-        if (data == NO_MOTORS) {
+        if (data == NO_MOTORS)
+        {
           spi.reply(STM32_ARM_CONF);
           noMotors = true;
           armed = true;
@@ -553,13 +581,15 @@ int main() {
   loop_timer = onTime.read_us(); // First timer reading (starting main loop)
 
   // Infinite PID Loop
-  while (1) {
+  while (1)
+  {
     calculate_angles();
 
     // For starting the motors: throttle low and yaw left (step 1)
     if ((receiver_input_throttle < 1050 && receiver_input_yaw < 1050 &&
          receiver_input_yaw > 990) ||
-        startingLoop) {
+        startingLoop)
+    {
       start = 2;
 
       // Set the gyro angles equal to the accelerometer angles when the
@@ -605,7 +635,8 @@ int main() {
     // Stopping the motors: throttle low and yaw right.
     if ((start == 2 && receiver_input_throttle < 1050 &&
          receiver_input_yaw > 1950) ||
-        !armed) {
+        !armed)
+    {
       start = 0;
     }
 
@@ -620,9 +651,12 @@ int main() {
     pid_roll_setpoint = 0;
 
     // We need a little dead band of 16us for better results.
-    if (receiver_input_roll > 1508) {
+    if (receiver_input_roll > 1508)
+    {
       pid_roll_setpoint = receiver_input_roll - 1508;
-    } else if (receiver_input_roll < 1492) {
+    }
+    else if (receiver_input_roll < 1492)
+    {
       pid_roll_setpoint = receiver_input_roll - 1492;
     }
 
@@ -658,7 +692,8 @@ int main() {
     pid_yaw_setpoint = 0;
     // We need a little dead band of 16us for better results.
     if (receiver_input_throttle >
-        1050) { // Do not yaw when turning off the motors.
+        1050)
+    { // Do not yaw when turning off the motors.
       if (receiver_input_yaw > 1508)
         pid_yaw_setpoint = (receiver_input_yaw - 1508) / 3.0;
       else if (receiver_input_yaw < 1492)
@@ -675,16 +710,22 @@ int main() {
     // throttle = 1300;
 
     // The motors are started.
-    if (start == 2) {
+    if (start == 2)
+    {
       // We need some room to keep full control at full throttle.
       if (throttle > 1800)
         throttle = 1800;
 
       // Calculating ESC PWM pulse length
-      esc_1 = throttle - pid_output_pitch + pid_output_roll - pid_output_yaw;
-      esc_2 = throttle + pid_output_pitch + pid_output_roll + pid_output_yaw;
-      esc_3 = throttle + pid_output_pitch - pid_output_roll - pid_output_yaw;
-      esc_4 = throttle - pid_output_pitch - pid_output_roll + pid_output_yaw;
+      // esc_1 = throttle - pid_output_pitch + pid_output_roll - pid_output_yaw;
+      // esc_2 = throttle + pid_output_pitch + pid_output_roll + pid_output_yaw;
+      // esc_3 = throttle + pid_output_pitch - pid_output_roll - pid_output_yaw;
+      // esc_4 = throttle - pid_output_pitch - pid_output_roll + pid_output_yaw;
+
+      esc_1 = throttle;
+      esc_2 = throttle;
+      esc_3 = throttle;
+      esc_4 = throttle;
 
       if (esc_1 < 1100)
         esc_1 = 1100; // Keep the motors running.
@@ -703,7 +744,9 @@ int main() {
         esc_3 = 2000; // Limit the esc-3 pulse to 2000us.
       if (esc_4 > 2000)
         esc_4 = 2000; // Limit the esc-4 pulse to 2000us.
-    } else {
+    }
+    else
+    {
       esc_1 = 1000; // If start is not 2 keep a 1000us pulse for esc-1.
       esc_2 = 1000; // If start is not 2 keep a 1000us pulse for esc-2.
       esc_3 = 1000; // If start is not 2 keep a 1000us pulse for esc-3.
@@ -716,52 +759,64 @@ int main() {
     // esc_4 = 1000;
 
     // Receiving inputs and sending diagnostics
-    if ((onTime.read_us() - loop_timer < 4000) && (spi.receive())) {
-#define BUF_SIZE 20
+    if ((onTime.read_us() - loop_timer < 4000) && (spi.receive()))
+    {
+#define BUF_SIZE 30
 
       // Going to get a buffer of 20 SPI reads to parse later,
       // leads to more consistant results than one read at a time
       volatile uint16_t buffer[BUF_SIZE];
-      for (int i = 0; i < 20; i++) {
+      for (int i = 0; i < BUF_SIZE; i++)
+      {
         wait_us(1);
         buffer[i] = spi.read();
       }
 
       // Parsing the buffer
       uint8_t index = 0;
-      while (onTime.read_us() - loop_timer < 4000) {
+      while (onTime.read_us() - loop_timer < 4000)
+      {
         if (index == BUF_SIZE - 1)
           break;
         uint16_t data = buffer[index];
         uint16_t nextData = buffer[index + 1];
 
-        switch ((data >> 8) & 0xFF) {
+        switch ((data >> 8) & 0xFF)
+        {
         case 0xA0:
-          if (((nextData >> 8) & 0xFF) == 0xA1) {
+          if (((nextData >> 8) & 0xFF) == 0xA1)
+          {
             receiver_input_pitch = (data & 0xFF) << 8 | (nextData & 0xFF);
             succCount++;
-          } else
+          }
+          else
             errorCount++;
           break;
         case 0xA2:
-          if (((nextData >> 8) & 0xFF) == 0xA3) {
+          if (((nextData >> 8) & 0xFF) == 0xA3)
+          {
             receiver_input_roll = (data & 0xFF) << 8 | (nextData & 0xFF);
             succCount++;
-          } else
+          }
+          else
             errorCount++;
           break;
         case 0xA4:
-          if (((nextData >> 8) & 0xFF) == 0xA5) {
+          if (((nextData >> 8) & 0xFF) == 0xA5)
+          {
             receiver_input_yaw = (data & 0xFF) << 8 | (nextData & 0xFF);
             succCount++;
-          } else
+          }
+          else
             errorCount++;
           break;
         case 0xA6:
-          if (((nextData >> 8) & 0xFF) == 0xA7) {
+          if (((nextData >> 8) & 0xFF) == 0xA7)
+          {
             receiver_input_throttle = (data & 0xFF) << 8 | (nextData & 0xFF);
             succCount++;
-          } else
+          }
+          else
             errorCount++;
           break;
         default:
@@ -771,7 +826,8 @@ int main() {
         index++;
       }
       // If we still have time, send back diagnostics
-      if (onTime.read_us() - loop_timer < 4000) {
+      if (onTime.read_us() - loop_timer < 4000)
+      {
         spi.reply(((signed char)PITCH_COEFF << 8) |
                   ((signed char)angle_pitch & 0xFF));
         spi.reply(((signed char)ROLL_COEFF << 8) |
@@ -782,8 +838,7 @@ int main() {
     }
 
     // Wait until 4 millisecond loop period is complete.
-    while (onTime.read_us() - loop_timer < 4000)
-      ;
+    while (onTime.read_us() - loop_timer < 4000);
     loop_timer = onTime.read_us(); // Set the timer for the next loop.
 
     // RISING EDGE of PWM motor pulses (start of loop)
@@ -807,7 +862,8 @@ int main() {
 
     // FALLING EDGES of PWM motor pulses
     // Stay in this loop until all motor PWM signals are low
-    while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1) {
+    while (motor1 == 1 || motor2 == 1 || motor3 == 1 || motor4 == 1)
+    {
       esc_loop_timer = onTime.read_us(); // Read the current time.
       if (timer_channel_1 <= esc_loop_timer)
         motor1 = 0; // Set digital output 7 to low if the time is expired.

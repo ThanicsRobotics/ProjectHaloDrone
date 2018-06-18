@@ -15,7 +15,7 @@
 class FCInterface
 {
   public:
-    FCInterface(std::shared_ptr<bool> shutdownIndicator, FCInterfaceConfig& cfg);
+    FCInterface(std::shared_ptr<bool> shutdownIndicator);
     ~FCInterface();
 
     /// @brief Message data structure for sending to STM32F446.
@@ -45,6 +45,7 @@ class FCInterface
 	void startInterface();
 	void stopInterface();
 
+    void setConfig(const FCInterfaceConfig &cfg);
 	void setPWMInputs(const channels &rcChannels);
 	void getPWMInputs(channels &rcChannels);
 

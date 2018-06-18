@@ -17,7 +17,7 @@
 
 /// @brief Class constructor, initializes private variables.
 FlightController::FlightController(std::shared_ptr<bool> shutdown)
-    : shutdownIndicator(shutdown), interface(shutdownIndicator, fcConfig), 
+    : shutdownIndicator(shutdown), interface(shutdownIndicator), 
     baro(shutdownIndicator)
 {
     // shutdownIndicator = shutdown;
@@ -34,6 +34,7 @@ FlightController::~FlightController()
 /// conducts pre-flight checks.
 void FlightController::startFlight()
 {
+    interface.setConfig(fcConfig);
     interface.startInterface();
     flightLoop();
     //stopFlight();
