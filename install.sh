@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# echo ""
-# echo "Downloading Thanics Halo Drone repository to $HOME"
-# cd $HOME
-# git clone https://github.com/ThanicsRobotics/ProjectHaloDrone.git
-
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo "script at: $DIR"
 cd $HOME
 mkdir temp
 cd temp
@@ -54,13 +51,12 @@ else
     cd ..
 fi
 
-if grep -Fxq "bcm2835gpio_swd_nums 20 21" /usr/local/share/openocd/scripts/interface/raspberrypi2-native.cfg
+if grep -q "bcm2835gpio_swd_nums 20 21" "/usr/local/share/openocd/scripts/interface/raspberrypi2-native.cfg"
 then
     echo "interface file already configured"
 else
     echo "replacing interface file"
     sudo rm /usr/local/share/openocd/scripts/interface/raspberrypi2-native.cfg
-    DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
     sudo cp $DIR/install/raspberrypi2-native.cfg /usr/local/share/openocd/scripts/interface/
 fi
 
@@ -74,15 +70,14 @@ else
     cd raspberry-pi-gcc-binary
     tar xf gcc-8.1.0.tar.bz2
     sudo mv gcc-8.1.0 /usr/local
-    sudo cp /usr/local/gcc-8.1.0/bin/g++-8.1.0 /usr/local/bin
-    sudo cp /usr/local/gcc-8.1.0/bin/gcc-8.1.0 /usr/local/bin
+    echo 'PATH=/usr/local/gcc-8.1.0/bin:$PATH' >> /etc/profile.d/setenvvars.sh
     cd ..
     echo "Replacing old libstdc++ with new one from GCC 8"
     sudo rm /usr/lib/arm-linux-gnueabihf/libstdc++*
     sudo cp /usr/local/gcc-8.1.0/lib/libstdc++.so.6 /usr/lib/arm-linux-gnueabihf/
 fi
 
-if [ -e "/usr/local/lib/libptp2.so.4" ]; then
+if [ -e "/usr/local/lib/libusb-0.1.so.4" ]; then
     echo "libusb already installed"
 else
     echo ""
@@ -102,13 +97,6 @@ else
     echo ""
     echo "Installing libptp2"
     echo ""
-
-if [ -e "/usr/local/lib/libptp2.so" ]; then
-    echo "libptp2 already installed"
-else
-    echo ""
-    echo "Installing libptp2"
-    echo ""
     wget https://sourceforge.net/projects/libptp/files/libptp2/libptp2-1.2.0/libptp2-1.2.0.tar.gz
     tar -xzvf libptp2-1.2.0.tar.gz
     cd libptp2-1.2.0
@@ -118,5 +106,27 @@ else
     cd ..
 fi
 
+if [ -e "/lib/arm-linux-gnueabihf/libncurses.so.5" ]; then
+    echo "libncurses already installed"
+else
+    echo ""
+    echo "Installing libncurses"
+    echo ""
+    sudo apt-get install libncurses5-dev libncursesw5-dev
+fi
+
+if grep -Fxq "thanics-drone" /etc/hostname
+then
+    echo 'hostname already set'
+else
+    echo "Changing hostname to thanics-drone"
+    sudo sed -i '1s/.*/thanics-drone/' /etc/hostname
+fi
+
 cd $HOME
-rm -r temp
+sudo rm -rf temp
+
+read -p "You need to reboot to make changes, reboot now? (y/n): " choice
+if [ $choice == 'y' ]; then
+    sudo reboot
+fi
