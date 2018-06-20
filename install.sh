@@ -112,7 +112,16 @@ else
     echo ""
     echo "Installing libncurses"
     echo ""
-    sudo apt-get install libncurses5-dev libncursesw5-dev
+    sudo apt-get install -y libncurses5-dev libncursesw5-dev
+fi
+
+if [ -e "/usr/bin/gst-launch-1.0" ]; then
+    echo "libgstreamer already installed"
+else
+    echo ""
+    echo "Installing libgstreamer"
+    echo ""
+    sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-doc gstreamer1.0-tools
 fi
 
 if grep -Fxq "thanics-drone" /etc/hostname
@@ -122,6 +131,8 @@ else
     echo "Changing hostname to thanics-drone"
     sudo sed -i '1s/.*/thanics-drone/' /etc/hostname
 fi
+
+#add raspi-config automation later...
 
 cd $HOME
 sudo rm -rf temp
