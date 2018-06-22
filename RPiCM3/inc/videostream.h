@@ -2,6 +2,7 @@
 #define VIDEOSTREAM_H
 
 class VideoStream {
+public:
     VideoStream();
 };
 

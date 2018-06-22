@@ -5,6 +5,7 @@
 
 #include <helper.h>
 #include <thetav.h>
+#include <videostream.h>
 
 int main(int argc, char *argv[]) {
     // Setup GPIO libraries
@@ -23,6 +24,7 @@ int main(int argc, char *argv[]) {
     filterCommandLineOptions(argc, argv, fc);
 
     std::cout << "Starting main loop\n";
+    VideoStream stereoStream;
     fc.startFlight();
 
     // ThetaV camera;
