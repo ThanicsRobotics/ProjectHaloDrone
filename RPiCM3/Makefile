@@ -1,6 +1,6 @@
 CC=g++-8.1.0
 CFLAGS=-Wall -Wextra -pthread -std=c++17 -ggdb3 -I/usr/local/include
-LIBS=-L/usr/local/lib -lwiringPi -lrt -lpigpio -lptp2 -lusb
+LIBS=`pkg-config --cflags --libs gstreamer-1.0` -L/usr/local/lib -lwiringPi -lrt -lpigpio -lptp2 -lusb
 PROJPATH=.
 DIR1=$(PROJPATH)/src/
 DIR2=$(PROJPATH)/libs/NemaTode/src/

@@ -21,7 +21,7 @@ void showUsage(std::string name) {
 /// @brief Filtering command line options.
 /// @param _argc Pass in argc from main() here.
 /// @param _argv Pass in argv from main() here.
-void filterCommandLineOptions(int _argc, char *_argv[], FlightController& fc) {
+void filterCommandLineOptions(int _argc, char *_argv[], CommandLineOptions& clo) {
     if (_argc > 1) {
         for (int i = 1; i < _argc; i++) {
             // if (std::string (_argv[i]) == "-c" || std::string (_argv[i]) == "--controller-enabled") 
@@ -29,25 +29,25 @@ void filterCommandLineOptions(int _argc, char *_argv[], FlightController& fc) {
             // else if (std::string (_argv[i]) == "-nc" || std::string (_argv[i]) == "--no-controller") 
             //     controllerConnected = false;
             if (std::string (_argv[i]) == "-tg" || std::string (_argv[i]) == "--test-gyro")
-                fc.setTestGyro(true);
+                clo.testGyro = true;
             if (std::string (_argv[i]) == "-mt" || std::string (_argv[i]) == "--motor-test") {
                 std::cout << "\n\t\t!!!! TESTING MOTORS BEFORE ARM !!!!\n\n";
-                fc.setMotorTest(true);
+                clo.testMotors = true;
             }
             if (std::string (_argv[i]) == "-nm" || std::string (_argv[i]) == "--no-motors")
-                fc.setNoMotors(true);
-            if (std::string (_argv[i]) == "-c" || std::string (_argv[i]) == "--camera") {
-                //camera = std::string (_argv[i+1]);
-            }
-            if (std::string (_argv[i]) == "-r" || std::string (_argv[i]) == "--receiver") {
-                //receiver = std::string (_argv[i+1]);
-            }
+                clo.disableMotors = true;
             if (std::string (_argv[i]) == "-h" || std::string (_argv[i]) == "--help") {
                 showUsage (_argv[0]);
                 exit(0);
             }
             if (std::string (_argv[i]) == "-sd" || std::string (_argv[i]) == "--stm-debug") {
-                fc.setSTM32Resetting(false);
+                clo.enableSTM32Resetting = false;
+            }
+            if (std::string (_argv[i]) == "-a" || std::string (_argv[i]) == "--addr") {
+                clo.ipAddress = std::string(_argv[i+1]);
+            }
+            if (std::string (_argv[i]) == "-p" || std::string (_argv[i]) == "--port") {
+                clo.port = std::string(_argv[i+1]);
             }
         }
     }

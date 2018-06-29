@@ -21,10 +21,25 @@ int main(int argc, char *argv[]) {
     // Creating flight controller and starting flight
     shuttingDownPtr = std::make_shared<bool>(false);
     FlightController fc(shuttingDownPtr);
-    filterCommandLineOptions(argc, argv, fc);
+    CommandLineOptions clo;
+    filterCommandLineOptions(argc, argv, clo);
 
     std::cout << "Starting main loop\n";
-    VideoStream stereoStream;
+
+    VideoStream::VideoSettings settings;
+    settings.bitrate = 2000000;
+    settings.vFlip = true;
+    settings.hFlip = true;
+    settings.height = 900;
+    settings.width = 896;
+    settings.fps = 40;
+
+    VideoStream::ReceiveAddress addr;
+    addr.ip = clo.ipAddress;
+    addr.port = clo.port;
+
+    VideoStream stream1(shuttingDownPtr, settings, false, 0, addr);
+    stream1.startPipeline();
     fc.startFlight();
 
     // ThetaV camera;

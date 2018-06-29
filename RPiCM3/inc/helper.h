@@ -24,6 +24,7 @@
 #include <gps.h>
 #include <radio.h>
 #include <serial.h>
+#include <types.h>
 
 #define projectPath std::string("./")
 
@@ -36,7 +37,7 @@ void signal_callback_handler(int signum);
 /// @brief Filtering command line options.
 /// @param _argc Pass in argc from main() here.
 /// @param _argv Pass in argv from main() here.
-void filterCommandLineOptions(int _argc, char *_argv[], FlightController& fc);
+void filterCommandLineOptions(int _argc, char *_argv[], CommandLineOptions& clo);
 
 /// @brief Displays message showing how to type options in command line.
 /// @param name Name of program, i.e. First string of argv[].

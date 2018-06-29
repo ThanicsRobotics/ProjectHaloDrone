@@ -7,6 +7,7 @@
 #define TYPES_H
 
 #include <inttypes.h>
+#include <string>
 
 /// @brief Holds all PWM control signals. All within 1000-2000.
 struct channels
@@ -15,6 +16,16 @@ struct channels
     uint16_t pitchPWM = 0;
     uint16_t yawPWM = 0;
     uint16_t throttlePWM = 0;
+};
+
+struct CommandLineOptions
+{
+    bool testGyro = false;
+    bool testMotors = false;
+    bool disableMotors = false;
+    bool enableSTM32Resetting = true;
+    std::string ipAddress = "192.168.168.178";
+    std::string port = "5002";
 };
 
 /// @brief Structure for holding drone angular position.
@@ -33,12 +44,5 @@ struct FCInterfaceConfig
     bool stm32Resetting = true;
     dronePosition flightPosition;
 };
-
-// enum ThreadStatus
-// {
-//     OFF = 0,
-//     IN_PROGRESS,
-//     DONE
-// };
 
 #endif
