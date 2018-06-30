@@ -43,6 +43,9 @@ void filterCommandLineOptions(int _argc, char *_argv[], CommandLineOptions& clo)
             if (std::string (_argv[i]) == "-sd" || std::string (_argv[i]) == "--stm-debug") {
                 clo.enableSTM32Resetting = false;
             }
+            if (std::string (_argv[i]) == "-r" || std::string (_argv[i]) == "--record") {
+                clo.record = true;
+            }
             if (std::string (_argv[i]) == "-a" || std::string (_argv[i]) == "--addr") {
                 clo.ipAddress = std::string(_argv[i+1]);
             }

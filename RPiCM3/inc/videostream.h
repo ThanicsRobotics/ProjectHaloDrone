@@ -40,6 +40,7 @@ private:
     bool record = false;
     int cameraNumber = 0;
     ReceiveAddress addr;
+    std::string videoStorageDirectory = "/home/pi/HaloVideos/";
     std::thread pipelineThread;
     PipelineData data;
 

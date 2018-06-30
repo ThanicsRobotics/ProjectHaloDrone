@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     addr.ip = clo.ipAddress;
     addr.port = clo.port;
 
-    VideoStream stream1(shuttingDownPtr, settings, false, 0, addr);
+    VideoStream stream1(shuttingDownPtr, settings, clo.record, 0, addr);
     stream1.startPipeline();
     fc.startFlight();
 

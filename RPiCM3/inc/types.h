@@ -24,6 +24,7 @@ struct CommandLineOptions
     bool testMotors = false;
     bool disableMotors = false;
     bool enableSTM32Resetting = true;
+    bool record = false;
     std::string ipAddress = "192.168.168.178";
     std::string port = "5002";
 };
