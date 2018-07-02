@@ -42,8 +42,8 @@ public:
 private:
     //pthread_t serialThread;
     std::thread serialThread;
-    bool serialConfigured;
-    int throttleInput;
+    bool serialConfigured = false;
+    int throttleInput = 0;
     int serialFd;
 
     // void serialLoop();

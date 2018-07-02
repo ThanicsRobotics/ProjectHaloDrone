@@ -18,15 +18,22 @@ struct channels
     uint16_t throttlePWM = 0;
 };
 
+enum VideoFormat
+{
+    NONE = 0,
+    MONO,
+    STEREO
+};
+
 struct CommandLineOptions
 {
     bool testGyro = false;
     bool testMotors = false;
     bool disableMotors = false;
     bool enableSTM32Resetting = true;
-    bool record = false;
-    std::string ipAddress = "192.168.168.178";
-    std::string port = "5002";
+    VideoFormat record = VideoFormat::NONE;
+    std::string ipAddress = "";
+    std::string ports[2] = {"", ""};
 };
 
 /// @brief Structure for holding drone angular position.

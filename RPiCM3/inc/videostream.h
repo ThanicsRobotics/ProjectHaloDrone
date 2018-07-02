@@ -4,31 +4,40 @@
 #include <string>
 #include <thread>
 #include <gst/gst.h>
+#include <types.h>
+
+struct ReceiveAddress {
+    std::string ip = "";
+    std::string port = "";
+};
+
+struct VideoSettings {
+    int camera = 2;
+    int bitrate = 2000000;
+    bool vFlip = true;
+    bool hFlip = true;
+    int height = 900;
+    int width = 896;
+    int fps = 40;
+
+    bool record = false;
+    bool stream = false;
+
+    ReceiveAddress addr;
+};
 
 class VideoStream {
 public:
-    struct VideoSettings {
-        int bitrate = 2000000;
-        bool vFlip = true;
-        bool hFlip = true;
-        int height = 900;
-        int width = 896;
-        int fps = 40;
-    };
+    VideoStream();
+    VideoStream(VideoSettings& videoSettings);
+    ~VideoStream();
 
-    struct ReceiveAddress {
-        std::string ip = "192.168.168.178";
-        std::string port = "5002";
-    };
     struct PipelineData {
         gboolean is_live = false;
         GstElement *pipeline = nullptr;
         GMainLoop *loop = nullptr;
     };
 
-    VideoStream(std::shared_ptr<bool> shutdown, VideoSettings videoSettings,
-        bool doRecord, int camera, ReceiveAddress address);
-    ~VideoStream();
     void startPipeline();
     void stopPipeline();
 
@@ -36,10 +45,6 @@ private:
     bool pipelineStarted = false;
 
     VideoSettings settings;
-    std::shared_ptr<bool> shutdownIndicator;
-    bool record = false;
-    int cameraNumber = 0;
-    ReceiveAddress addr;
     std::string videoStorageDirectory = "/home/pi/HaloVideos/";
     std::thread pipelineThread;
     PipelineData data;

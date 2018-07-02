@@ -1,5 +1,7 @@
 #include <helper.h>
 
+#include <regex>
+
 // bool shuttingDown = false;
 std::shared_ptr<bool> shuttingDownPtr;
 //bool doneShuttingDown = false;
@@ -38,19 +40,33 @@ void filterCommandLineOptions(int _argc, char *_argv[], CommandLineOptions& clo)
                 clo.disableMotors = true;
             if (std::string (_argv[i]) == "-h" || std::string (_argv[i]) == "--help") {
                 showUsage (_argv[0]);
-                exit(0);
+                exit(1);
             }
             if (std::string (_argv[i]) == "-sd" || std::string (_argv[i]) == "--stm-debug") {
                 clo.enableSTM32Resetting = false;
             }
             if (std::string (_argv[i]) == "-r" || std::string (_argv[i]) == "--record") {
-                clo.record = true;
+                clo.record = VideoFormat::MONO;
+            }
+            if (std::string (_argv[i]) == "-rr" || std::string (_argv[i]) == "--record-stereo") {
+                clo.record = VideoFormat::STEREO;
             }
             if (std::string (_argv[i]) == "-a" || std::string (_argv[i]) == "--addr") {
-                clo.ipAddress = std::string(_argv[i+1]);
+                // Check for valid IP address
+                std::string address = std::string(_argv[i+1]);
+                if (std::regex_match(address, std::regex("[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}")))
+                    clo.ipAddress = address;
+                else {
+                    std::cout << "Invalid IP address" << std::endl;
+                    exit(1);
+                }
             }
             if (std::string (_argv[i]) == "-p" || std::string (_argv[i]) == "--port") {
-                clo.port = std::string(_argv[i+1]);
+                clo.ports[0] = std::string(_argv[i+1]);
+            }
+            if (std::string (_argv[i]) == "-pp" || std::string (_argv[i]) == "--stereo-ports") {
+                clo.ports[0] = std::string(_argv[i+1]);
+                clo.ports[1] = std::string(_argv[i+2]);
             }
         }
     }

@@ -4,8 +4,6 @@
 /// @brief Main program implementation.
 
 #include <helper.h>
-#include <thetav.h>
-#include <videostream.h>
 
 int main(int argc, char *argv[]) {
     // Setup GPIO libraries
@@ -17,39 +15,15 @@ int main(int argc, char *argv[]) {
 
     // Override pigpio SIGINT handling
     signal(SIGINT, signal_callback_handler);
-    {
-    // Creating flight controller and starting flight
-    shuttingDownPtr = std::make_shared<bool>(false);
-    FlightController fc(shuttingDownPtr);
     CommandLineOptions clo;
     filterCommandLineOptions(argc, argv, clo);
+    {
+        // Creating flight controller and starting flight
+        shuttingDownPtr = std::make_shared<bool>(false);
+        HaloController hc(shuttingDownPtr, clo);
+        hc.startVideoPipelines();
 
-    std::cout << "Starting main loop\n";
-
-    VideoStream::VideoSettings settings;
-    settings.bitrate = 2000000;
-    settings.vFlip = true;
-    settings.hFlip = true;
-    settings.height = 900;
-    settings.width = 896;
-    settings.fps = 40;
-
-    VideoStream::ReceiveAddress addr;
-    addr.ip = clo.ipAddress;
-    addr.port = clo.port;
-
-    VideoStream stream1(shuttingDownPtr, settings, clo.record, 0, addr);
-    stream1.startPipeline();
-    fc.startFlight();
-
-    // ThetaV camera;
-    // delay(2000);
-    // camera.switchMode(ThetaV::Mode::PHOTO);
-    // camera.takePicture();
-    // delay(1000);
-    // camera.startVideo();
-    // delay(5000);
-    // camera.stopVideo(false);
+        std::cout << "Starting main loop\n";
     }
     gpioTerminate();
 

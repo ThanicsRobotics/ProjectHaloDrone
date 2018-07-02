@@ -25,6 +25,7 @@
 #include <radio.h>
 #include <serial.h>
 #include <types.h>
+#include <halocontroller.h>
 
 #define projectPath std::string("./")
 

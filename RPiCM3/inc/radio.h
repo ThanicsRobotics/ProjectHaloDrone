@@ -155,13 +155,11 @@ void Radio<InterfaceType>::customReceiveByte(uint8_t data, channels& rcChannels)
 
 template<typename InterfaceType>
 bool Radio<InterfaceType>::customParseChar(uint8_t data, receivedMessage& msg) {
-    //printf("here2\n");
     static uint8_t msgCache[100];
     static int index = 0;
     static int startIndex = 0;
     static MSG_STATE state = MSG_STATE::WAITING;
     msgCache[index] = data;
-    // printf("%x\n", data);
 
     if (index == 0) {
         index++;

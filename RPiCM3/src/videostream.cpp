@@ -9,12 +9,24 @@
 #include <wiringPi.h>
 #include <ctime>
 
-VideoStream::VideoStream(std::shared_ptr<bool> shutdown, VideoSettings videoSettings,
-    bool doRecord, int camera, ReceiveAddress address)
-    : shutdownIndicator(shutdown), settings(videoSettings), record(doRecord), 
-    cameraNumber(camera), addr(address)
+VideoStream::VideoStream()
 {
 
+}
+
+VideoStream::VideoStream(VideoSettings& videoSettings)
+   : settings(videoSettings)
+{
+    if(settings.camera > 1)
+    {
+        std::cout << "Invalid camera number [0-1]\n";
+        exit(1);
+    }
+    if (settings.addr.ip.empty() || settings.addr.port.empty())
+    {
+        std::cout << "Invalid address\n";
+        exit(1);
+    }
 }
 
 VideoStream::~VideoStream()
@@ -28,7 +40,7 @@ void VideoStream::startPipeline()
     {
         std::cout << "Pipeline already started\n";
     }
-    else 
+    else
     {
         pipelineThread = std::thread([this] { startPipelineInThread(); });
         pipelineStarted = true;
@@ -104,7 +116,7 @@ void VideoStream::startPipelineInThread()
     gst_init(NULL, NULL);
 
     std::string pipelineCommand;
-    if (record)
+    if (settings.record)
     {
         // Test to see if storage directory exists
         if (mkdir(videoStorageDirectory.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1)
@@ -117,7 +129,8 @@ void VideoStream::startPipelineInThread()
         // Figure out file name
         std::time_t t = std::time(0);
         std::tm* now = std::localtime(&t);
-        std::string fileName = videoStorageDirectory + "halo-video-"
+        std::string fileName = videoStorageDirectory + "halo-video-cam"
+            + std::to_string(settings.camera)
             + std::to_string(now->tm_year + 1900) + '-' 
             + std::to_string(now->tm_mon + 1) + '-'
             + std::to_string(now->tm_mday) + '-'
@@ -125,26 +138,39 @@ void VideoStream::startPipelineInThread()
             + std::to_string(now->tm_min) + ':'
             + std::to_string(now->tm_sec);
 
-        pipelineCommand = "rpicamsrc bitrate=" + std::to_string(settings.bitrate) +
-            " preview=0 hflip=" + std::to_string(settings.hFlip) +
-            " vflip=" + std::to_string(settings.vFlip) +
-            " camera-number=" + std::to_string(cameraNumber) +
-            " ! video/x-h264, width=" + std::to_string(settings.width) +
-            ", height=" + std::to_string(settings.height) + ", framerate=" + std::to_string(settings.fps) +
-            "/1 ! tee name=t ! queue ! h264parse ! avimux ! filesink location=" + fileName + 
-            ".avi t. ! queue ! h264parse ! rtph264pay config-interval=1 pt=96 ! " +
-            "udpsink host=" + addr.ip + " port=" + addr.port + " sync=false";
+        if (settings.stream)
+        {
+            pipelineCommand = "rpicamsrc bitrate=" + std::to_string(settings.bitrate) +
+                " preview=0 hflip=" + std::to_string(settings.hFlip) +
+                " vflip=" + std::to_string(settings.vFlip) +
+                " camera-number=" + std::to_string(settings.camera) +
+                " ! video/x-h264, width=" + std::to_string(settings.width) +
+                ", height=" + std::to_string(settings.height) + ", framerate=" + std::to_string(settings.fps) +
+                "/1 ! tee name=t ! queue ! h264parse ! avimux ! filesink location=" + fileName + 
+                ".avi t. ! queue ! h264parse ! rtph264pay config-interval=1 pt=96 ! " +
+                "udpsink host=" + settings.addr.ip + " port=" + settings.addr.port + " sync=false";
+        }
+        else
+        {
+            pipelineCommand = "rpicamsrc bitrate=" + std::to_string(settings.bitrate) +
+                " preview=0 hflip=" + std::to_string(settings.hFlip) +
+                " vflip=" + std::to_string(settings.vFlip) +
+                " camera-number=" + std::to_string(settings.camera) +
+                " ! video/x-h264, width=" + std::to_string(settings.width) +
+                ", height=" + std::to_string(settings.height) + ", framerate=" + std::to_string(settings.fps) +
+                "/1 ! queue ! h264parse ! avimux ! filesink location=" + fileName + ".avi";
+        }
     }
     else
     {
         pipelineCommand = "rpicamsrc bitrate=" + std::to_string(settings.bitrate) +
             " preview=0 hflip=" + std::to_string(settings.hFlip) +
             " vflip=" + std::to_string(settings.vFlip) +
-            " camera-number=" + std::to_string(cameraNumber) +
+            " camera-number=" + std::to_string(settings.camera) +
             " ! video/x-h264, width=" + std::to_string(settings.width) +
             ", height=" + std::to_string(settings.height) + ", framerate=" + std::to_string(settings.fps) +
             "/1 ! h264parse ! queue ! rtph264pay config-interval=1 pt=96 ! " +
-            "udpsink host=" + addr.ip + " port=" + addr.port + " sync=false";
+            "udpsink host=" + settings.addr.ip + " port=" + settings.addr.port + " sync=false";
     }
     
     std::cout << "Starting pipeline with command:\n" << pipelineCommand << std::endl;
