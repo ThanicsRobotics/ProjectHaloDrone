@@ -3,8 +3,6 @@
 
 ThetaV::ThetaV()
 {
-    stopVideo(true);
-    switchMode(Mode::PHOTO);
 }
 
 void ThetaV::takePicture()
@@ -16,6 +14,7 @@ void ThetaV::takePicture()
 
 void ThetaV::startVideo()
 {
+    stopVideo(true);
     if (cameraMode != Mode::VIDEO)
         switchMode(Mode::VIDEO);
     std::array<uint32_t, 5> params = {0,0,0,0,1};

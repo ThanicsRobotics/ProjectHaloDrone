@@ -15,6 +15,7 @@ public:
     ~HaloController();
 
     void startVideoPipelines();
+    void startFlightController();
 
 private:
     std::shared_ptr<bool> shutdownIndicator;

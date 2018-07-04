@@ -744,6 +744,7 @@ int main()
         esc_3 = 2000; // Limit the esc-3 pulse to 2000us.
       if (esc_4 > 2000)
         esc_4 = 2000; // Limit the esc-4 pulse to 2000us.
+
     }
     else
     {
@@ -754,9 +755,9 @@ int main()
     }
 
     // Keep these motors off
-    // esc_1 = 1000;
-    // esc_3 = 1000;
-    // esc_4 = 1000;
+    //esc_1 = 1000;
+    //esc_3 = 1000;
+    //esc_4 = 1000;
 
     // Receiving inputs and sending diagnostics
     if ((onTime.read_us() - loop_timer < 4000) && (spi.receive()))

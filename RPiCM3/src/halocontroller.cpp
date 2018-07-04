@@ -46,6 +46,9 @@ HaloController::~HaloController()
 void HaloController::startVideoPipelines()
 {
     vsc.start();
-    fc.startFlight();
 }
 
+void HaloController::startFlightController()
+{
+    fc.startFlight();
+}

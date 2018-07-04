@@ -17,6 +17,16 @@ VideoStream::VideoStream()
 VideoStream::VideoStream(VideoSettings& videoSettings)
    : settings(videoSettings)
 {
+    
+}
+
+VideoStream::~VideoStream()
+{
+    if (pipelineStarted) stopPipeline();
+}
+
+void VideoStream::startPipeline()
+{
     if(settings.camera > 1)
     {
         std::cout << "Invalid camera number [0-1]\n";
@@ -27,15 +37,7 @@ VideoStream::VideoStream(VideoSettings& videoSettings)
         std::cout << "Invalid address\n";
         exit(1);
     }
-}
-
-VideoStream::~VideoStream()
-{
-    if (pipelineStarted) stopPipeline();
-}
-
-void VideoStream::startPipeline()
-{
+    
     if (pipelineStarted)
     {
         std::cout << "Pipeline already started\n";
