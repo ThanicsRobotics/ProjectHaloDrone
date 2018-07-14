@@ -1,4 +1,5 @@
 #include <videostreamcontroller.h>
+#include <gst/gst.h>
 
 VideoStreamController::VideoStreamController()
     : mStreamLeft(VideoStream(mSettings[0])), mStreamRight(VideoStream(mSettings[1]))
@@ -19,15 +20,16 @@ void VideoStreamController::setFormat(VideoFormat cameraFormat)
 void VideoStreamController::setSettings(std::array<VideoSettings, 2>& settings)
 {
     mSettings = settings;
+    mStreamLeft.setSettings(mSettings[0]);
+    mStreamRight.setSettings(mSettings[1]);
 }
 
 void VideoStreamController::start()
-{
-    //mStreams.push_back(VideoStream(mSettings[0]));
+{   
+    gst_init(NULL, NULL);
     mStreamLeft.startPipeline();
     if (mCameraFormat == VideoFormat::STEREO)
     {
-        //mStreams.push_back(VideoStream(mSettings[1]));
         mStreamRight.startPipeline();
     }
 }

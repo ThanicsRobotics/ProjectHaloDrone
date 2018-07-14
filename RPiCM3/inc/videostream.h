@@ -40,6 +40,7 @@ public:
 
     void startPipeline();
     void stopPipeline();
+    void setSettings(VideoSettings& videoSettings);
 
 private:
     bool pipelineStarted = false;

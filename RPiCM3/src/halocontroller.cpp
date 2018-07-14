@@ -10,6 +10,7 @@ HaloController::HaloController(std::shared_ptr<bool> shutdown, CommandLineOption
         format = VideoFormat::STEREO;
     else format = VideoFormat::MONO;
 
+    mVideoSettings[0].camera = 0;
     mVideoSettings[0].bitrate = 2000000;
     mVideoSettings[0].vFlip = true;
     mVideoSettings[0].hFlip = true;
@@ -22,6 +23,7 @@ HaloController::HaloController(std::shared_ptr<bool> shutdown, CommandLineOption
     mVideoSettings[0].addr.ip = clo.ipAddress;
     mVideoSettings[0].addr.port = clo.ports[0];
 
+    mVideoSettings[1].camera = 1;
     mVideoSettings[1].bitrate = 2000000;
     mVideoSettings[1].vFlip = true;
     mVideoSettings[1].hFlip = true;

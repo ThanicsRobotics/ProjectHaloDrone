@@ -25,6 +25,11 @@ VideoStream::~VideoStream()
     if (pipelineStarted) stopPipeline();
 }
 
+void VideoStream::setSettings(VideoSettings& videoSettings)
+{
+    settings = videoSettings;
+}
+
 void VideoStream::startPipeline()
 {
     if(settings.camera > 1)
@@ -114,8 +119,6 @@ void VideoStream::startPipelineInThread()
     GstStateChangeReturn ret;
     GMainLoop *main_loop;
     GError *error;
-    
-    gst_init(NULL, NULL);
 
     std::string pipelineCommand;
     if (settings.record)
@@ -175,7 +178,7 @@ void VideoStream::startPipelineInThread()
             "udpsink host=" + settings.addr.ip + " port=" + settings.addr.port + " sync=false";
     }
     
-    std::cout << "Starting pipeline with command:\n" << pipelineCommand << std::endl;
+    std::cout << "\nStarting pipeline with command:\n" << pipelineCommand << std::endl;
 
     pipeline = gst_parse_launch(pipelineCommand.c_str(), &error);
     if (error) {

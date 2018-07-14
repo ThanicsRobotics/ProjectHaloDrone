@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
         // Creating flight controller and starting flight
         shuttingDownPtr = std::make_shared<bool>(false);
         HaloController hc(shuttingDownPtr, clo);
-        //hc.startVideoPipelines();
+        hc.startVideoPipelines();
         std::cout << "Starting main loop\n";
         hc.startFlightController();
     }
