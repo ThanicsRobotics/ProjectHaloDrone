@@ -130,6 +130,21 @@ sudo apt-get install python-pip
 echo 'Installing platformio'
 sudo pip install -U platformio
 
+if [ -d "/usr/local/include/boost" ]; then
+    echo "Boost already installed"
+else
+    echo ""
+    echo "Downloading and installing Boost"
+    echo ""
+    wget https://dl.bintray.com/boostorg/release/1.67.0/source/boost_1_67_0.tar.gz
+    tar -xvf boost_1_67_0.tar.gz
+    cd boost_1_67_0
+    sudo ./bootstrap.sh
+    sudo ./b2 install
+    cd ..
+    rm -rf boost*
+fi
+
 if grep -Fxq "thanics-drone" /etc/hostname
 then
     echo 'hostname already set'
