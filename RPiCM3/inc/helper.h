@@ -26,6 +26,7 @@
 #include <serial.h>
 #include <types.h>
 #include <halocontroller.h>
+#include <tofsensor.h>
 
 #define projectPath std::string("./")
 

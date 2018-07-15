@@ -17,14 +17,16 @@ int main(int argc, char *argv[]) {
     signal(SIGINT, signal_callback_handler);
     CommandLineOptions clo;
     filterCommandLineOptions(argc, argv, clo);
-    {
-        // Creating flight controller and starting flight
-        shuttingDownPtr = std::make_shared<bool>(false);
-        HaloController hc(shuttingDownPtr, clo);
-        hc.startVideoPipelines();
-        std::cout << "Starting main loop\n";
-        hc.startFlightController();
-    }
+    // {
+    //     // Creating flight controller and starting flight
+    //     shuttingDownPtr = std::make_shared<bool>(false);
+    //     HaloController hc(shuttingDownPtr, clo);
+    //     hc.startVideoPipelines();
+    //     std::cout << "Starting main loop\n";
+    //     hc.startFlightController();
+    // }
+
+    
     gpioTerminate();
 
     return 0;
