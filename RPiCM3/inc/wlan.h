@@ -1,42 +1,50 @@
 /// @file stream.h
 /// @author Andrew Loomis
 /// @date 5/17/2018
-/// @brief Definition of Stream class.
+/// @brief Definition of WLAN class.
 
-#ifndef STREAM_H
-#define STREAM_H
+#ifndef WLAN_H
+#define WLAN_H
+
+#define MAX_BUFFER_SIZE 128
 
 #include <iostream>
 #include <boost/asio.hpp>
 #include <string>
 #include <functional>
+#include <array>
 
 /// @brief Controls a Wireless LAN (WLAN) radio, like the pDDL2450.
-class Stream
+class WLAN
 {
 public:
     /// @brief Initializes private variables.
-    Stream();
+    WLAN();
 
-    void startClient();
-    void startHost();
+    void startClient(std::string ipAddress, int port);
     void write(std::string& msg);
-    void read(std::function<void()> callback);
+    void read();
+    void setCallback(std::function<void(std::size_t)> callback);
+    void checkBuffer();
 
     /// @brief Gives access to whether the socket is active.
     /// @return True if socket is active, false if not.
     bool isActive() const { return active; }
 
-    std::string getCurrentMessage() const { return currentMessage; }
+    void getCachedMessage(std::array<char, MAX_BUFFER_SIZE>& msg) const { msg = cachedMessage; }
 
 private:
     bool active;
+
     boost::asio::io_context io;
     boost::asio::ip::tcp::socket socket;
     boost::asio::ip::tcp::acceptor acceptor;
     boost::asio::ip::tcp::resolver resolver;
 
-    std::string currentMessage;
+    std::function<void(std::size_t size)> receiveCallback;
+    bool callbackSet = false;
+
+    std::array<char, MAX_BUFFER_SIZE> cachedMessage;
 };
 
 #endif

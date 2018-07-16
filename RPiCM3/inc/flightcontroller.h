@@ -8,7 +8,7 @@
 
 #include <fcinterface.h>
 #include <barometer.h>
-#include <radio.h>
+#include <wlanradio.h>
 #include <string>
 #include <string.h>
 #include <iostream>
@@ -65,7 +65,7 @@ class FlightController
 
 	FCInterfaceConfig fcConfig;
 	FCInterface interface;
-	Radio<Serial> radio;
+	WLANRadio radio;
     Barometer baro;
 	
 	bool run = true;

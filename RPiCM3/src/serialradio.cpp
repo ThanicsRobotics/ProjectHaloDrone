@@ -1,139 +1,16 @@
-/// @file radio.h
-/// @author Andrew Loomis
-/// @date 5/17/2018
-/// @brief Definition of the Radio class template.
-
-#ifndef RADIO_H
-#define RADIO_H
+#include <serialradio.h>
 
 #include <stdint.h>
 #include <memory>
-//#include <mavlink/common/mavlink.h>
 #include <pigpio.h>
 #include <iostream>
 #include <wiringPi.h>
 #include <algorithm>
 #include <array>
 
-#include <fcinterface.h>
-#include <serial.h>
-#include <stream.h>
-#include <types.h>
-
-#define SYSID 1
-#define COMPID 1
-#define PAYLOAD_LEN 11
-
-/// @brief Custom message structure for communication network.
-/// Message payload is exactly PAYLOAD_LEN bytes long.
-struct receivedMessage {
-    uint8_t msgid;          ///< ID of type of message.
-    uint8_t fromid;         ///< ID of sender system.
-    uint8_t seqid;          ///< Sequential message number, used for checking message continuity.
-    channels rcChannels;
-};
-
-/// @brief Contains states of message parsing process.
-enum MSG_STATE {
-    WAITING = 0,    ///< Waiting for starting header.
-    FILLING = 1,    ///< Message has started, and filling buffer.
-    FAIL = 2,       ///< Buffer overflowed, or other error.
-    DONE = 3        ///< Message footer found, finished filing buffer.
-};
-
-/// @brief Class template for controlling the radio, whether a WLAN radio, or UART Serial.
-/// Specify "Serial" or "Stream" based Radio in template argument
-/// for example: Radio<Serial> will generate a Serial-based radio object
-template<typename InterfaceType>
-class Radio : public InterfaceType
-{
-public:
-    //radioBuffer& sendHeartbeat(uint8_t mode, uint8_t status);
-    //void mavlinkReceiveByte(uint8_t data);
-    //void mavlinkReceivePacket(uint8_t *packet);
-
-    /// @brief Checks to see if the receiver thread is running.
-    /// @return True if running thread, false if not.
-    bool isReceiveThreadActive() const { return receiveThreadActive; }
-
-    //void startReceiveLoop();
-    void stopReceiveLoop();
-
-    /// @brief Convience function for inputing each byte received by radio and
-    /// parsing it into a completed message.
-    /// @param data Byte from radio stream.
-    void customReceiveByte(uint8_t data, channels& rcChannels);
-
-private:
-    channels pwmInputs;         ///< Current PWM control inputs.
-    uint8_t controllerStatus;   ///< Status of controller operation (currently not used). 
-    std::thread receiveThread;  ///< Thread that will independently get and parse comms data.
-    bool receiveThreadActive;   ///< True if receive thread is running, false if not.
-
-    /// @brief Loop executed by receive thread, gets data from interface and parses it.
-    //void receiveLoop();
-
-    /// @brief Parses incoming radio data and modifies a receivedMessage object to contain that data.
-    /// @param data Byte from radio interface.
-    /// @param msg A reference to the receivedMessage object to be modified.
-    /// @return True if message is completed, false if error or still filling buffer.
-    bool customParseChar(uint8_t data, receivedMessage& msg);
-};
-
-// template<>
-// void Radio<Serial>::receiveLoop() {
-//     int heartbeatTimer = millis();
-//     int byteCount = 0;
-//     while (receiveThreadActive) {
-//         byteCount++;
-//         //mavlinkReceiveByte(readChar());
-//         //customReceiveByte(readChar(), fc);
-        
-//         //Every second, send heartbeat to controller
-//         // if (millis() - heartbeatTimer > 1000) {
-//         //     radioBuffer msg = sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
-//         //     this->write(msg.buf, msg.len);
-//         //     printf("rate: %dkbps\n", (byteCount*8)/1000);
-//         //     byteCount = 0;
-//         //     heartbeatTimer = millis();
-//         // }
-//     }
-// }
-
-// template<>
-// void Radio<Stream>::receiveLoop() {
-//     // int heartbeatTimer = millis();
-//     // while (serialThreadActive) {
-//     //     mavlinkReceiveByte(readChar());
-//     //     //Every second, send heartbeat to controller
-//     //     if (millis() - heartbeatTimer > 1000) {
-//     //         radioBuffer msg = radio.sendHeartbeat(0,3); //Heartbeat in PREFLIGHT mode and STANDBY state
-//     //         radio.write(msg.buf, msg.len);
-//     //         heartbeatTimer = millis();
-//     //     }
-//     // }
-// }
-
-/// @brief start serial thread loop.
-// template<typename InterfaceType>
-// void Radio<InterfaceType>::startReceiveLoop() {
-//     //std::cout << "starting thread\n";
-//     receiveThreadActive = true;
-//     receiveThread = std::thread([this]{ receiveLoop(); });
-// }
-
-template<typename InterfaceType>
-void Radio<InterfaceType>::stopReceiveLoop() {
-    if (receiveThreadActive) {
-        receiveThreadActive = false;
-        receiveThread.join();
-    }
-}
-
-template<typename InterfaceType>
-void Radio<InterfaceType>::customReceiveByte(uint8_t data, channels& rcChannels) {
+void SerialRadio::customReceiveByte(uint8_t data, channels& rcChannels) {
     static uint32_t timer = 0;
-    static receivedMessage msg;
+    static messagePacket msg;
     if (customParseChar(data, msg)) {
         std::cout << "Received msg from " << (int)msg.fromid
             << ", seq: " << (int)msg.seqid
@@ -153,8 +30,7 @@ void Radio<InterfaceType>::customReceiveByte(uint8_t data, channels& rcChannels)
     }
 }
 
-template<typename InterfaceType>
-bool Radio<InterfaceType>::customParseChar(uint8_t data, receivedMessage& msg) {
+bool SerialRadio::customParseChar(uint8_t data, messagePacket& msg) {
     static uint8_t msgCache[100];
     static int index = 0;
     static int startIndex = 0;
@@ -180,7 +56,7 @@ bool Radio<InterfaceType>::customParseChar(uint8_t data, receivedMessage& msg) {
                 // printf("startindex: %d\n", startIndex);
                 // printf("range: %d\n", index - startIndex);
                 if (index - startIndex - 1 == PAYLOAD_LEN) {
-                    receivedMessage outMsg;
+                    messagePacket outMsg;
                     outMsg.msgid = msgCache[startIndex];
                     outMsg.fromid = msgCache[startIndex + 1];
                     outMsg.seqid = msgCache[startIndex + 2];
@@ -229,8 +105,8 @@ bool Radio<InterfaceType>::customParseChar(uint8_t data, receivedMessage& msg) {
 ///
 ///////
 
-// template<typename InterfaceType>
-// radioBuffer& Radio<InterfaceType>::sendHeartbeat(uint8_t mode, uint8_t status) {
+//
+// radioBuffer& SerialRadio::sendHeartbeat(uint8_t mode, uint8_t status) {
 //     mavlink_message_t msg;
 //     uint16_t len;
 //     static uint8_t buf[MAVLINK_MAX_PACKET_LEN];
@@ -245,8 +121,8 @@ bool Radio<InterfaceType>::customParseChar(uint8_t data, receivedMessage& msg) {
 //     return sendBuffer;
 // }
 
-// template<typename InterfaceType>
-// void Radio<InterfaceType>::mavlinkReceivePacket(uint8_t *packet) {
+//
+// void SerialRadio::mavlinkReceivePacket(uint8_t *packet) {
 //     uint8_t byte = 1;
 //     int i = 0;
 //     while (byte != '\0') {
@@ -258,8 +134,8 @@ bool Radio<InterfaceType>::customParseChar(uint8_t data, receivedMessage& msg) {
 //     }
 // }
 
-// template<typename InterfaceType>
-// void Radio<InterfaceType>::mavlinkReceiveByte(uint8_t data) {
+//
+// void SerialRadio::mavlinkReceiveByte(uint8_t data) {
 //     mavlink_message_t msg;
 //     mavlink_status_t status;
 //     if(mavlink_parse_char(MAVLINK_COMM_0, data, &msg, &status)) {
@@ -306,5 +182,3 @@ bool Radio<InterfaceType>::customParseChar(uint8_t data, receivedMessage& msg) {
 //     }
 //     //else printf("fail\n");
 // }
-
-#endif

@@ -51,11 +51,11 @@ void FlightController::flightLoop()
     int heartbeatTimer, baroTimer, radioTimer = millis();
     int loopTimer = micros();
     float currentAltitude = 0;
-    radio.setupSerial("/dev/serial0", 115200);
-    
+    //radio.setupSerial("/dev/serial0", 115200);
+    radio.connect("192.168.1.24", 5000);
+
     printf("Calibrating barometer...\n");
     baro.setup();
-    //radio.startReceiveLoop();
     while(!(*shutdownIndicator)) {
         //Every 260ms, get pressure altitude, if barometer is calibrated
         if (baro.isCalibrated() && (millis() - baroTimer > BARO_DELAY)) {
@@ -65,7 +65,7 @@ void FlightController::flightLoop()
             baroTimer = millis();
         }
 
-        radio.customReceiveByte(radio.readChar(), pwmInputs);
+        radio.update(pwmInputs);
         interface.setPWMInputs(pwmInputs);
         std::cout << "Pitch: " << pwmInputs.pitchPWM
             << "\nRoll: " << pwmInputs.rollPWM

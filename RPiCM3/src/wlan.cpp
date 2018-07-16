@@ -1,34 +1,28 @@
-#include <stream.h>
-
-#include <array>
-#include <ctime>
-
-#define MAXDATASIZE 500 // max number of bytes we can get at once 
+#include <wlan.h>
 
 using boost::asio::ip::tcp;
 
-Stream::Stream()
+WLAN::WLAN()
     : socket(io), acceptor(io, tcp::endpoint(tcp::v4(), 13)), resolver(io)
 {
     
 }
 
-void Stream::startClient()
+void WLAN::startClient(std::string ipAddress, int port)
 {
     try
     {
-        tcp::resolver::results_type endpoints = resolver.resolve("192.168.1.24", "5000");
+        tcp::resolver::results_type endpoints = resolver.resolve(ipAddress, std::to_string(port));
         boost::asio::connect(socket, endpoints);
         std::cout << "Connected" << std::endl;
 
-        std::array<char, 128> buf;
+        std::array<char, MAX_BUFFER_SIZE> buf;
         boost::system::error_code error;
 
         size_t len = socket.read_some(boost::asio::buffer(buf), error);
         if (error == boost::asio::error::eof)
         {
             std::cout << "Server closed connection" << std::endl;
-            // break;
         }
         else if (error)
             throw boost::system::system_error(error);
@@ -41,7 +35,7 @@ void Stream::startClient()
     }
 }
 
-void Stream::write(std::string& msg)
+void WLAN::write(std::string& msg)
 {
     try
     {
@@ -61,16 +55,16 @@ void Stream::write(std::string& msg)
     }
 }
 
-void Stream::read(std::function<void(std::size_t)> callback)
+void WLAN::read()
 {
     try
     {
         socket.async_read_some(boost::asio::buffer(currentMessage), 
-        [callback](boost::system::error_code ec, std::size_t size)
+        [this](boost::system::error_code ec, std::size_t size)
         {
             if (!ec)
             {
-                callback(size);
+                receiveCallback(size);
             }
             else
                 throw boost::system::system_error(ec);
@@ -80,4 +74,15 @@ void Stream::read(std::function<void(std::size_t)> callback)
     {
         std::cerr << e.what() << std::endl;
     }
+}
+
+void WLAN::setCallback(std::function<void(std::size_t)> callback)
+{
+    receiveCallback = callback;
+    callbackSet = true;
+}
+
+void WLAN::checkBuffer()
+{
+    io.poll();
 }

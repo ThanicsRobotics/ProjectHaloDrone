@@ -9,6 +9,29 @@
 #include <inttypes.h>
 #include <string>
 
+///////////////////////
+/////
+///// Communication Protocol Types
+/////
+///////////////////////
+
+/// @brief Custom message structure for communication network.
+/// Message payload is exactly PAYLOAD_LEN bytes long.
+struct messagePacket {
+    uint8_t msgid;          ///< ID of type of message.
+    uint8_t fromid;         ///< ID of sender system.
+    uint8_t seqid;          ///< Sequential message number, used for checking message continuity.
+    channels rcChannels;
+};
+
+/// @brief Contains states of message parsing process.
+enum MSG_STATE {
+    WAITING = 0,    ///< Waiting for starting header.
+    FILLING = 1,    ///< Message has started, and filling buffer.
+    FAIL = 2,       ///< Buffer overflowed, or other error.
+    DONE = 3        ///< Message footer found, finished filing buffer.
+};
+
 /// @brief Holds all PWM control signals. All within 1000-2000.
 struct channels
 {
@@ -18,12 +41,24 @@ struct channels
     uint16_t throttlePWM = 0;
 };
 
+///////////////////////
+/////
+///// Streaming Types
+/////
+///////////////////////
+
 enum VideoFormat
 {
     NONE = 0,
     MONO,
     STEREO
 };
+
+///////////////////////
+/////
+///// Misc Types
+/////
+///////////////////////
 
 struct CommandLineOptions
 {
