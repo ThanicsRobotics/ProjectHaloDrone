@@ -6,6 +6,8 @@ cd $HOME
 mkdir temp
 cd temp
 
+sudo ifconfig eth0 down
+
 if [ -e "/usr/local/lib/libpigpio.so" ]; then
     echo "PIGPIO already installed"
 else
@@ -127,8 +129,12 @@ fi
 echo 'Installing Python PIP'
 sudo apt-get install python-pip
 
-echo 'Installing platformio'
-sudo pip install -U platformio
+if [ -e "/usr/local/bin/platformio" ]; then
+    echo 'Platformio already installed'
+else
+    echo 'Installing platformio'
+    sudo pip install -U platformio
+fi
 
 if [ -d "/usr/local/include/boost" ]; then
     echo "Boost already installed"
@@ -140,10 +146,13 @@ else
     tar -xvf boost_1_67_0.tar.gz
     cd boost_1_67_0
     sudo ./bootstrap.sh
+    sudo ./b2 -j4
     sudo ./b2 install
     cd ..
     rm -rf boost*
 fi
+
+sudo ifconfig eth0 up
 
 if grep -Fxq "thanics-drone" /etc/hostname
 then
