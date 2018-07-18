@@ -15,6 +15,15 @@
 /////
 ///////////////////////
 
+/// @brief Holds all PWM control signals. All within 1000-2000.
+struct channels
+{
+    uint16_t rollPWM = 0;
+    uint16_t pitchPWM = 0;
+    uint16_t yawPWM = 0;
+    uint16_t throttlePWM = 0;
+};
+
 /// @brief Custom message structure for communication network.
 /// Message payload is exactly PAYLOAD_LEN bytes long.
 struct messagePacket {
@@ -32,14 +41,6 @@ enum MSG_STATE {
     DONE = 3        ///< Message footer found, finished filing buffer.
 };
 
-/// @brief Holds all PWM control signals. All within 1000-2000.
-struct channels
-{
-    uint16_t rollPWM = 0;
-    uint16_t pitchPWM = 0;
-    uint16_t yawPWM = 0;
-    uint16_t throttlePWM = 0;
-};
 
 ///////////////////////
 /////

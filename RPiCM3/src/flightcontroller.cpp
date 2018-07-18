@@ -17,8 +17,8 @@
 
 /// @brief Class constructor, initializes private variables.
 FlightController::FlightController(std::shared_ptr<bool> shutdown)
-    : shutdownIndicator(shutdown), interface(FCInterface(shutdownIndicator)), 
-    baro(Barometer(shutdownIndicator))
+    : shutdownIndicator(shutdown), interface(shutdownIndicator), 
+    baro(shutdownIndicator), radio(WLAN::DeviceType::CLIENT, "raspberrypi.local", 5000)
 {
     
 }
@@ -51,8 +51,12 @@ void FlightController::flightLoop()
     int heartbeatTimer, baroTimer, radioTimer = millis();
     int loopTimer = micros();
     float currentAltitude = 0;
-    //radio.setupSerial("/dev/serial0", 115200);
-    radio.connect("192.168.1.24", 5000);
+    radio.setUpdater([this](std::size_t size)
+    {
+        std::cout << "callback" << std::endl;
+        radio.update(pwmInputs, size);
+    });
+    //radio.connect("raspberrypi.local", 5000);
 
     printf("Calibrating barometer...\n");
     baro.setup();
@@ -65,8 +69,8 @@ void FlightController::flightLoop()
             baroTimer = millis();
         }
 
-        radio.update(pwmInputs);
-        interface.setPWMInputs(pwmInputs);
+        radio.checkBuffer();
+        // interface.setPWMInputs(pwmInputs);
         std::cout << "Pitch: " << pwmInputs.pitchPWM
             << "\nRoll: " << pwmInputs.rollPWM
             << "\nYaw: " << pwmInputs.yawPWM
@@ -77,6 +81,7 @@ void FlightController::flightLoop()
         uint16_t newThrottle = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude);
         //std::cout << "Loop Time: " << micros() - loopTimer << "us" << std::endl;
         loopTimer = micros();
+        delay(50);
     }
 }
 

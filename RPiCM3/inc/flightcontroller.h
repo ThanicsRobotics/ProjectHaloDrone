@@ -60,7 +60,6 @@ class FlightController
 	uint16_t calculateThrottlePID(uint16_t altitudePWM, float altitude);
 
   private:
-  	//bool *shutdownIndicator = nullptr;
 	std::shared_ptr<bool> shutdownIndicator;
 
 	FCInterfaceConfig fcConfig;
@@ -72,7 +71,6 @@ class FlightController
 
 	//dronePosition flightPosition;
 	channels pwmInputs;
-	//std::shared_ptr<channels> pwmInputs;
 
 	//Throttle PID Variables and functions for hovering
 	int pid_p_gain, pid_i_gain, pid_d_gain; ///< PID gains.

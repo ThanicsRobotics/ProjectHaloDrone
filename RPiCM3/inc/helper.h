@@ -3,28 +3,11 @@
 
 #include <pigpio.h>
 #include <wiringPi.h>
-#include <unistd.h>
-#include <time.h>
-#include <sys/time.h>
-#include <bits/stdc++.h>
 #include <iostream>
-#include <errno.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <signal.h>
-#include <string.h>
-#include <bitset>
-#include <pthread.h>
 #include <memory>
+#include <string>
 
 //Project headers
-#include <barometer.h>
-#include <flightcontroller.h>
-#include <stream.h>
-#include <gps.h>
-#include <radio.h>
-#include <serial.h>
-#include <types.h>
 #include <halocontroller.h>
 
 #define projectPath std::string("./")

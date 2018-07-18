@@ -18,10 +18,16 @@
 class WLAN
 {
 public:
+    enum DeviceType {
+        HOST = 0,
+        CLIENT
+    };
+
     /// @brief Initializes private variables.
     WLAN();
+    WLAN(DeviceType type, std::string ipAddress, int port);
 
-    void startClient(std::string ipAddress, int port);
+    void start(DeviceType type, std::string ipAddress, int port);
     void write(std::string& msg);
     void read();
     void setCallback(std::function<void(std::size_t)> callback);
@@ -34,7 +40,16 @@ public:
     void getCachedMessage(std::array<char, MAX_BUFFER_SIZE>& msg) const { msg = cachedMessage; }
 
 private:
-    bool active;
+    void startHost();
+    void startClient(std::string ipAddress, int port);
+
+    bool active = false;
+    bool connected = false;
+
+    // Cached for repeated attempts
+    DeviceType deviceType;
+    std::string hostname;
+    int port;
 
     boost::asio::io_context io;
     boost::asio::ip::tcp::socket socket;

@@ -8,13 +8,72 @@ WLAN::WLAN()
     
 }
 
-void WLAN::startClient(std::string ipAddress, int port)
+WLAN::WLAN(DeviceType type, std::string ipAddress, int port)
+    : socket(io), acceptor(io, tcp::endpoint(tcp::v4(), port)), resolver(io),
+    hostname(ipAddress), port(port), deviceType(type)
+{
+    start(type, ipAddress, port);
+}
+
+void WLAN::start(DeviceType type, std::string ipAddress, int port)
+{
+    switch (type)
+    {
+        case DeviceType::CLIENT:
+            startClient(ipAddress, port);
+            break;
+        case DeviceType::HOST:
+            startHost();
+            break;
+        default:
+            break;
+    }
+}
+
+void WLAN::startHost()
 {
     try
     {
+        std::cout << "Waiting for client..." << std::endl;
+        acceptor.accept(socket);
+        connected = true;
+        // Use async_accept here in the future
+
+        std::cout << "Client connected: " << socket.remote_endpoint().address().to_string() << std::endl;
+        std::string msg = "Hello from Controller\n";
+        boost::system::error_code err;
+        boost::asio::write(socket, boost::asio::buffer(msg), err);
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+}
+
+void WLAN::startClient(std::string ipAddress, int port)
+{
+    std::cout << "Starting in client mode" << std::endl;
+    try
+    {
         tcp::resolver::results_type endpoints = resolver.resolve(ipAddress, std::to_string(port));
+        if (endpoints.empty())
+        {
+            std::cout << "No hosts available" << std::endl;
+            connected = false;
+            return;
+        }
+        else
+        {
+            std::cout << "Available hosts:" << std::endl;
+            for (auto endpoint : endpoints)
+            {
+                std::cout << endpoint.host_name() << ":" << endpoint.service_name() << std::endl;
+            }
+        }
+        
         boost::asio::connect(socket, endpoints);
         std::cout << "Connected" << std::endl;
+        connected = true;
 
         std::array<char, MAX_BUFFER_SIZE> buf;
         boost::system::error_code error;
@@ -37,6 +96,11 @@ void WLAN::startClient(std::string ipAddress, int port)
 
 void WLAN::write(std::string& msg)
 {
+    if (!connected)
+    {
+        start(deviceType, hostname, port);
+        return;
+    }
     try
     {
         boost::system::error_code error;
@@ -57,9 +121,14 @@ void WLAN::write(std::string& msg)
 
 void WLAN::read()
 {
+    if (!connected)
+    {
+        start(deviceType, hostname, port);
+        return;
+    }
     try
     {
-        socket.async_read_some(boost::asio::buffer(currentMessage), 
+        socket.async_read_some(boost::asio::buffer(cachedMessage), 
         [this](boost::system::error_code ec, std::size_t size)
         {
             if (!ec)

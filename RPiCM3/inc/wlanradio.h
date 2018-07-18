@@ -8,15 +8,21 @@
 class WLANRadio
 {
 public:
-    void connect(std::string ipAddress, int port);
+    WLANRadio(WLAN::DeviceType deviceType, std::string ipAddress, int port);
+    void connect(WLAN::DeviceType deviceType, std::string ipAddress, int port);
     void send(messagePacket& msg);
-    void setUpdater(std::function<void(std::size_t size)> callback) { wlan.setCallback(callback); }
-    void update(channels& pwmInputs);
+    void setUpdater(std::function<void(std::size_t size)> callback);
+    void update(channels& pwmInputs, std::size_t size);
+    void checkBuffer();
+
 private:
     WLAN wlan;
     messagePacket currentPacket;
+    bool connected = false;
+    unsigned int seq = 0;
 
     bool decode(std::array<char, MAX_BUFFER_SIZE>& packet, channels& pwmInputs);
+    void encode(messagePacket& msg, std::array<char, MAX_BUFFER_SIZE>& outPacket);
 };
 
 #endif

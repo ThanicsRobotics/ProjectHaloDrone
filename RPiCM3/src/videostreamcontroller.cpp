@@ -26,6 +26,7 @@ void VideoStreamController::setSettings(std::array<VideoSettings, 2>& settings)
 
 void VideoStreamController::start()
 {   
+    if (mCameraFormat == VideoFormat::NONE) return;
     gst_init(NULL, NULL);
     mStreamLeft.startPipeline();
     if (mCameraFormat == VideoFormat::STEREO)
