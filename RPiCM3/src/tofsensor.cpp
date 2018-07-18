@@ -4,17 +4,19 @@
 #include <pigpio.h>
 #include <cstring>
 #include <errno.h>
+#include <wiringPi.h>
 
 TOFSensor::TOFSensor()
 {
     setup();
     ReadPhaseOut();
     CalculateDistance();
+    ReportDistance();
 }
 
 TOFSensor::~TOFSensor()
 {
-
+    i2cClose(i2cFd);
 }
 
 void TOFSensor::setup()
@@ -33,25 +35,22 @@ void TOFSensor::setup()
 
 void TOFSensor::ReadPhaseOut(){
 
-    char outputRegister[2];
-    i2cReadBlockData(fd, 0x08, outputRegister);
-    phaseOut = (float)(short)((outputRegister[1] << 8) |  (outputRegister[0]));
+    char outputRegister[3];
+    i2cReadI2CBlockData(i2cFd, 0x08, outputRegister, 3);
+    std::cout << outputRegister[0] << " " << outputRegister[1] << " " << outputRegister[2] << std::endl;
+    phaseOut = (short)((outputRegister[1] << 8) |  (outputRegister[0]));
 }
 
 void TOFSensor::CalculateDistance(){
 
-    int distance; //meters
-    int speedOfLight = 299792458 //exact in meters per second
-    int twoFMod = 2 * 10 //MHz - modulation frequency
-
-    distance = (phaseOut/65536.0) * (speedOfLight/twoFMod);
+    distance = (phaseOut/65536.0) * (299792458/20);
 }
 
 void TOFSensor::ReportDistance(){
 
 while(1){
         int time = millis();                                                 
-        std::cout << "Distance: " <<  distance << " meters until impact!" << std::endl;
+        std::cout << distance << std::endl;
             while(millis() - time <= 4);
 }
-
+}

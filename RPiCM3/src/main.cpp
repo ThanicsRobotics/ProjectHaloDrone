@@ -26,7 +26,11 @@ int main(int argc, char *argv[]) {
     //     hc.startFlightController();
     // }
 
-    
+    {
+        TOFSensor tofSensor;
+        
+    }
+
     gpioTerminate();
 
     return 0;
