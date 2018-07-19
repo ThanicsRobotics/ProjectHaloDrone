@@ -193,15 +193,15 @@ int run(int argc, char **argv)
 
 //DEFINE_GUID(GUID_DEVCLASS_PORTS, {0x4d36e978, 0xe325, 0x11ce, {0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18}});
 
-int main(void) {
-	uint8_t i;
-	vector<serial::PortInfo> devices_found;
-	devices_found=serial::list_ports();
-	for(i=0;i<devices_found.size();i++)
-		printf("Serial port is %s %s\n",devices_found[i].hardware_id.c_str(), devices_found[i].port.c_str());
-	printf("All done...\n");
-	WINPAUSE;
-	return 0;
+// int main(void) {
+// 	uint8_t i;
+// 	vector<serial::PortInfo> devices_found;
+// 	devices_found=serial::list_ports();
+// 	for(i=0;i<devices_found.size();i++)
+// 		printf("Serial port is %s %s\n",devices_found[i].hardware_id.c_str(), devices_found[i].port.c_str());
+// 	printf("All done...\n");
+// 	WINPAUSE;
+// 	return 0;
 
-}
+// }
 

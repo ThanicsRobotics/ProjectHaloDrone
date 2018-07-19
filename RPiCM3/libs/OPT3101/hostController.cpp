@@ -24,7 +24,7 @@
 * \section DESCRIPTION
 * This file contains the hostController class methods
 */
-
+#include <wiringPi.h>
 #include "hostController.h"
 
 #ifdef _WIN32
@@ -94,7 +94,8 @@ uint32_t hostController::readI2C(uint8_t address) {
 void hostController::sleep(uint32_t timeInMilliSeconds) {
 	/// <b>Algorithm of the method is as follows</b>
 #if defined(HOST_PC) && defined(OPT3101_USE_SERIALLIB)
-	Sleep(timeInMilliSeconds);/// * Sleeps for the time specified in the argument timeInMilliSeconds
+	delay(timeInMilliSeconds);
+	//Sleep(timeInMilliSeconds);/// * Sleeps for the time specified in the argument timeInMilliSeconds
 #endif
 }
 void hostController::sleepDataReadyCounts(uint16_t dataReadyCounts) {

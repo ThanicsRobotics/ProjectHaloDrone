@@ -39,7 +39,7 @@ Disabling this disabled report routines and file storage and load routines
 This is enabled by default in SDK. Not defining this derivate would disable the serial communication capability. 
 In case of usage with TI EVM this derivative is required, if using any other method of communication this can be disabled by user
 */
-#define OPT3101_USE_SERIALLIB
+//#define OPT3101_USE_SERIALLIB
 
 /*! \def OPT3101_USE_STREAMLIB
 \brief This pre-processor derivative dictates whether to load std::iostream and std::fstream  libraries
