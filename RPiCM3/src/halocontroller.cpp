@@ -1,7 +1,8 @@
 #include <halocontroller.h>
+#include <wiringPi.h>
 
 HaloController::HaloController(std::shared_ptr<bool> shutdown, CommandLineOptions& clo)
-    : shutdownIndicator(shutdown), fc(FlightController(shutdownIndicator))
+    : shutdownIndicator(shutdown), fc(shutdownIndicator)
 {
     VideoFormat format;
     if (clo.ports[0].empty() && clo.ports[1].empty() && 

@@ -4,8 +4,13 @@
 #include <wiringPi.h>
 #include <iostream>
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
+#include <string.h>
+
+Serial::Serial(std::string port, int baud)
+{
+    setupSerial(port, baud);
+}
 
 Serial::Serial() {
 }
@@ -18,8 +23,8 @@ Serial::~Serial() {
 /// @brief Opens serial port at specified baud rate.
 /// @param port serial port address, i.e. "/dev/serial0".
 /// @param baud baudrate, i.e. 115200 for Xbee S3B radio.
-void Serial::setupSerial(const char* port, int baud) {
-    if ((serialFd = serOpen((char*)port, baud, 0)) < 0) {
+void Serial::setupSerial(std::string port, int baud) {
+    if ((serialFd = serOpen((char*)port.c_str(), baud, 0)) < 0) {
         std::cout << "Unable to open serial interface: " << strerror(errno) << '\n';
         fflush(stdout);
     }
@@ -56,10 +61,10 @@ uint8_t Serial::readChar() {
     if(!serialConfigured) return NULL;
     int timer = micros();
     while((serDataAvailable(serialFd) < 1) && (micros() - timer < 1000));
-    if(serDataAvailable(serialFd) > 0) {
+    // if(serDataAvailable(serialFd) > 0) {
         return (uint8_t)serReadByte(serialFd);
-    }
-    else return NULL;
+    // }
+    // else return NULL;
 }
 
 int Serial::write(uint8_t* bytes, uint16_t len) {

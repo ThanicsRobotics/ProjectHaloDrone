@@ -4,6 +4,8 @@
 #include <flightcontroller.h>
 #include <videostreamcontroller.h>
 #include <thetav.h>
+#include <gimbal.h>
+
 #include <types.h>
 #include <memory>
 #include <array>
@@ -20,6 +22,7 @@ public:
 private:
     std::shared_ptr<bool> shutdownIndicator;
 
+    Gimbal gimbal;
     FlightController fc;
     VideoStreamController vsc;
     ThetaV mThetaV;

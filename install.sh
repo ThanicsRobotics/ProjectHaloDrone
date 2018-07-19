@@ -152,6 +152,10 @@ else
     rm -rf boost*
 fi
 
+# Add these to /boot/config.txt
+# dtoverlay=uart1,txd1_pin=40,rxd1_pin=41
+# enable_uart=1
+
 sudo ifconfig eth0 up
 
 if grep -Fxq "thanics-drone" /etc/hostname

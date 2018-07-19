@@ -10,19 +10,21 @@
 #include <inttypes.h>
 #include <memory>
 #include <thread>
+#include <string>
 
 /// @brief Contains functions for opening, writing, 
 /// and reading serial port
 class Serial
 {
 public:
+    Serial(std::string port, int baud);
     Serial();
     ~Serial();
 
     /// @brief Opens serial port at specified baud rate.
     /// @param port serial port address, i.e. "/dev/serial0".
     /// @param baud baudrate, i.e. 9600.
-    void setupSerial(const char* port, int baud);
+    void setupSerial(std::string port, int baud);
 
     /// @brief Closes serial port.
     void closeSerial();

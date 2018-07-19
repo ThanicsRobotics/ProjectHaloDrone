@@ -56,7 +56,7 @@ void FlightController::flightLoop()
         std::cout << "callback" << std::endl;
         radio.update(pwmInputs, size);
     });
-    //radio.connect("raspberrypi.local", 5000);
+    // radio.connect("raspberrypi.local", 5000);
 
     printf("Calibrating barometer...\n");
     baro.setup();
