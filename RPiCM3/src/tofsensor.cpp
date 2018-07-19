@@ -47,10 +47,12 @@ void TOFSensor::ConfigureMonoshot(){
     i2cWriteI2CBlockData(i2cFd, I2C_CONT_RW, configI2CCONT, 3);
     
     char configCONT[3];
-    configCONT[0] = 0xFF;
-    configCONT[1] = 0xFF;
-    configCONT[2] = 0xFF;
+    // configCONT[0] = 0xFF;
+    // configCONT[1] = 0xFF;
+    // configCONT[2] = 0xFF;
     i2cWriteI2CBlockData(i2cFd, CONTINUOUSandNUMFRAMES, configCONT, 3);
+    i2cWriteI2CBlockData(i2cFd, CONTINUOUSandNUMFRAMES, configCONT, 3);
+
 
 
 
