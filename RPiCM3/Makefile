@@ -5,7 +5,11 @@ PROJPATH=.
 DIR1=$(PROJPATH)/src/
 DIR2=$(PROJPATH)/libs/NemaTode/src/
 DIR3=$(PROJPATH)/libs/ptpcam/
-OBJ=$(patsubst %.cpp,%.o,$(wildcard $(DIR1)*.cpp)) $(patsubst %.cpp,%.o,$(wildcard $(DIR2)*.cpp)) $(patsubst %.cpp,%.o,$(wildcard $(DIR3)*.cpp))
+DIR4=$(PROJPATH)/libs/OPT3101/
+DIR5=$(PROJPATH)/libs/OPT3101/serialLib
+OBJ=$(patsubst %.cpp,%.o,$(wildcard $(DIR1)*.cpp)) $(patsubst %.cpp,%.o,$(wildcard $(DIR2)*.cpp)) \
+$(patsubst %.cpp,%.o,$(wildcard $(DIR3)*.cpp)) $(patsubst %.cpp,%.o,$(wildcard $(DIR4)*.cpp)) \
+$(patsubst %.cpp,%.o,$(wildcard $(DIR5)*.cpp))
 EXEC=halo
 
 all:

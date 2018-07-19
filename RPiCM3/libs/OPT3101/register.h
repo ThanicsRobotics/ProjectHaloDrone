@@ -93,7 +93,7 @@ class deviceRegister{
 		* \param[in] size; size (typically 1 or 2 bytes) determines the number of segments that the register is divided in to.
 		*
 		*/
-		OPT3101::deviceRegister(uint8_t size);
+		deviceRegister(uint8_t size);
 		/*!
 		* \brief Operator overload for '='.
 		*
