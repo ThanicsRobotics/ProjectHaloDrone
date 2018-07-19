@@ -1,5 +1,4 @@
 #include <tofsensor.h>
-
 #include <iostream>
 #include <pigpio.h>
 #include <cstring>
@@ -25,15 +24,6 @@ TOFSensor::~TOFSensor()
     i2cClose(i2cFd);
 }
 
-void TOFSensor::ConfigureMonoshot(){
-
-    i2cWriteByteData(i2cFd, I2C_CONT_RW, 0xC0); //Break 24 bit I2C_CONT_RW_DATA into 3 bytes for slave to recieve.
-    i2cWriteByteData(i2cFd, I2C_CONT_RW, 0x00);
-    i2cWriteByteData(i2cFd, I2C_CONT_RW, 0x40);
-    std:cout << "Configured" << std::endl;
-
-    }
-
 void TOFSensor::setup()
 {
     // Open I2C address
@@ -41,9 +31,29 @@ void TOFSensor::setup()
         std::cout << strerror(errno) << std::endl;
     }
     else i2cConfigured = true;
-
-
+    
+    
 }
+
+void TOFSensor::ConfigureMonoshot(){
+    
+    char calibRegister[3];
+    calibRegister[0] = 0x40;
+    calibRegister[1] = 0x00;
+    calibRegister[2] = 0xC0;
+    i2cWriteI2CBlockData(i2cFd, I2C_CONT_RW, calibRegister, 3);
+    std::cout << calibRegister[0] << calibRegister[1] << calibRegister[2] << std::endl;
+    
+
+    char inputRegister[3];
+    i2cReadI2CBlockData(i2cFd, I2C_CONT_RW, inputRegister, 3);
+    std::cout << inputRegister[0] << inputRegister[1] << inputRegister[2] << std::endl;
+    
+    
+
+    }
+
+
 
 void TOFSensor::ReadPhaseOut(){
 
@@ -58,11 +68,12 @@ void TOFSensor::CalculateDistance(){
     distance = (phaseOut/65536.0) * (299792458/20);
 }
 
+
 void TOFSensor::ReportDistance(){
 
-while(1){
-        int time = millis();                                                 
-        std::cout << distance << std::endl;
-            while(millis() - time <= 50);
-}
+// while(1){
+//         int time = millis();                                                 
+         std::cout << distance << std::endl;
+//             while(millis() - time <= 50);
+// }
 }

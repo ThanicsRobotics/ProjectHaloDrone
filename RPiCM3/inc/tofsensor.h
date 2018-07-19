@@ -13,6 +13,7 @@ private:
 
 
     void setup();
+    void ConfigureMonoshot();
     void ReadPhaseOut();
     void CalculateDistance();
     void ReportDistance();
