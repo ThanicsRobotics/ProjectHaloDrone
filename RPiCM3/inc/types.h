@@ -73,7 +73,7 @@ struct CommandLineOptions
 };
 
 /// @brief Structure for holding drone angular position.
-struct dronePosition
+struct AngularPosition
 {
     int8_t pitch = 0;   ///< Pitch angle.
     int8_t roll = 0;    ///< Roll angle.
@@ -86,7 +86,7 @@ struct FCInterfaceConfig
     bool motorTest = false;
     bool noMotors = false;
     bool stm32Resetting = true;
-    dronePosition flightPosition;
+    AngularPosition flightPosition;
 };
 
 #endif

@@ -87,7 +87,7 @@ void FlightController::flightLoop()
 
 /// @brief Returns the drone's 3-axis angular position.
 /// @return dronePosition struct.
-dronePosition FlightController::getDronePosition()
+AngularPosition FlightController::getDronePosition()
 {
     return fcConfig.flightPosition;
 }

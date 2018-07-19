@@ -42,7 +42,7 @@ class FlightController
 	void setHoverAltitude(uint8_t hoverAltitude);
 
 	/// @brief Gets drone's angular position (pitch, roll, yaw).
-	dronePosition getDronePosition();
+	AngularPosition getDronePosition();
 
 	bool isTestGyroActive() const { return fcConfig.testGyro; }
     bool isMotorTestActive() const { return fcConfig.motorTest; }
@@ -69,7 +69,6 @@ class FlightController
 	
 	bool run = true;
 
-	//dronePosition flightPosition;
 	channels pwmInputs;
 
 	//Throttle PID Variables and functions for hovering

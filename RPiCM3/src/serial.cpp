@@ -60,11 +60,12 @@ char *Serial::readLine() {
 uint8_t Serial::readChar() {
     if(!serialConfigured) return NULL;
     int timer = micros();
-    while((serDataAvailable(serialFd) < 1) && (micros() - timer < 1000));
-    // if(serDataAvailable(serialFd) > 0) {
+    while((serDataAvailable(serialFd) < 1) && (micros() - timer < 500));
+    if(serDataAvailable(serialFd) > 0) {
         return (uint8_t)serReadByte(serialFd);
-    // }
+    }
     // else return NULL;
+    else readChar();
 }
 
 int Serial::write(uint8_t* bytes, uint16_t len) {
