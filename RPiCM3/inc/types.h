@@ -8,6 +8,28 @@
 
 #include <inttypes.h>
 #include <string>
+#include <array>
+
+///////////////////////
+/////
+///// Flight Control Types
+/////
+///////////////////////
+
+/// @brief Structure for holding drone angular position.
+struct AngularPosition
+{
+    int8_t pitch = 0;   ///< Pitch angle.
+    int8_t roll = 0;    ///< Roll angle.
+    int16_t yaw = 0;	///< Yaw angle.
+};
+
+enum Maneuvers
+{
+    NONE = 0,
+    TAKEOFF = 1,
+    HOVER = 2
+};
 
 ///////////////////////
 /////
@@ -31,6 +53,8 @@ struct messagePacket {
     uint8_t fromid;         ///< ID of sender system.
     uint8_t seqid;          ///< Sequential message number, used for checking message continuity.
     channels rcChannels;
+    Maneuvers requestedManeuver;
+    std::array<uint8_t, 10> maneuverOptions;
 };
 
 /// @brief Contains states of message parsing process.
@@ -70,14 +94,6 @@ struct CommandLineOptions
     VideoFormat record = VideoFormat::NONE;
     std::string ipAddress = "";
     std::string ports[2] = {"", ""};
-};
-
-/// @brief Structure for holding drone angular position.
-struct AngularPosition
-{
-    int8_t pitch = 0;   ///< Pitch angle.
-    int8_t roll = 0;    ///< Roll angle.
-    int16_t yaw = 0;	///< Yaw angle.
 };
 
 struct FCInterfaceConfig

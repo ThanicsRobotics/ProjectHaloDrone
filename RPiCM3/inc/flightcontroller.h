@@ -9,6 +9,8 @@
 #include <fcinterface.h>
 #include <barometer.h>
 #include <wlanradio.h>
+#include <maneuvercontroller.h>
+
 #include <string>
 #include <string.h>
 #include <iostream>
@@ -37,10 +39,6 @@ class FlightController
 	/// @return true if thread is active, false if not.
 	bool isRunning() const { return run; }
 
-	/// @brief Sets the target altitude for takeoff hover.
-	/// @param hoverAltitude Hover altitude in centimeters (max 255 cm).
-	void setHoverAltitude(uint8_t hoverAltitude);
-
 	/// @brief Gets drone's angular position (pitch, roll, yaw).
 	AngularPosition getDronePosition();
 
@@ -62,24 +60,15 @@ class FlightController
   private:
 	std::shared_ptr<bool> shutdownIndicator;
 
+	ManeuverController mc;
 	FCInterfaceConfig fcConfig;
 	FCInterface interface;
 	WLANRadio radio;
-    Barometer baro;
+    //Barometer baro;
 	
 	bool run = true;
 
 	channels pwmInputs;
-
-	//Throttle PID Variables and functions for hovering
-	int pid_p_gain, pid_i_gain, pid_d_gain; ///< PID gains.
-	int pid_max;							///< Maximum output of the PID-controller (+/-)
-	int pid_error_temp;						///< PID proportional error
-	int pid_i_mem, pid_setpoint, pid_last_d_error;
-	int pid_output;
-
-	int lastAltitude;
-	float currentAltitude, setAltitude;
 
 	void flightLoop();
 };

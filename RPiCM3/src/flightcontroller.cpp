@@ -18,7 +18,7 @@
 /// @brief Class constructor, initializes private variables.
 FlightController::FlightController(std::shared_ptr<bool> shutdown)
     : shutdownIndicator(shutdown), interface(shutdownIndicator), 
-    baro(shutdownIndicator), radio(WLAN::DeviceType::CLIENT, "raspberrypi.local", 5000)
+    radio(WLAN::DeviceType::CLIENT, "raspberrypi.local", 5000), mc(shutdown)
 {
     
 }
@@ -59,15 +59,15 @@ void FlightController::flightLoop()
     // radio.connect("raspberrypi.local", 5000);
 
     printf("Calibrating barometer...\n");
-    baro.setup();
+    //baro.setup();
     while(!(*shutdownIndicator)) {
         //Every 260ms, get pressure altitude, if barometer is calibrated
-        if (baro.isCalibrated() && (millis() - baroTimer > BARO_DELAY)) {
-            currentAltitude = baro.getPressureAltitude();
-            std::cout << "BARO: Altitude: " << currentAltitude << "m\n";
-            baro.takeReading();
-            baroTimer = millis();
-        }
+        // if (baro.isCalibrated() && (millis() - baroTimer > BARO_DELAY)) {
+        //     currentAltitude = baro.getPressureAltitude();
+        //     std::cout << "BARO: Altitude: " << currentAltitude << "m\n";
+        //     baro.takeReading();
+        //     baroTimer = millis();
+        // }
 
         radio.checkBuffer();
         // interface.setPWMInputs(pwmInputs);
@@ -78,7 +78,7 @@ void FlightController::flightLoop()
             << "\ntime: " << micros() - loopTimer << "us\n----\n";
 
         //Calculate new PID compensated throttle
-        uint16_t newThrottle = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude);
+        //uint16_t newThrottle = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude);
         //std::cout << "Loop Time: " << micros() - loopTimer << "us" << std::endl;
         loopTimer = micros();
         delay(50);
@@ -107,61 +107,4 @@ void FlightController::getPWMInputs(channels &rcChannels)
     rcChannels.rollPWM = pwmInputs.rollPWM;
     rcChannels.yawPWM = pwmInputs.yawPWM;
     rcChannels.throttlePWM = pwmInputs.throttlePWM;
-}
-
-/// @brief Sets the target altitude for takeoff hover.
-/// @param hoverAltitude Hover altitude in centimeters (max 255 cm)
-void FlightController::setHoverAltitude(uint8_t hoverAltitude)
-{
-    setAltitude = hoverAltitude;
-}
-
-float map(int x, int in_min, int in_max, int out_min, int out_max)
-{
-    return (float)(x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
-/// @brief Calculate new throttle based on a altitude-driven PID loop.
-/// @param altitudePWM PWM Input from controller.
-/// @param altitude Current altitude.
-/// @return New throttle value (1000-2000).
-uint16_t FlightController::calculateThrottlePID(uint16_t altitudePWM, float altitude)
-{
-    //Increase or decrease set altitude proportional to stick position
-    if (altitudePWM < 1000)
-        altitudePWM = 1500;
-    if (altitudePWM >= 1520)
-        setAltitude += 0.2 * map(altitudePWM, 1520, 2000, 1, 20);
-    else if (altitudePWM <= 1480)
-        setAltitude -= 0.2 * map(altitudePWM, 1000, 1480, 20, 1);
-    if (setAltitude < 0)
-        setAltitude = 0;
-
-    //Proportional error
-    pid_error_temp = (int)(setAltitude - altitude);
-
-    //Integrating error over time
-    pid_i_mem += pid_i_gain * pid_error_temp;
-    if (pid_i_mem > pid_max)
-        pid_i_mem = pid_max;
-    else if (pid_i_mem < pid_max * -1)
-        pid_i_mem = pid_max * -1;
-
-    //Combining all controllers into one output
-    pid_output = pid_p_gain * pid_error_temp + pid_i_mem + pid_d_gain * (pid_error_temp - pid_last_d_error);
-    if (pid_output > pid_max)
-        pid_output = pid_max;
-    else if (pid_output < pid_max * -1)
-        pid_output = pid_max * -1;
-
-    pid_last_d_error = pid_error_temp;
-
-    //PID compensated throttle calculation
-    uint16_t newThrottle = 1500 + pid_output;
-
-    if (newThrottle > 2000)
-        newThrottle = 2000;
-    else if (newThrottle < 1000)
-        newThrottle = 1000;
-    return newThrottle;
 }
