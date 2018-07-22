@@ -85,17 +85,22 @@ bool ManeuverController::startLanding()
 
     getAltitude();
     float startingAltitude = currentAltitude;
-    unsigned int stationaryTimer = 0;
     std::cout << "Landing from " << startingAltitude << "cm at " << descentRate << "cm/sec" << std::endl;
-    return maneuverLoop([this, startingAltitude, decrement, stationaryTimer](){
+    return maneuverLoop([this, startingAltitude, decrement](){
         getAltitude();
         pwmFinalOutputs.throttlePWM = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude, currentAltitude - decrement);
         delay(1000/maneuverRefreshRate); // Updates at 250Hz, same as flight motor control
 
-        // Start hover when current altitude reaches 5cm from target takeoff height
+        // If altitude is less than 5cm, wait 2 seconds to make sure we are at ground level,
+        // then turn off motors
         if (currentAltitude < 5)
         {
-            stationaryTimer = millis();
+            maneuverTimer += 1;
+            if (maneuverTimer > maneuverRefreshRate * 2)
+            {
+                pwmFinalOutputs.throttlePWM = 1000; // motors off
+                return;
+            }
         }
     },
     [](){

@@ -5,6 +5,8 @@
 #include <wlan.h>
 #include <functional>
 
+#define PACKET_SIZE 26
+
 class WLANRadio
 {
 public:
@@ -20,9 +22,10 @@ private:
     messagePacket currentPacket;
     bool connected = false;
     unsigned int seq = 0;
-
-    bool decode(std::array<uint8_t, MAX_BUFFER_SIZE>& packet, channels& pwmInputs, Maneuver& maneuver);
-    void encode(messagePacket& msg, std::array<uint8_t, MAX_BUFFER_SIZE>& outPacket);
+    uint16_t crc = 0;
+    
+    bool decode(std::array<uint8_t, PACKET_SIZE>& packet, channels& pwmInputs, Maneuver& maneuver);
+    void encode(messagePacket& msg, std::array<uint8_t, PACKET_SIZE>& outPacket);
 };
 
 #endif

@@ -6,7 +6,7 @@
 #ifndef WLAN_H
 #define WLAN_H
 
-#define MAX_BUFFER_SIZE 128
+#define PACKET_SIZE 26
 
 #include <iostream>
 #include <boost/asio.hpp>
@@ -37,7 +37,7 @@ public:
     /// @return True if socket is active, false if not.
     bool isActive() const { return active; }
 
-    void getCachedMessage(std::array<uint8_t, MAX_BUFFER_SIZE>& msg) const { msg = cachedMessage; }
+    void getCachedMessage(std::array<uint8_t, PACKET_SIZE>& msg) const { msg = cachedMessage; }
 
 private:
     void startHost();
@@ -59,7 +59,7 @@ private:
     std::function<void(std::size_t size)> receiveCallback;
     bool callbackSet = false;
 
-    std::array<uint8_t, MAX_BUFFER_SIZE> cachedMessage;
+    std::array<uint8_t, PACKET_SIZE> cachedMessage;
 };
 
 #endif

@@ -30,6 +30,7 @@ private:
     bool stopManeuver = false;
     std::shared_ptr<bool> shutdownIndicator;
     unsigned int baroTimer = 0;
+    unsigned int maneuverTimer = 0;
     Barometer baro;
     channels pwmInputs;
     channels pwmFinalOutputs;

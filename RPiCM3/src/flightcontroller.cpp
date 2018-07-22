@@ -67,12 +67,9 @@ void FlightController::flightLoop()
         std::cout << "Pitch: " << finalPWMs.pitchPWM
             << "\nRoll: " << finalPWMs.rollPWM
             << "\nYaw: " << finalPWMs.yawPWM
-            << "\nthrottle: " << finalPWMs.throttlePWM
-            << "\ntime: " << micros() - loopTimer << "us\n----\n";
+            << "\nThrottle: " << finalPWMs.throttlePWM
+            << "\nLoop Time: " << micros() - loopTimer << "us\n----\n";
 
-        //Calculate new PID compensated throttle
-        //uint16_t newThrottle = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude);
-        //std::cout << "Loop Time: " << micros() - loopTimer << "us" << std::endl;
         loopTimer = micros();
         delay(50);
     }
