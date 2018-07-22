@@ -6,6 +6,10 @@
 ManeuverController::ManeuverController(std::shared_ptr<bool> shutdown)
     : shutdownIndicator(shutdown), baro(shutdown)
 {
+    pwmFinalOutputs.pitchPWM = 1500;
+    pwmFinalOutputs.rollPWM = 1500;
+    pwmFinalOutputs.yawPWM = 1500;
+    pwmFinalOutputs.throttlePWM = 1000;
 }
 
 // Returns false if requested maneuver is already being executed
@@ -17,19 +21,6 @@ bool ManeuverController::executeManeuver(const Maneuver& requestedManeuver)
         activeManeuver = requestedManeuver;
         newManeuver();
     }
-}
-
-bool ManeuverController::maneuverLoop(std::function<void()> maneuverFunction, std::function<void()> callback)
-{
-    maneuverThread = std::thread([this, maneuverFunction, callback](){
-        while (!isTimeForShutdown())
-        {
-            maneuverFunction();
-        }
-        callback();
-    });
-    activeManeuver.type = ManeuverType::NONE;
-    return true;
 }
 
 bool ManeuverController::newManeuver()
@@ -51,19 +42,77 @@ bool ManeuverController::newManeuver()
     }
 }
 
+bool ManeuverController::maneuverLoop(std::function<void()> maneuverFunction, std::function<void()> callback)
+{
+    maneuverThread = std::thread([this, maneuverFunction, callback](){
+        while (!isTimeForShutdown())
+        {
+            maneuverFunction();
+        }
+        callback();
+    });
+    activeManeuver.type = ManeuverType::NONE;
+    return true;
+}
+
+// First index of maneuverOptions is takeoff height in centimeters
 bool ManeuverController::startTakeoff()
 {
+    const float ascentRate = 50.0; // cm/sec
+    const float increment = ascentRate / maneuverRefreshRate;
+    int takeoffHeight = activeManeuver.maneuverOptions[0];
 
+    getAltitude();
+    float surfaceAltitude = currentAltitude;
+    std::cout << "Taking off to " << takeoffHeight << "cm at " << ascentRate << "cm/sec" << std::endl;
+    return maneuverLoop([this, surfaceAltitude, increment, takeoffHeight](){
+        getAltitude();
+        pwmFinalOutputs.throttlePWM = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude, currentAltitude + increment);
+        delay(1000/maneuverRefreshRate); // Updates at 250Hz, same as flight motor control
+
+        // Start hover when current altitude reaches 5cm from target takeoff height
+        if(abs(currentAltitude - (takeoffHeight + surfaceAltitude)) < 5) startHover();
+    },
+    [](){
+        std::cout << "Takeoff Canceled. New Maneuver starting." << std::endl;
+    });
+}
+
+bool ManeuverController::startLanding()
+{
+    const float descentRate = 30.0; // cm/sec
+    const float decrement = descentRate / maneuverRefreshRate;
+
+    getAltitude();
+    float startingAltitude = currentAltitude;
+    unsigned int stationaryTimer = 0;
+    std::cout << "Landing from " << startingAltitude << "cm at " << descentRate << "cm/sec" << std::endl;
+    return maneuverLoop([this, startingAltitude, decrement, stationaryTimer](){
+        getAltitude();
+        pwmFinalOutputs.throttlePWM = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude, currentAltitude - decrement);
+        delay(1000/maneuverRefreshRate); // Updates at 250Hz, same as flight motor control
+
+        // Start hover when current altitude reaches 5cm from target takeoff height
+        if (currentAltitude < 5)
+        {
+            stationaryTimer = millis();
+        }
+    },
+    [](){
+        std::cout << "Landing Canceled. New Maneuver starting." << std::endl;
+    });
 }
 
 bool ManeuverController::startHover()
 {
+    getAltitude();
+    setAltitude = currentAltitude;
     return maneuverLoop([this](){
         getAltitude();
-        throttleFinal = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude);
-        delay(4); // Updates at 250Hz, same as flight motor control
+        pwmFinalOutputs.throttlePWM = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude, setAltitude);
+        delay(1000/maneuverRefreshRate); // Updates at 250Hz, same as flight motor control
     },
-    [this](){
+    [](){
         std::cout << "Hover Canceled. New Maneuver starting." << std::endl;
     });
 }
@@ -97,7 +146,7 @@ float map(int x, int in_min, int in_max, int out_min, int out_max)
 /// @param altitudePWM PWM Input from controller.
 /// @param altitude Current altitude.
 /// @return New throttle value (1000-2000).
-uint16_t ManeuverController::calculateThrottlePID(uint16_t altitudePWM, float altitude)
+uint16_t ManeuverController::calculateThrottlePID(uint16_t altitudePWM, float currentAltitude, float setAltitude)
 {
     //Increase or decrease set altitude proportional to stick position
     if (altitudePWM < 1000)
@@ -110,7 +159,7 @@ uint16_t ManeuverController::calculateThrottlePID(uint16_t altitudePWM, float al
         setAltitude = 0;
 
     //Proportional error
-    pid_error_temp = (int)(setAltitude - altitude);
+    pid_error_temp = (int)(setAltitude - currentAltitude);
 
     //Integrating error over time
     pid_i_mem += pid_i_gain * pid_error_temp;

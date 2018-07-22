@@ -58,13 +58,16 @@ void FlightController::flightLoop()
     while(!(*shutdownIndicator)) {
 
         radio.checkBuffer();
+        mc.setPWMInputs(pwmInputs);
         mc.executeManeuver(requestedManeuver);
-        
-        // interface.setPWMInputs(pwmInputs);
-        std::cout << "Pitch: " << pwmInputs.pitchPWM
-            << "\nRoll: " << pwmInputs.rollPWM
-            << "\nYaw: " << pwmInputs.yawPWM
-            << "\nthrottle: " << pwmInputs.throttlePWM
+        channels finalPWMs;
+        mc.getPWMFinalOutputs(finalPWMs);
+        //interface.setPWMInputs(finalPWMs);
+
+        std::cout << "Pitch: " << finalPWMs.pitchPWM
+            << "\nRoll: " << finalPWMs.rollPWM
+            << "\nYaw: " << finalPWMs.yawPWM
+            << "\nthrottle: " << finalPWMs.throttlePWM
             << "\ntime: " << micros() - loopTimer << "us\n----\n";
 
         //Calculate new PID compensated throttle

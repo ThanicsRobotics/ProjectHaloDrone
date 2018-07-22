@@ -19,9 +19,11 @@ public:
     int getPitchFinal() const { return pitchFinal; }
     int getRollFinal() const { return rollFinal; }
     int getYawFinal() const { return yawFinal; }
+    void setPWMInputs(channels& rcInputs) { pwmInputs = rcInputs; }
     void getPWMFinalOutputs(channels& finalPWM) const { finalPWM = pwmFinalOutputs; }
 
 private:
+    const float maneuverRefreshRate = 250.0; //Hz
     Maneuver activeManeuver;
     
     std::thread maneuverThread;
@@ -35,11 +37,12 @@ private:
 
     bool startTakeoff();
     bool startHover();
+    bool startLanding();
     bool isTimeForShutdown() { return (!stopManeuver && !(*shutdownIndicator)) ? false : true; }
     void getAltitude();
     bool maneuverLoop(std::function<void()> maneuverFunction, std::function<void()> callback);
     bool newManeuver();
-    uint16_t calculateThrottlePID(uint16_t altitudePWM, float altitude);
+    uint16_t calculateThrottlePID(uint16_t altitudePWM, float currentAltitude, float setAltitude);
     
     //Throttle PID Variables and functions for hovering
 	int pid_p_gain, pid_i_gain, pid_d_gain; ///< PID gains.
