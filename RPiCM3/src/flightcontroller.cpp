@@ -17,10 +17,14 @@
 
 /// @brief Class constructor, initializes private variables.
 FlightController::FlightController(std::shared_ptr<bool> shutdown)
-    : shutdownIndicator(shutdown), interface(shutdownIndicator), 
-    radio(WLAN::DeviceType::CLIENT, "raspberrypi.local", 5000), mc(shutdown)
+    : shutdownIndicator(shutdown), interface(shutdownIndicator), mc(shutdown),
+    radio(WLAN::DeviceType::CLIENT, "raspberrypi.local", 5000)
 {
-    
+    radio.setUpdater([this](std::size_t size)
+    {
+        std::cout << "callback" << std::endl;
+        radio.update(pwmInputs, requestedManeuver, size);
+    });
 }
 
 FlightController::~FlightController()
@@ -36,7 +40,6 @@ void FlightController::startFlight()
     interface.setConfig(fcConfig);
     interface.startInterface();
     flightLoop();
-    //stopFlight();
 }
 
 /// @brief Stops interfaceLoop thread.
@@ -51,25 +54,12 @@ void FlightController::flightLoop()
     int heartbeatTimer, baroTimer, radioTimer = millis();
     int loopTimer = micros();
     float currentAltitude = 0;
-    radio.setUpdater([this](std::size_t size)
-    {
-        std::cout << "callback" << std::endl;
-        radio.update(pwmInputs, size);
-    });
-    // radio.connect("raspberrypi.local", 5000);
 
-    printf("Calibrating barometer...\n");
-    //baro.setup();
     while(!(*shutdownIndicator)) {
-        //Every 260ms, get pressure altitude, if barometer is calibrated
-        // if (baro.isCalibrated() && (millis() - baroTimer > BARO_DELAY)) {
-        //     currentAltitude = baro.getPressureAltitude();
-        //     std::cout << "BARO: Altitude: " << currentAltitude << "m\n";
-        //     baro.takeReading();
-        //     baroTimer = millis();
-        // }
 
         radio.checkBuffer();
+        mc.executeManeuver(requestedManeuver);
+        
         // interface.setPWMInputs(pwmInputs);
         std::cout << "Pitch: " << pwmInputs.pitchPWM
             << "\nRoll: " << pwmInputs.rollPWM

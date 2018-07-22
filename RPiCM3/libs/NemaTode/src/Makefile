@@ -1,4 +1,8 @@
-CC=g++-8.1.0
+ifeq ($(TARGET),cross)
+    CC = arm-linux-gnueabihf-g++
+else
+    CC = g++-8.1.0
+endif
 CFLAGS=-w -std=c++17 -ggdb3
 SOURCES=$(wildcard *.cpp)
 DIR1=-I../include/

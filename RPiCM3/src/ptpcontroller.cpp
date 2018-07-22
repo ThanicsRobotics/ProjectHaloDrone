@@ -2,7 +2,7 @@
 
 // Code from this file is taken from the libptp2 ptpcam program,
 // and uses the libptp2 library.
-#include <libptp2/ptp.h>
+#include <ptp.h>
 
 int PTPController::getProperty(uint16_t propertyCode)
 {

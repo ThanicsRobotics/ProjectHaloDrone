@@ -12,7 +12,7 @@ public:
     void connect(WLAN::DeviceType deviceType, std::string ipAddress, int port);
     void send(messagePacket& msg);
     void setUpdater(std::function<void(std::size_t size)> callback);
-    void update(channels& pwmInputs, std::size_t size);
+    void update(channels& pwmInputs, Maneuver& maneuver, std::size_t size);
     void checkBuffer();
 
 private:
@@ -21,8 +21,8 @@ private:
     bool connected = false;
     unsigned int seq = 0;
 
-    bool decode(std::array<char, MAX_BUFFER_SIZE>& packet, channels& pwmInputs);
-    void encode(messagePacket& msg, std::array<char, MAX_BUFFER_SIZE>& outPacket);
+    bool decode(std::array<uint8_t, MAX_BUFFER_SIZE>& packet, channels& pwmInputs, Maneuver& maneuver);
+    void encode(messagePacket& msg, std::array<uint8_t, MAX_BUFFER_SIZE>& outPacket);
 };
 
 #endif

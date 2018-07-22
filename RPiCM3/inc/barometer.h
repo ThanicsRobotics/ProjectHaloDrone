@@ -53,6 +53,7 @@ private:
         THREAD_CLOSED
     } calState = NOT_CALIBRATED;
 
+    bool alreadySetup = false;
     int baroI2cFd;      ///< File descriptor for the Barometer's I2C port.
     bool i2cConfigured = false; ///< State of I2C configuration.
     bool calibrated = false;    ///< State of barometer calibration/acclimation.

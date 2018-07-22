@@ -24,11 +24,22 @@ struct AngularPosition
     int16_t yaw = 0;	///< Yaw angle.
 };
 
-enum Maneuvers
+enum class ManeuverType
 {
     NONE = 0,
     TAKEOFF = 1,
     HOVER = 2
+};
+
+struct Maneuver
+{
+    ManeuverType type = ManeuverType::NONE;
+    std::array<uint8_t, 10> maneuverOptions{};
+
+    bool operator==(const Maneuver& other) const
+    {
+        return ((type == other.type) && (maneuverOptions == other.maneuverOptions));
+    }
 };
 
 ///////////////////////
@@ -53,12 +64,11 @@ struct messagePacket {
     uint8_t fromid;         ///< ID of sender system.
     uint8_t seqid;          ///< Sequential message number, used for checking message continuity.
     channels rcChannels;
-    Maneuvers requestedManeuver;
-    std::array<uint8_t, 10> maneuverOptions;
+    Maneuver requestedManeuver;
 };
 
 /// @brief Contains states of message parsing process.
-enum MSG_STATE {
+enum class MSG_STATE {
     WAITING = 0,    ///< Waiting for starting header.
     FILLING = 1,    ///< Message has started, and filling buffer.
     FAIL = 2,       ///< Buffer overflowed, or other error.
@@ -72,7 +82,7 @@ enum MSG_STATE {
 /////
 ///////////////////////
 
-enum VideoFormat
+enum class VideoFormat
 {
     NONE = 0,
     MONO,

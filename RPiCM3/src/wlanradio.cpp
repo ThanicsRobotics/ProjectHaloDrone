@@ -1,7 +1,7 @@
 #include <wlanradio.h>
 #include <algorithm>
 
-#define PACKET_SIZE 11
+#define PACKET_SIZE 24
 
 WLANRadio::WLANRadio(WLAN::DeviceType deviceType, std::string ipAddress, int port)
     : wlan(deviceType, ipAddress, port), connected(true)
@@ -34,20 +34,20 @@ void WLANRadio::checkBuffer()
     wlan.checkBuffer();
 }
 
-void WLANRadio::update(channels& pwmInputs, std::size_t size)
+void WLANRadio::update(channels& pwmInputs, Maneuver& maneuver, std::size_t size)
 {
-    std::array<char, MAX_BUFFER_SIZE> msg;
+    std::array<uint8_t, MAX_BUFFER_SIZE> msg;
     wlan.getCachedMessage(msg);
     for (int i = 0; i < size; i++)
     {
         std::cout << msg[i];
     }
     std::cout << std::endl;
-    decode(msg, pwmInputs);
+    decode(msg, pwmInputs, maneuver);
     wlan.read();
 }
 
-bool WLANRadio::decode(std::array<char, MAX_BUFFER_SIZE>& packet, channels& pwmInputs)
+bool WLANRadio::decode(std::array<uint8_t, MAX_BUFFER_SIZE>& packet, channels& pwmInputs, Maneuver& maneuver)
 {
     // Find start of message
     auto start = std::find(packet.begin(), packet.end(), 0xFF);
@@ -65,12 +65,17 @@ bool WLANRadio::decode(std::array<char, MAX_BUFFER_SIZE>& packet, channels& pwmI
         pwmInputs.rollPWM = *(++start) << 8 | *(++start);
         pwmInputs.yawPWM = *(++start) << 8 | *(++start);
         pwmInputs.throttlePWM = *(++start) << 8 | *(++start);
+        maneuver.type = static_cast<ManeuverType>(*(++start));
+        for (int i = 0; i < maneuver.maneuverOptions.size(); i++)
+        {
+            maneuver.maneuverOptions[i] = *(++start);
+        }
         return true;
     }
     return false;
 }
 
-void WLANRadio::encode(messagePacket& msg, std::array<char, MAX_BUFFER_SIZE>& outPacket)
+void WLANRadio::encode(messagePacket& msg, std::array<uint8_t, MAX_BUFFER_SIZE>& outPacket)
 {
     msg.fromid = 0;
     msg.msgid = 0;
@@ -92,4 +97,9 @@ void WLANRadio::encode(messagePacket& msg, std::array<char, MAX_BUFFER_SIZE>& ou
     outPacket[10] = msg.rcChannels.yawPWM & 0xFF;
     outPacket[11] = (msg.rcChannels.throttlePWM >> 8) & 0xFF;
     outPacket[12] = msg.rcChannels.throttlePWM & 0xFF;
+    outPacket[13] = static_cast<uint8_t>(msg.requestedManeuver.type);
+    for (int i = 0; i < msg.requestedManeuver.maneuverOptions.size(); i++)
+    {
+        outPacket[14 + i] = msg.requestedManeuver.maneuverOptions[i];
+    }
 }

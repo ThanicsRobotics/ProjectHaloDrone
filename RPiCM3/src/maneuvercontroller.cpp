@@ -1,24 +1,48 @@
 #include <maneuvercontroller.h>
 #include <flightcontroller.h>
 #include <iostream>
+#include <wiringPi.h>
 
 ManeuverController::ManeuverController(std::shared_ptr<bool> shutdown)
     : shutdownIndicator(shutdown), baro(shutdown)
 {
-
 }
 
-bool ManeuverController::newManeuver(Maneuvers maneuver)
+// Returns false if requested maneuver is already being executed
+bool ManeuverController::executeManeuver(const Maneuver& requestedManeuver)
+{
+    if (requestedManeuver == activeManeuver) return false;
+    else
+    {
+        activeManeuver = requestedManeuver;
+        newManeuver();
+    }
+}
+
+bool ManeuverController::maneuverLoop(std::function<void()> maneuverFunction, std::function<void()> callback)
+{
+    maneuverThread = std::thread([this, maneuverFunction, callback](){
+        while (!isTimeForShutdown())
+        {
+            maneuverFunction();
+        }
+        callback();
+    });
+    activeManeuver.type = ManeuverType::NONE;
+    return true;
+}
+
+bool ManeuverController::newManeuver()
 {
     stopManeuver = true;
     maneuverThread.join();
     stopManeuver = false;
-    switch (maneuver)
+    switch (activeManeuver.type)
     {
-        case Maneuvers::TAKEOFF:
+        case ManeuverType::TAKEOFF:
             return startTakeoff();
             break;
-        case Maneuvers::HOVER:
+        case ManeuverType::HOVER:
             return startHover();
             break;
         default:
@@ -34,18 +58,34 @@ bool ManeuverController::startTakeoff()
 
 bool ManeuverController::startHover()
 {
-    if(activeManeuver == Maneuvers::NONE)
-    {
-        maneuverThread = std::thread([this](){
-            while (!isTimeForShutdown())
-            {
+    return maneuverLoop([this](){
+        getAltitude();
+        throttleFinal = calculateThrottlePID(pwmInputs.throttlePWM, currentAltitude);
+        delay(4); // Updates at 250Hz, same as flight motor control
+    },
+    [this](){
+        std::cout << "Hover Canceled. New Maneuver starting." << std::endl;
+    });
+}
 
-            }
-            std::cout << "Hover Canceled. New Maneuver starting." << std::endl;
-        });
-        return true;
+void ManeuverController::getAltitude()
+{
+    // Use lidar altimeter
+    if (currentAltitude < 10000)
+    {
+        // currentAltitude = lidarAltimeter.getDistance();
     }
-    else return false;
+    // Use barometer
+    else
+    {
+        //Every 260ms, get pressure altitude, if barometer is calibrated
+        if (baro.isCalibrated() && (millis() - baroTimer > BARO_DELAY)) {
+            currentAltitude = baro.getPressureAltitude();
+            std::cout << "BARO: Altitude: " << currentAltitude << "m\n";
+            baro.takeReading();
+            baroTimer = millis();
+        }
+    }
 }
 
 float map(int x, int in_min, int in_max, int out_min, int out_max)

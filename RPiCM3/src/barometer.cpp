@@ -17,6 +17,8 @@
 Barometer::Barometer(std::shared_ptr<bool> shutdown)
     : shutdownIndicator(shutdown)
 {
+    alreadySetup = true;
+    setup();
 }
 
 Barometer::~Barometer() {
@@ -26,6 +28,7 @@ Barometer::~Barometer() {
 /// @brief Opens I2C port, sets up barometer registers
 /// and starts calibration/acclimation thread.
 void Barometer::setup() {
+    if (alreadySetup) return;
     // Open I2C address
     if ((baroI2cFd = i2cOpen(1, BARO_ADDR, 0)) < 0) {
         printf("%s", strerror(errno));

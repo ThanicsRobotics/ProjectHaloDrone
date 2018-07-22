@@ -75,7 +75,7 @@ void WLAN::startClient(std::string ipAddress, int port)
         std::cout << "Connected" << std::endl;
         connected = true;
 
-        std::array<char, MAX_BUFFER_SIZE> buf;
+        std::array<uint8_t, MAX_BUFFER_SIZE> buf;
         boost::system::error_code error;
 
         size_t len = socket.read_some(boost::asio::buffer(buf), error);
@@ -86,7 +86,7 @@ void WLAN::startClient(std::string ipAddress, int port)
         else if (error)
             throw boost::system::system_error(error);
 
-        std::cout.write(buf.data(), len);
+        std::cout.write((char*)buf.data(), len);
     }
     catch (std::exception& e)
     {

@@ -51,12 +51,6 @@ class FlightController
     void setNoMotors(bool state) { fcConfig.noMotors = state; }
     void setSTM32Resetting(bool state) { fcConfig.stm32Resetting = state; }
 
-	/// @brief Calculate new throttle based on a altitude-driven PID loop.
-	/// @param altitudePWM PWM Input from controller.
-	/// @param altitude Current altitude.
-	/// @return New throttle value (1000-2000).
-	uint16_t calculateThrottlePID(uint16_t altitudePWM, float altitude);
-
   private:
 	std::shared_ptr<bool> shutdownIndicator;
 
@@ -64,6 +58,7 @@ class FlightController
 	FCInterfaceConfig fcConfig;
 	FCInterface interface;
 	WLANRadio radio;
+	Maneuver requestedManeuver;
     //Barometer baro;
 	
 	bool run = true;
