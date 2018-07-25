@@ -28,7 +28,7 @@ public:
     WLAN(DeviceType type, std::string ipAddress, int port);
 
     void start(DeviceType type, std::string ipAddress, int port);
-    void write(std::string& msg);
+    void write(std::array<uint8_t, PACKET_SIZE>& msg);
     void read();
     void setCallback(std::function<void(std::size_t)> callback);
     void checkBuffer();

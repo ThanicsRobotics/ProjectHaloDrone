@@ -20,7 +20,9 @@ void WLANRadio::connect(WLAN::DeviceType deviceType, std::string ipAddress, int 
 
 void WLANRadio::send(messagePacket& msg)
 {
-
+    std::array<uint8_t, PACKET_SIZE> packet;
+    encode(msg, packet);
+    wlan.write(packet);
 }
 
 void WLANRadio::setUpdater(std::function<void(std::size_t size)> callback)
