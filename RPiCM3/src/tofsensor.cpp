@@ -6,9 +6,12 @@
 #include <wiringPi.h>
 #include <OPT3101device.h>
 
-#define I2C_CONT_RW         0x00     // R/W
-#define I2C_CONT_RW_DATA    0xC00040 // R/W  Binary: 010000000000000001000000
-#define PHASE_OUT           0x08     // R
+#define I2C_CONT_RW                 0x00     // R/W
+#define I2C_CONT_RW_DATA            0xC00040 // R/W  Binary: 010000000000000001000000
+#define PHASE_OUT                   0x08     // R
+#define CONTINUOUSandNUMFRAMES      0x27     // R/W
+#define CONTINUOUSandNUMFRAMES_DATA 0x7FF7F  // R/W
+
 
 
 TOFSensor::TOFSensor()
@@ -39,17 +42,22 @@ void TOFSensor::setup()
 
 void TOFSensor::ConfigureMonoshot(){
     
-    char calibRegister[3];
-    calibRegister[0] = 0x40;
-    calibRegister[1] = 0x00;
-    calibRegister[2] = 0xC0;
-    i2cWriteI2CBlockData(i2cFd, I2C_CONT_RW, calibRegister, 3);
-    std::cout << calibRegister[0] << calibRegister[1] << calibRegister[2] << std::endl;
+    char configI2CCONT[3];
+    configI2CCONT[0] = 0xC0;
+    configI2CCONT[1] = 0x00;
+    configI2CCONT[2] = 0x40;
+    i2cWriteI2CBlockData(i2cFd, I2C_CONT_RW, configI2CCONT, 3);
     
+    char configCONT[3];
+    // configCONT[0] = 0xFF;
+    // configCONT[1] = 0xFF;
+    // configCONT[2] = 0xFF;
+    i2cWriteI2CBlockData(i2cFd, CONTINUOUSandNUMFRAMES, configCONT, 3);
+    i2cWriteI2CBlockData(i2cFd, CONTINUOUSandNUMFRAMES, configCONT, 3);
 
-    char inputRegister[3];
-    i2cReadI2CBlockData(i2cFd, I2C_CONT_RW, inputRegister, 3);
-    std::cout << inputRegister[0] << inputRegister[1] << inputRegister[2] << std::endl;
+
+
+
     
     
 
