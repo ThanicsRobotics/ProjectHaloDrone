@@ -45,7 +45,7 @@ serial::Serial OPT3101commandPort("COM32", 9600, serial::Timeout::simpleTimeout(
 const char filePath[] = { "C:/temp/" };
 #endif
 
-//hostController host;
+hostController host;
 
 void hostController::writeI2C(int fd, uint8_t address, uint32_t data) {
 	uint8_t buf[3] = {data & 0xFF, (data >> 8) & 0xFF, (data >> 16) & 0xFF};

@@ -51,7 +51,7 @@ namespace OPT3101{
 class deviceRegister{
 	private:
 		int mI2cFd; ///< I2C file descriptor
-		hostController host;
+		// hostController host;
 		/*!
 		* \brief Function to resolve actual data to be written before calling writeI2C function
 		*
@@ -96,6 +96,7 @@ class deviceRegister{
 		* \param[in] size; size (typically 1 or 2 bytes) determines the number of segments that the register is divided in to.
 		*
 		*/
+		deviceRegister();
 		deviceRegister(int i2cFd, uint8_t size);
 		/*!
 		* \brief Operator overload for '='.

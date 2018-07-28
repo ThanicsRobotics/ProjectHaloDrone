@@ -99,7 +99,7 @@ extern const char filePath[];
 /** \brief hostController declaration
 This global variable declaration with name host of class hostController is used by various different classes like OPT3101::deviceRegister , OPT3101::registers and OPT3101::device to specify specific instructions to the host like wait, sleep, I2C reads and writes
 */
-//extern hostController host;
+extern hostController host;
 
 /*! \class hostController
 \brief Generic implementation for host 

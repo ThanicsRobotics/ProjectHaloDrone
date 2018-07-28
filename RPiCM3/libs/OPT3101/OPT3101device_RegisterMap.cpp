@@ -27,6 +27,11 @@
 
 #include "OPT3101RegisterDefinition.h"
 
+OPT3101::registers::registers()
+{
+	
+}
+
 OPT3101::registers::registers(int i2cFd) :
 dig_gpo_sel0(i2cFd, 1),			///< dig_gpo_sel0;Register Addresses: 11[3:0];
 dig_gpo_sel1(i2cFd, 1),			///< dig_gpo_sel1;Register Addresses: 11[7:4];

@@ -31,7 +31,10 @@
 /** \brief hostController declaration
 This global variable declaration with name host of hostController is used by various methods to send specific control commands to the host
 */
-
+OPT3101::deviceRegister::deviceRegister()
+{
+	
+}
 OPT3101::deviceRegister::deviceRegister(int i2cFd, uint8_t size)
 	: size(size), mI2cFd(i2cFd)
 {
