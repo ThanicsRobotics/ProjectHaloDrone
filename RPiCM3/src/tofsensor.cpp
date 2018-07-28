@@ -4,7 +4,7 @@
 #include <cstring>
 #include <errno.h>
 #include <wiringPi.h>
-#include <OPT3101device.h>
+
 
 #define I2C_CONT_RW                 0x00     // R/W
 #define I2C_CONT_RW_DATA            0xC00040 // R/W  Binary: 010000000000000001000000
@@ -15,8 +15,8 @@
 
 
 TOFSensor::TOFSensor()
+    : dev(0x5F)
 {
-    OPT3101::device dev;
     setup();
     ConfigureMonoshot();
     ReadPhaseOut();

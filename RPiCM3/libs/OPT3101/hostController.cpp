@@ -25,6 +25,7 @@
 * This file contains the hostController class methods
 */
 #include <wiringPi.h>
+#include <pigpio.h>
 #include "hostController.h"
 
 #ifdef _WIN32
@@ -44,10 +45,11 @@ serial::Serial OPT3101commandPort("COM32", 9600, serial::Timeout::simpleTimeout(
 const char filePath[] = { "C:/temp/" };
 #endif
 
-hostController host;
+//hostController host;
 
-
-void hostController::writeI2C(uint8_t address, uint32_t data) {
+void hostController::writeI2C(int fd, uint8_t address, uint32_t data) {
+	uint8_t buf[3] = {data & 0xFF, (data >> 8) & 0xFF, (data >> 16) & 0xFF};
+	i2cWriteI2CBlockData(fd, address, (char*)buf, 3);
 	/// <b>Algorithm of the method is as follows</b>
 #if defined(OPT3101_USE_STDIOLIB) && defined(OPT3101_USE_SERIALLIB)
 	std::string returnValue;
@@ -59,8 +61,11 @@ void hostController::writeI2C(uint8_t address, uint32_t data) {
 #endif
 
 }
-uint32_t hostController::readI2C(uint8_t address) {
+uint32_t hostController::readI2C(int fd, uint8_t address) {
 	uint32_t i2cReadValue=0;
+	uint8_t buf[3];
+	i2cReadI2CBlockData(fd, address, (char*)buf, 3);
+	i2cReadValue = buf[0] << 16 | buf[1] << 8 | buf[2];
 #if defined(OPT3101_USE_STDIOLIB) && defined(OPT3101_USE_SERIALLIB)
 	char *writeData;
 	std::string returnValue;
@@ -93,10 +98,10 @@ uint32_t hostController::readI2C(uint8_t address) {
 
 void hostController::sleep(uint32_t timeInMilliSeconds) {
 	/// <b>Algorithm of the method is as follows</b>
-#if defined(HOST_PC) && defined(OPT3101_USE_SERIALLIB)
+//#if defined(HOST_PC) && defined(OPT3101_USE_SERIALLIB)
 	delay(timeInMilliSeconds);
 	//Sleep(timeInMilliSeconds);/// * Sleeps for the time specified in the argument timeInMilliSeconds
-#endif
+//#endif
 }
 void hostController::sleepDataReadyCounts(uint16_t dataReadyCounts) {
 	/// <b>Algorithm of the method is as follows</b>

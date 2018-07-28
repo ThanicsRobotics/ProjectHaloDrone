@@ -18,7 +18,7 @@ THIS SOFTWARE IS PROVIDED BY TI AND TI's LICENSORS "AS IS" AND ANY EXPRESS OR IM
 
 
 #include "OPT3101device.h"
-
+#include <pigpio.h>
 
 /* OPT3101 device initialization Sequence Header file written by OPT3101 Calibration tool - Version 0.8.0
 By: andre
@@ -89,9 +89,19 @@ void OPT3101::device::initialize(void){
 
 }
 
-OPT3101::device::device(void):
-configurationFlags_isTXChannelActive{true,false,false},
-configurationFlags_isRegisterSetActive{false,true} {this->calibration = new calibrationC[1];}
+OPT3101::device::device(int deviceAddress)
+	: configurationFlags_isTXChannelActive{true,false,false},
+	configurationFlags_isRegisterSetActive{false,true}
+{
+	i2cFd = i2cOpen(1, deviceAddress, 0);
+	reg = registers(i2cFd);
+	this->calibration = new calibrationC[1];
+}
+
+OPT3101::device::~device()
+{
+	i2cClose(i2cFd);
+}
 
 OPT3101::calibrationC::calibrationC(void) : calibrationC(true) {
 	this->recordLength           = 1; // //This configuration requires 1 crosstalk and other configuration record(s)
