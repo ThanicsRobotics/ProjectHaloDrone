@@ -19,10 +19,7 @@
 TOFSensor::TOFSensor()
     : dev(0x5F)
 {
-<<<<<<< HEAD
     OPT3101::device dev; ///* Declared variable dev of class OPT3101::device 
-=======
->>>>>>> 851bdb616b3aa9da468f5cade96b142250def9f1
     setup();
     ConfigureMonoshot();
     ReadPhaseOut();
