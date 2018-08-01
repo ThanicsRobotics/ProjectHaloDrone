@@ -45,6 +45,7 @@ class registers {
 		* Constructor allocates OPT3101::deviceRegister::size to each OPT3101::deviceRegister instance on construction 
 		*/
 		registers();
+		registers(int i2cFd);
 		OPT3101::deviceRegister dig_gpo_sel0; ///< dig_gpo_sel0;Register Addresses: 11[3:0];
 		OPT3101::deviceRegister dig_gpo_sel1; ///< dig_gpo_sel1;Register Addresses: 11[7:4];
 		OPT3101::deviceRegister dig_gpo_sel2; ///< dig_gpo_sel2;Register Addresses: 11[13:10];

@@ -5,16 +5,21 @@
 #include <errno.h>
 #include <wiringPi.h>
 
-#define I2C_CONT_RW                 0x00     // R/W
-#define I2C_CONT_RW_DATA            0xC00040 // R/W  Binary: 010000000000000001000000
-#define PHASE_OUT                   0x08     // R
-#define CONTINUOUSandNUMFRAMES      0x27     // R/W
-#define CONTINUOUSandNUMFRAMES_DATA 0x7FF7F  // R/W
 
-
+#define I2C_CONT_RW                 0     // R/W
+#define I2C_CONT_RW_DATA            12582976 // R/W  Binary: 010000000000000001000000
+#define PHASE_OUT                   8     // R
+#define CONTINUOUSandNUMFRAMES      39     // R/W
+#define CONTINUOUSandNUMFRAMES_DATA 524159  // R/W
+#define OPT3101_USE_STDIOLIB 
+#define OPT3101_USE_SERIALLIB 
+#define OPT3101_USE_STDIOLIB
+ 
 
 TOFSensor::TOFSensor()
+    : dev(0x5F)
 {
+    OPT3101::device dev; ///* Declared variable dev of class OPT3101::device 
     setup();
     ConfigureMonoshot();
     ReadPhaseOut();
@@ -29,44 +34,27 @@ TOFSensor::~TOFSensor()
 
 void TOFSensor::setup()
 {
-    // Open I2C address
-    if ((i2cFd = i2cOpen(1, 0x5F, 0)) < 0) {
-        std::cout << strerror(errno) << std::endl;
-    }
-    else i2cConfigured = true;
+    OPT3101::device dev; ///* Declared variable dev of class OPT3101::device 
+    dev.calibrationSession_firstTimeBringUp(); ///* Calls the method to bring up the device first time and calibrate. Calls OPT3101::calibrationSession_firstTimeBringUp
+    dev.calibration->report(); ///* Calls report function for all calibration coefficients. Since not all coefficients are done in this example most of them are expected to be zero.
+    printf("Waiting for user input to quit program...\n"); ///* Waits for user input before closing the console 
+    host.pause();
+    dev.initialize();
     
     
 }
 
 void TOFSensor::ConfigureMonoshot(){
-    
-    char configI2CCONT[3];
-    configI2CCONT[0] = 0xC0;
-    configI2CCONT[1] = 0x00;
-    configI2CCONT[2] = 0x40;
-    i2cWriteI2CBlockData(i2cFd, I2C_CONT_RW, configI2CCONT, 3);
-    
-    char configCONT[3];
-    configCONT[0] = 0xFF;
-    configCONT[1] = 0xFF;
-    configCONT[2] = 0xFF;
-    i2cWriteI2CBlockData(i2cFd, CONTINUOUSandNUMFRAMES, configCONT, 3);
+    extern hostController host;
+    host.writeI2C(uint8_t (0), uint32_t (12582976));
+    host.writeI2C(uint8_t (39), uint32_t (524159));
 
-
-
-    
-    
 
     }
 
-
-
 void TOFSensor::ReadPhaseOut(){
-
-    char outputRegister[3];
-    i2cReadI2CBlockData(i2cFd, PHASE_OUT, outputRegister, 3);
-    std::cout << outputRegister[0] << " " << outputRegister[1] << " " << outputRegister[2] << std::endl;
-    phaseOut = (short)((outputRegister[1] << 8) |  (outputRegister[0]));
+    extern hostController host;
+    phaseOut = host.readI2C(uint8_t (8));
 }
 
 void TOFSensor::CalculateDistance(){
@@ -83,3 +71,9 @@ void TOFSensor::ReportDistance(){
 //             while(millis() - time <= 50);
 // }
 }
+
+    // // Open I2C address
+    // if ((i2cFd = i2cOpen(1, 0x5F, 0)) < 0) {
+    //     std::cout << strerror(errno) << std::endl;
+    //  }
+    // else i2cConfigured = true;

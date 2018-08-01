@@ -7,12 +7,13 @@ DIR1=-I$(PROJPATH)/inc/
 DIR2=-I$(PROJPATH)/libs/NemaTode/include/
 DIR3=-I$(PROJPATH)/libs/
 DIR4=-I$(PROJPATH)/libs/ptpcam/
+DIR5=-I$(PROJPATH)/libs/OPT3101/
 OBJ= $(SOURCES:.cpp=.o)
 
 all: $(OBJ)
 
 .cpp.o:
-	$(CC) -c $(CFLAGS) $< -o $@ $(DIR1) $(DIR2) $(DIR3) $(DIR4) `pkg-config --cflags --libs gstreamer-1.0` $(LIBS)
+	$(CC) -c $(CFLAGS) $< -o $@ $(DIR1) $(DIR2) $(DIR3) $(DIR4) $(DIR5) `pkg-config --cflags --libs gstreamer-1.0` $(LIBS)
 
 clean:
 	rm -f *.o
