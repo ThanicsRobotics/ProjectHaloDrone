@@ -16,6 +16,14 @@
 #include <bitset>
 #include <pthread.h>
 #include <memory>
+#include "OPT3101device.h"
+#include "hostController.h"
+#include "OPT3101RegisterDefinition.h"
+#include "OPT3101Calibration.h"
+#include "OPT3101DesignCoefficients.h"
+#include "OPT3101PhaseOffset.h"
+#include "OPT3101frameData.h"
+#include "register.h"
 
 //Project headers
 #include <barometer.h>
@@ -27,6 +35,7 @@
 #include <types.h>
 #include <halocontroller.h>
 #include <tofsensor.h>
+
 
 #define projectPath std::string("./")
 

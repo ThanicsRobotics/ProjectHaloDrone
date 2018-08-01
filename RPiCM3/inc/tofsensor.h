@@ -11,7 +11,6 @@ private:
     short phaseOut;
     int distance; //meters
 
-
     void setup();
     void ConfigureMonoshot();
     void ReadPhaseOut();
