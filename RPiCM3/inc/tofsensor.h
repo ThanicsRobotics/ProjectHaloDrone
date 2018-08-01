@@ -1,6 +1,8 @@
 #ifndef TOFSENSOR_H
 #define TOFSENSOR_H
 
+#include <OPT3101device.h>
+
 class TOFSensor {
 public:
     TOFSensor();
@@ -10,6 +12,10 @@ private:
     bool i2cConfigured = false;
     short phaseOut;
     int distance; //meters
+<<<<<<< HEAD
+=======
+    OPT3101::device dev;
+>>>>>>> 851bdb616b3aa9da468f5cade96b142250def9f1
 
     void setup();
     void ConfigureMonoshot();

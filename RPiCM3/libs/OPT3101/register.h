@@ -50,6 +50,8 @@ Example of register which has more than 1 address is OPT3101::registers::amplitu
 namespace OPT3101{
 class deviceRegister{
 	private:
+		int mI2cFd; ///< I2C file descriptor
+		// hostController host;
 		/*!
 		* \brief Function to resolve actual data to be written before calling writeI2C function
 		*
@@ -87,13 +89,15 @@ class deviceRegister{
 		uint8_t lsb[2]; ///< This is the LSB position of this register. The register occupies the OPT3101::deviceRegister::address from OPT3101::deviceRegister::msb to OPT3101::deviceRegister::lsb
 		uint8_t address[2]; ///< This is the ADDRESS of this register. The register occupies the OPT3101::deviceRegister::address from OPT3101::deviceRegister::msb to OPT3101::deviceRegister::lsb
 		uint8_t size; ///< This specifies how many ADDRESS does this register span across. For eg: There are registers which span multiple address locations in chunks. 
+		
 		/*!
 		* \brief Constructor for class OPT3101::deviceRegister
 		*  Constructor allocated size to each register instance on construction
 		* \param[in] size; size (typically 1 or 2 bytes) determines the number of segments that the register is divided in to.
 		*
 		*/
-		deviceRegister(uint8_t size);
+		deviceRegister();
+		deviceRegister(int i2cFd, uint8_t size);
 		/*!
 		* \brief Operator overload for '='.
 		*

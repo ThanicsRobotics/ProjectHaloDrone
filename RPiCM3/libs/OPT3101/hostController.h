@@ -117,7 +117,7 @@ class hostController {
 		* \param[in] address; address is the I2C register address 
 		* \return value; value read from I2C port for the address
 		*/
-		uint32_t readI2C(uint8_t address);
+		uint32_t readI2C(int fd, uint8_t address);
 		/*!
 		* \brief method to write data from I2C port
 		*
@@ -125,7 +125,7 @@ class hostController {
 		* \param[in] data; data to write to I2C register 
 		* \return Nothing
 		*/
-		void writeI2C(uint8_t address, uint32_t data);
+		void writeI2C(int fd, uint8_t address, uint32_t data);
 		/*!
 		* \brief send reset pulse to OPT3101 device
 		* Method used to send reset pulse to OPT3101 device
