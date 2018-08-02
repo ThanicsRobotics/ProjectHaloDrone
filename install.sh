@@ -146,8 +146,7 @@ else
     tar -xvf boost_1_67_0.tar.gz
     cd boost_1_67_0
     sudo ./bootstrap.sh
-    sudo ./b2 -j4
-    sudo ./b2 install
+    sudo ./b2 -j8 --with-system --with-thread --with-date_time --with-regex --with-serialization install
     cd ..
     rm -rf boost*
 fi
