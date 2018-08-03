@@ -10,7 +10,7 @@
 #include <cmath>
 
 #define BARO_ADDR 0x60
-#define BARO_ERROR 2
+#define BARO_TOLERANCE 2
 #define SURFACE_OFFSET -1
 
 /// @brief Initializes private variables.
@@ -77,7 +77,7 @@ void Barometer::calibrate() {
     int timer = millis();
     int count = 0;
 
-    // In this loop until range of 30 samples is less than BARO_ERROR in meters,
+    // In this loop until range of 30 samples is less than BARO_TOLERANCE in meters,
     // and repeats 2 other times in a row to make sure.
     while (count < 3) {
         float calibrationData[30];
@@ -97,12 +97,12 @@ void Barometer::calibrate() {
         }
         readingI2C = false;
 
-        // Finds range of the 30 samples, if less than BARO_ERROR, this sample is valid
+        // Finds range of the 30 samples, if less than BARO_TOLERANCE, this sample is valid
         // and barometer is acclimated
         auto minmax = std::minmax_element(std::begin(calibrationData), std::end(calibrationData));
         float range = *(minmax.second) - *(minmax.first);
         std::cout << "BARO: Range: " << range << std::endl;
-        if (range < BARO_ERROR && range != 0) {
+        if (range < BARO_TOLERANCE && range != 0) {
             printf("BARO: successful range\n");
             count++;
         }
@@ -111,7 +111,7 @@ void Barometer::calibrate() {
         // 80 second timout if barometer has not acclimated yet
         if(millis() - timer > 80000) {
             std::cout << "Baro error: failed to acclimate. CNTL-C to exit." << std::endl;
-            while(1);
+            while(!(*shutdownIndicator));
         }
     }
     printf("BARO: Baro acclimated in %d seconds, now calibrating...\n", (millis() - timer)/1000);

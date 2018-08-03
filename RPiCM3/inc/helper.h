@@ -1,11 +1,12 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-#include <pigpio.h>
-#include <wiringPi.h>
 #include <iostream>
 #include <memory>
 #include <string>
+#include <signal.h>
+#include <wiringPi.h>
+#include <pigpio.h>
 
 //Project headers
 #include <halocontroller.h>
@@ -26,8 +27,5 @@ void filterCommandLineOptions(int _argc, char *_argv[], CommandLineOptions& clo)
 /// @brief Displays message showing how to type options in command line.
 /// @param name Name of program, i.e. First string of argv[].
 void showUsage(std::string name);
-
-/// @brief Shutting down threads and closing ports.
-void shutdown();
 
 #endif

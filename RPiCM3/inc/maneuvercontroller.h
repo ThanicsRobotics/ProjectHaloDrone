@@ -13,6 +13,7 @@ class ManeuverController
 {
 public:
     ManeuverController(std::shared_ptr<bool> shutdown);
+    ~ManeuverController();
     bool executeManeuver(const Maneuver& requestedManeuver);
 
     int getThrottleFinal() const { return throttleFinal; }

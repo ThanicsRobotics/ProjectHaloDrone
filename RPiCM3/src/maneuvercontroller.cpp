@@ -4,12 +4,17 @@
 #include <wiringPi.h>
 
 ManeuverController::ManeuverController(std::shared_ptr<bool> shutdown)
-    : shutdownIndicator(shutdown), baro(shutdown)
+    : shutdownIndicator(shutdown), baro(shutdownIndicator)
 {
     pwmFinalOutputs.pitchPWM = 1500;
     pwmFinalOutputs.rollPWM = 1500;
     pwmFinalOutputs.yawPWM = 1500;
     pwmFinalOutputs.throttlePWM = 1000;
+}
+
+ManeuverController::~ManeuverController()
+{
+    std::cout << "MC: Closing" << std::endl;
 }
 
 // Returns false if requested maneuver is already being executed

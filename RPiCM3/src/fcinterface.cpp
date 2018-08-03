@@ -10,7 +10,7 @@
 #include <string.h>
 
 #define SEL2 5
-#define projectPath std::string("./")
+#define projectPath std::string("/home/pi/ProjectHaloDrone/RPiCM3/")
 
 #define GYRO_CAL 0x04
 #define AUTH_KEY 0xF9
@@ -33,6 +33,7 @@ FCInterface::FCInterface(std::shared_ptr<bool> shutdownIndicator)
 
 FCInterface::~FCInterface()
 {
+    std::cout << "FCI: Closing" << std::endl;
     interfaceConfig.stm32Resetting = true;
     reset();
     closeSPI();

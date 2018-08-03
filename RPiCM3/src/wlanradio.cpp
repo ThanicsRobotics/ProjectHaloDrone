@@ -2,11 +2,17 @@
 #include <checksum.h>
 
 #include <algorithm>
+#include <iostream>
 
 WLANRadio::WLANRadio(WLAN::DeviceType deviceType, std::string ipAddress, int port)
     : wlan(deviceType, ipAddress, port), connected(true)
 {
     
+}
+
+WLANRadio::~WLANRadio()
+{
+    std::cout << "WLANR: Closing" << std::endl;
 }
 
 void WLANRadio::connect(WLAN::DeviceType deviceType, std::string ipAddress, int port)

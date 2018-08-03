@@ -1,5 +1,4 @@
 #include <halocontroller.h>
-#include <wiringPi.h>
 
 HaloController::HaloController(std::shared_ptr<bool> shutdown, CommandLineOptions& clo)
     : shutdownIndicator(shutdown), fc(shutdownIndicator)
@@ -43,7 +42,7 @@ HaloController::HaloController(std::shared_ptr<bool> shutdown, CommandLineOption
 
 HaloController::~HaloController()
 {
-
+    
 }
 
 void HaloController::startVideoPipelines()

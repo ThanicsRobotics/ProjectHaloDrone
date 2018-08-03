@@ -6,6 +6,8 @@
 std::shared_ptr<bool> shuttingDownPtr;
 //bool doneShuttingDown = false;
 
+void signal_callback_handler(int signum) { *shuttingDownPtr = true; }
+
 /// @brief Displays message showing how to type options in command line.
 /// @param name Name of program, i.e. First string of argv[].
 void showUsage(std::string name) {
@@ -75,14 +77,4 @@ void filterCommandLineOptions(int _argc, char *_argv[], CommandLineOptions& clo)
         showUsage (_argv[0]);
         exit(0);
     }
-}
-
-/// @brief Terminal signal handler (for ending program via terminal).
-void signal_callback_handler(int signum) {
-    shutdown();
-}
-
-/// @brief Shutting down threads and closing ports.
-void shutdown() {
-    *shuttingDownPtr = true;
 }

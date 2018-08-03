@@ -17,7 +17,7 @@
 
 /// @brief Class constructor, initializes private variables.
 FlightController::FlightController(std::shared_ptr<bool> shutdown)
-    : shutdownIndicator(shutdown), interface(shutdownIndicator), mc(shutdown),
+    : shutdownIndicator(shutdown), interface(shutdownIndicator), mc(shutdownIndicator),
     radio(WLAN::DeviceType::CLIENT, "thanics-controller.local", 5000)
 {
     radio.setUpdater([this](std::size_t size)

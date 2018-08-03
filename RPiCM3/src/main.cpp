@@ -13,30 +13,19 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // Override pigpio SIGINT handling
-    signal(SIGINT, signal_callback_handler);
     CommandLineOptions clo;
     filterCommandLineOptions(argc, argv, clo);
     {
-        // Creating flight controller and starting flight
         shuttingDownPtr = std::make_shared<bool>(false);
+
+        // Creating flight controller and starting flight
         HaloController hc(shuttingDownPtr, clo);
+        signal(SIGINT, signal_callback_handler);
         hc.startVideoPipelines();
         std::cout << "Starting main loop\n";
         hc.startFlightController();
     }
-
-    // Stream stream;
-    // stream.startClient();
-    // int i = 0;
-    // while (1)
-    // {
-    //     std::string msg = "hello - " + std::to_string(i++) + " -\n";
-    //     stream.write(msg);
-    //     delay(2000);
-    // }
-
     gpioTerminate();
-
+    
     return 0;
 }
