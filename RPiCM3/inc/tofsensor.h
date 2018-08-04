@@ -14,7 +14,9 @@ private:
     bool i2cConfigured = false;
     short phaseOut;
     int distance; //meters
-    OPT3101::device droneOne;
+
+    
+    OPT3101::device dev;
     hostController host;
 
     void setup();
