@@ -18,6 +18,8 @@ private:
     
     OPT3101::device dev;
 
+    hostController andrew;
+
     void setup();
     void ConfigureMonoshot();
     void ReadPhaseOut();

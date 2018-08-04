@@ -118,8 +118,10 @@ void hostController::pause()
 }
 
 void hostController::resetDevice() {
-	// These comments rest the device on power-up
+	// These comments reset the device on power-up
 #if defined(OPT3101_USE_STDIOLIB) && defined(OPT3101_USE_SERIALLIB)
+andrew.writeI2C(dev.i2cFd, 0x00, register0Reset);
+
 	char *writeData;
 	writeData = new char[6];
 	/// <b>Algorithm of the method is as follows</b>

@@ -5,6 +5,11 @@
 #include <errno.h>
 #include <wiringPi.h> 
 
+//Data for register 0 = 0x400040 or 4194368
+
+uint32_t register0Data = 0x400040;
+uint32_t register0Reset = 0x1;
+
 TOFSensor::TOFSensor()
     : dev(0x5F)
 
@@ -26,10 +31,15 @@ TOFSensor::~TOFSensor()
 
 void TOFSensor::setup()
 {
-    dev.calibrationSession_firstTimeBringUp(); ///* Calls the method to bring up the device first time and calibrate. Calls OPT3101::calibrationSession_firstTimeBringUp
-    dev.calibration->report(); ///* Calls report function for all calibration coefficients. Since not all coefficients are done in this example most of them are expected to be zero.
-    printf("Waiting for user input to quit program...\n"); ///* Waits for user input before closing the console 
-    dev.initialize();   
+    andrew.resetDevice();
+    andrew.writeI2C(dev.i2cFd, 0x00, register0Reset);
+    std::cout << andrew.readI2C(dev.i2cFd, 0x00) << std::endl;
+    andrew.writeI2C(dev.i2cFd, 0x00, register0Data);
+    std::cout << andrew.readI2C(dev.i2cFd, 0x00) << std::endl;
+    // dev.calibrationSession_firstTimeBringUp(); ///* Calls the method to bring up the device first time and calibrate. Calls OPT3101::calibrationSession_firstTimeBringUp
+    // dev.calibration->report(); ///* Calls report function for all calibration coefficients. Since not all coefficients are done in this example most of them are expected to be zero.
+    // printf("Waiting for user input to quit program...\n"); ///* Waits for user input before closing the console 
+    // dev.initialize();   
 }
 
 void TOFSensor::ConfigureMonoshot(){
