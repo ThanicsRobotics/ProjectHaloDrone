@@ -50,8 +50,8 @@ Example of register which has more than 1 address is OPT3101::registers::amplitu
 namespace OPT3101{
 class deviceRegister{
 	private:
-		int mI2cFd; ///< I2C file descriptor
-		// hostController host;
+		hostController host;
+
 		/*!
 		* \brief Function to resolve actual data to be written before calling writeI2C function
 		*
@@ -97,7 +97,7 @@ class deviceRegister{
 		*
 		*/
 		deviceRegister();
-		deviceRegister(int i2cFd, uint8_t size);
+		deviceRegister(const hostController& host, uint8_t size);
 		/*!
 		* \brief Operator overload for '='.
 		*

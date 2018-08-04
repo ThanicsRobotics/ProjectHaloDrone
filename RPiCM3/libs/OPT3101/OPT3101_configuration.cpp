@@ -94,7 +94,8 @@ OPT3101::device::device(int deviceAddress)
 	configurationFlags_isRegisterSetActive{false,true}
 {
 	i2cFd = i2cOpen(1, deviceAddress, 0);
-	reg = registers(i2cFd);
+	host = hostController(i2cFd);
+	reg = registers(host);
 	this->calibration = new calibrationC[1];
 }
 
@@ -114,7 +115,7 @@ OPT3101::calibrationC::calibrationC(void) : calibrationC(true) {
 	this->registerAddressListSize= 17; // //This configuration requires 17 registers [544] bits to be stored for calibration
 	this->registerAddressList    = new uint8_t[this->registerAddressListSize]; // //Allocation of memory to store register addresses
 	this->EEPROM_connected       =  false; // //This configuration helps configure EEPROM
-	this->extTempSensor_connected=  true; // //This configuration helps configure Ext temp sensor
+	this->extTempSensor_connected=  false; // //This configuration helps configure Ext temp sensor
 	this->registerAddressList[0] = 0x31; // //Address for register(s) iphase_xtalk_reg_hdr1_tx0
 	this->registerAddressList[1] = 0x32; // //Address for register(s) qphase_xtalk_reg_hdr1_tx0
 	this->registerAddressList[2] = 0x5e; // //Address for register(s) temp_coeff_xtalk_iphase_hdr1_tx0

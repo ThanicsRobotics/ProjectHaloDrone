@@ -45,11 +45,17 @@ serial::Serial OPT3101commandPort("COM32", 9600, serial::Timeout::simpleTimeout(
 const char filePath[] = { "C:/temp/" };
 #endif
 
-hostController host;
+//hostController host;
 
-void hostController::writeI2C(int fd, uint8_t address, uint32_t data) {
+hostController::hostController() {}
+
+hostController::hostController(int fd)
+	: i2cFd(fd)
+{}
+
+void hostController::writeI2C(uint8_t address, uint32_t data) {
 	uint8_t buf[3] = {data & 0xFF, (data >> 8) & 0xFF, (data >> 16) & 0xFF};
-	i2cWriteI2CBlockData(fd, address, (char*)buf, 3);
+	i2cWriteI2CBlockData(i2cFd, address, (char*)buf, 3);
 	/// <b>Algorithm of the method is as follows</b>
 #if defined(OPT3101_USE_STDIOLIB) && defined(OPT3101_USE_SERIALLIB)
 	std::string returnValue;
@@ -61,10 +67,10 @@ void hostController::writeI2C(int fd, uint8_t address, uint32_t data) {
 #endif
 
 }
-uint32_t hostController::readI2C(int fd, uint8_t address) {
+uint32_t hostController::readI2C(uint8_t address) {
 	uint32_t i2cReadValue=0;
 	uint8_t buf[3];
-	i2cReadI2CBlockData(fd, address, (char*)buf, 3);
+	i2cReadI2CBlockData(i2cFd, address, (char*)buf, 3);
 	i2cReadValue = buf[0] << 16 | buf[1] << 8 | buf[2];
 #if defined(OPT3101_USE_STDIOLIB) && defined(OPT3101_USE_SERIALLIB)
 	char *writeData;
@@ -119,9 +125,8 @@ void hostController::pause()
 
 void hostController::resetDevice() {
 	// These comments reset the device on power-up
+	writeI2C(0x00, 1);
 #if defined(OPT3101_USE_STDIOLIB) && defined(OPT3101_USE_SERIALLIB)
-andrew.writeI2C(dev.i2cFd, 0x00, register0Reset);
-
 	char *writeData;
 	writeData = new char[6];
 	/// <b>Algorithm of the method is as follows</b>

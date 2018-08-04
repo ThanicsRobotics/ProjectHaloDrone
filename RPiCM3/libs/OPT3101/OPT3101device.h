@@ -34,6 +34,7 @@
 #include "OPT3101DesignCoefficients.h"
 #include "OPT3101PhaseOffset.h"
 #include "OPT3101frameData.h"
+#include "hostController.h"
 
 /*! \namespace OPT3101
 \brief OPT3101 name space is used to classify and segregate all OPT3101SDK related methods and class definitions. 
@@ -89,6 +90,8 @@ namespace OPT3101 {
 			*/
 			device(int deviceAddress);
 			~device();
+
+			hostController host;
 			registers reg; ///< Instance of the register class OPT3101::registers control for the device dev.reg.{registerName}=value initiates I2C register writes. 
 			calibrationC *calibration; ///< Instance of the calibration class OPT3101::calibrationC. This instance acts a staging area to load, save and calculate calibration coefficients during initial bring up, debug and factory calibration steps. 
 			/*!

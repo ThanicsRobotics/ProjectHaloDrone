@@ -35,8 +35,8 @@ OPT3101::deviceRegister::deviceRegister()
 {
 	
 }
-OPT3101::deviceRegister::deviceRegister(int i2cFd, uint8_t size)
-	: size(size), mI2cFd(i2cFd)
+OPT3101::deviceRegister::deviceRegister(const hostController& host, uint8_t size)
+	: host(host), size(size)
 {
 	/// <b>Algorithm of the method is as follows</b>
 	//this->size=size; /// * Assigns size from input argument to the class member OPT3101::deviceRegister::size 
@@ -97,12 +97,12 @@ uint32_t OPT3101::deviceRegister::read(uint8_t index){
 
 uint32_t OPT3101::deviceRegister::readI2C(uint8_t address){
 	/// <b>Algorithm of the method is as follows</b>
-	return host.readI2C(mI2cFd, address); /// * Invokes hostController::readI2C and returns the value read from the h/w d
+	return host.readI2C(address); /// * Invokes hostController::readI2C and returns the value read from the h/w d
 }
 
 void OPT3101::deviceRegister::writeI2C(uint8_t address,uint32_t data){
 	/// <b>Algorithm of the method is as follows</b>
-	host.writeI2C(mI2cFd, address, data); /// * Invokes hostController::writeI2C with address and data specified as arguments
+	host.writeI2C(address, data); /// * Invokes hostController::writeI2C with address and data specified as arguments
 }
 
 //printf("Dummy I2C read  from OPT3101 register addr:0x%02x data:0x%06x\n",address,i2cReadValue);
