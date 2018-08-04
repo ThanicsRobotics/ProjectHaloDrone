@@ -3,15 +3,7 @@
 #include <pigpio.h>
 #include <cstring>
 #include <errno.h>
-#include <wiringPi.h>
-
-
-#define I2C_CONT_RW                 0     // R/W
-#define I2C_CONT_RW_DATA            12582976 // R/W  Binary: 010000000000000001000000
-#define PHASE_OUT                   8     // R
-#define CONTINUOUSandNUMFRAMES      39     // R/W
-#define CONTINUOUSandNUMFRAMES_DATA 524159  // R/W
- 
+#include <wiringPi.h> 
 
 TOFSensor::TOFSensor()
     : dev(0x5F)
@@ -20,7 +12,6 @@ TOFSensor::TOFSensor()
 //     : host()
 
 {
-    OPT3101::device dev; ///* Declared variable dev of class OPT3101::device 
     setup();
     ConfigureMonoshot();
     ReadPhaseOut();
@@ -30,25 +21,15 @@ TOFSensor::TOFSensor()
 
 TOFSensor::~TOFSensor()
 {
-    i2cClose(i2cFd);
+    
 }
 
 void TOFSensor::setup()
 {
-    // Open I2C address
-    if ((i2cFd = i2cOpen(1, 0x5F, 0)) < 0) {
-        std::cout << strerror(errno) << std::endl;
-    }
-    else i2cConfigured = true;
-
-    OPT3101::device dev; ///* Declared variable dev of class OPT3101::device 
     dev.calibrationSession_firstTimeBringUp(); ///* Calls the method to bring up the device first time and calibrate. Calls OPT3101::calibrationSession_firstTimeBringUp
     dev.calibration->report(); ///* Calls report function for all calibration coefficients. Since not all coefficients are done in this example most of them are expected to be zero.
     printf("Waiting for user input to quit program...\n"); ///* Waits for user input before closing the console 
-    host.pause();
-    dev.initialize();
-    
-    
+    dev.initialize();   
 }
 
 void TOFSensor::ConfigureMonoshot(){
@@ -89,9 +70,3 @@ void TOFSensor::ReportDistance(){
 //             while(millis() - time <= 50);
 // }
 }
-
-    // // Open I2C address
-    // if ((i2cFd = i2cOpen(1, 0x5F, 0)) < 0) {
-    //     std::cout << strerror(errno) << std::endl;
-    //  }
-    // else i2cConfigured = true;

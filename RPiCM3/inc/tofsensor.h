@@ -17,7 +17,6 @@ private:
 
     
     OPT3101::device dev;
-    hostController host;
 
     void setup();
     void ConfigureMonoshot();
