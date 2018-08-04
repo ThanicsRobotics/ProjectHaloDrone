@@ -406,7 +406,7 @@ OPT3101::frameData::frameData()
 
 }
 
-void OPT3101::frameData::capture(hostController *host, OPT3101::device *dev,bool readTillum) {
+void OPT3101::frameData::capture(hostController *host, OPT3101::device *dev, bool readTillum) {
 	uint8_t c0;
 	uint32_t data32[3];
 	/// <b>Algorithm of the method is as follows</b>

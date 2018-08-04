@@ -93,7 +93,7 @@ uint32_t hostController::readI2C(int fd, uint8_t address) {
 		}
 	}
 #endif
-	return i2cReadValue; /// * Returns the data in uint32_t format 
+	return i2cReadValue; /// * Returns the data in uint32_t format !!!!nice!!!
 }
 
 void hostController::sleep(uint32_t timeInMilliSeconds) {

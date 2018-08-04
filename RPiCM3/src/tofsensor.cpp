@@ -15,7 +15,11 @@
 
 
 TOFSensor::TOFSensor()
-    : dev(0x5F)
+    : droneOne(0x5F)
+
+// TOFSensor::TOFSensor()
+//     : host()
+
 {
     setup();
     ConfigureMonoshot();
@@ -36,46 +40,41 @@ void TOFSensor::setup()
         std::cout << strerror(errno) << std::endl;
     }
     else i2cConfigured = true;
+
+    droneOne.calibrationSession_firstTimeBringUp();
+    droneOne.initialize();
+
     
     
 }
 
 void TOFSensor::ConfigureMonoshot(){
     
-    char configI2CCONT[3];
-    configI2CCONT[0] = 0xC0;
-    configI2CCONT[1] = 0x00;
-    configI2CCONT[2] = 0x40;
-    i2cWriteI2CBlockData(i2cFd, I2C_CONT_RW, configI2CCONT, 3);
+    // char configI2CCONT[3];
+    // configI2CCONT[0] = 0xC0;
+    // configI2CCONT[1] = 0x00;
+    // configI2CCONT[2] = 0x40;
     
-    char configCONT[3];
+    // char configCONT[3];
     // configCONT[0] = 0xFF;
     // configCONT[1] = 0xFF;
     // configCONT[2] = 0xFF;
-    i2cWriteI2CBlockData(i2cFd, CONTINUOUSandNUMFRAMES, configCONT, 3);
-    i2cWriteI2CBlockData(i2cFd, CONTINUOUSandNUMFRAMES, configCONT, 3);
-
-
-
-
     
-    
-
     }
-
 
 
 void TOFSensor::ReadPhaseOut(){
 
-    char outputRegister[3];
-    i2cReadI2CBlockData(i2cFd, PHASE_OUT, outputRegister, 3);
-    std::cout << outputRegister[0] << " " << outputRegister[1] << " " << outputRegister[2] << std::endl;
-    phaseOut = (short)((outputRegister[1] << 8) |  (outputRegister[0]));
+    // frameData frameData;
+    // frameData.capture(host, droneOne, true);
+    // frameData.report();
+    //std::cout << host.readI2C(i2cFd, 0x08) << std::endl;
+
 }
 
 void TOFSensor::CalculateDistance(){
 
-    distance = (phaseOut/65536.0) * (299792458/20);
+    //distance = (phaseOut/65536.0) * (299792458/20);
 }
 
 
@@ -83,7 +82,7 @@ void TOFSensor::ReportDistance(){
 
 // while(1){
 //         int time = millis();                                                 
-         std::cout << distance << std::endl;
+         //std::cout << distance << std::endl;
 //             while(millis() - time <= 50);
 // }
 }

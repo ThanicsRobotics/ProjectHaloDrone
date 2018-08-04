@@ -2,6 +2,8 @@
 #define TOFSENSOR_H
 
 #include <OPT3101device.h>
+#include <hostController.h>
+#include <OPT3101frameData.h>
 
 class TOFSensor {
 public:
@@ -12,7 +14,8 @@ private:
     bool i2cConfigured = false;
     short phaseOut;
     int distance; //meters
-    OPT3101::device dev;
+    OPT3101::device droneOne;
+    hostController host;
 
     void setup();
     void ConfigureMonoshot();
