@@ -11,9 +11,6 @@
 #define PHASE_OUT                   8     // R
 #define CONTINUOUSandNUMFRAMES      39     // R/W
 #define CONTINUOUSandNUMFRAMES_DATA 524159  // R/W
-#define OPT3101_USE_STDIOLIB 
-#define OPT3101_USE_SERIALLIB 
-#define OPT3101_USE_STDIOLIB
  
 
 TOFSensor::TOFSensor()
