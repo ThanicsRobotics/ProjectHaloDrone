@@ -88,7 +88,7 @@ void OPT3101::device::calibrationSession_perUnitFactoryCalibrationWriteRegisterD
 
 	for (c0 = 0; c0 < this->calibration->registerAddressListSize; c0++) {
 		this->writeDataToEEPROM(c0 << 2, this->calibration->registerAddressList[c0]);
-		data = host.readI2C(i2cFd, this->calibration->registerAddressList[c0]); ///* Reads all the registers from the list OPT3101::calibrationC::registerAddressList from h/w and writes the address and data to the connected external EEPROM
+		data = host.readI2C(this->calibration->registerAddressList[c0]); ///* Reads all the registers from the list OPT3101::calibrationC::registerAddressList from h/w and writes the address and data to the connected external EEPROM
 		for (c1 = 0; c1<3; c1++)
 			this->writeDataToEEPROM((c0 << 2) + c1 + 1, (data >> ((c1 << 3)) & 0xFF));
 	}

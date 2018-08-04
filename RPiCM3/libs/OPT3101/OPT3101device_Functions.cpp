@@ -412,7 +412,7 @@ void OPT3101::frameData::capture(hostController *host, OPT3101::device *dev, boo
 	/// <b>Algorithm of the method is as follows</b>
 	host->sleep((dev->configurationFlags_frameTimeInMilliSeconds)<<1); ///* Sleep host for a specified time depending on device configuration to OPT3101 AFE can update measurements to the registers.
 	for (c0 = 8; c0 < 11; c0++) ///* Performs a direct read of I2C registers 0x08 0x09 and 0x0A directly though hostController::readI2C method 
-		data32[c0-8] = (host->readI2C(dev->i2cFd, c0));
+		data32[c0-8] = (host->readI2C(c0));
 
 	this->phase = data32[0] & 0xFFFF; ///* Maps the I2C read values to the class members like OPT3101::frameData::phase, OPT3101::frameData::amplitude etc 
 	this->phaseovl = (data32[0] >> 16) & 0x1;
