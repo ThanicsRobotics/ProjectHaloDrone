@@ -8,8 +8,6 @@
 TOFSensor::TOFSensor()
     : dev(0x5F)
 
-// TOFSensor::TOFSensor()
-//     : host()
 
 {
     setup();
@@ -32,32 +30,22 @@ void TOFSensor::setup()
 }
 
 void TOFSensor::ConfigureMonoshot(){
-    
-    // char configI2CCONT[3];
-    // configI2CCONT[0] = 0xC0;
-    // configI2CCONT[1] = 0x00;
-    // configI2CCONT[2] = 0x40;
-    
-    // char configCONT[3];
-    // configCONT[0] = 0xFF;
-    // configCONT[1] = 0xFF;
-    // configCONT[2] = 0xFF;
-    
+    uint32_t configData = 0x400040;
+    andrew.writeI2C(i2cFd, configData);
+
     }
 
 
 void TOFSensor::ReadPhaseOut(){
 
-    // frameData frameData;
-    // frameData.capture(host, droneOne, true);
-    // frameData.report();
-    //std::cout << host.readI2C(i2cFd, 0x08) << std::endl;
+letsgetit.capture(andrew, dev);
+letsgetit.report();
 
 }
 
 void TOFSensor::CalculateDistance(){
 
-    //distance = (phaseOut/65536.0) * (299792458/20);
+   // distance = (phaseOut/65536.0) * (299792458/20);
 }
 
 

@@ -388,6 +388,7 @@ OPT3101::frameData::frameData()
 	/// <b>Algorithm of the method is as follows</b>
 
 	this->phase = 0; ///* Initializes all members to 0
+	this->distance = 0;
 	this->phaseovl = false;
 	this->phaseovlf2 = false;
 	this->ambovl = false;
@@ -406,7 +407,7 @@ OPT3101::frameData::frameData()
 
 }
 
-void OPT3101::frameData::capture(hostController *host, OPT3101::device *dev, bool readTillum) {
+void OPT3101::frameData::capture(hostController *host, OPT3101::device *dev) {
 	uint8_t c0;
 	uint32_t data32[3];
 	/// <b>Algorithm of the method is as follows</b>
@@ -417,6 +418,7 @@ void OPT3101::frameData::capture(hostController *host, OPT3101::device *dev, boo
 	this->phase = data32[0] & 0xFFFF; ///* Maps the I2C read values to the class members like OPT3101::frameData::phase, OPT3101::frameData::amplitude etc 
 	this->phaseovl = (data32[0] >> 16) & 0x1;
 
+	this->distance = ((this->phase)/65536.0) * (299792458/20);
 	this->phase |= (((uint32_t) this->phaseovl) << 16);
 
 	this->illumDac = (data32[0] >> 17) & 0x01;
@@ -436,6 +438,7 @@ void OPT3101::frameData::capture(hostController *host, OPT3101::device *dev, boo
 	this->ambient = (data32[2] >> 2) & 0x3FF;
 	this->temp = (data32[2] >> 12) & 0xFFF;
 	this->tmain = this->temp;
+	bool readTillum = true;
 	if (readTillum)
 		this->tillum = dev->reg.tillum.read(); ///* Based on readIllum flag reads the OPT3101::registers::tillum and assigns to OPT3101::frameData::tillum
 
@@ -449,6 +452,7 @@ void OPT3101::frameData::report()
 	printf("Frame data Class Report\n");
 	printf("-----------------------\n"); ///* Prints all the members and values of members on screen. 
 	printf("phase=%d\n", this->phase);
+	printf("DISTANCE=%d\n", this->distance);
 	printf("phaseovl=%d\n", this->phaseovl);
 	printf("phaseovlf2=%d\n", this->phaseovlf2);
 	printf("ambovl=%d\n", this->ambovl);

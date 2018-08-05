@@ -58,6 +58,7 @@ namespace OPT3101 {
 	class frameData {
 		public:
 			uint32_t phase; ///< phase value measured by the AFE. Actually 16 bit unsigned value upscaled to 17 bits with 1 bit of frameData::phaseovl flag added to the MSB. Same as OPT3101::registers::phase_out
+			uint32_t distance;
 			bool phaseovl; ///< phase overload flag, specifying if phase value detected exceeds 16 bits. (greater than 65535). OPT3101::registers::.phase_overflow
 			bool phaseovlf2; ///< phase overload flag for frequency 2, specifying if phase value detected exceeds 16 bits. (greater than 65535). Same as OPT3101::registers::phase_overflow_f2
 			bool ambovl; ///< ambient over load flag which flags if the AFE is saturated due to very high ambient condition. Same as OPT3101::registers::amb_ovl_flag
@@ -84,10 +85,9 @@ namespace OPT3101 {
 			*  This method invokes I2C transactions to capture data from the OPT3101 device registers 0x08, 0x09 and 0x0A. Extracts and assigns members their respective values based on their positions in the registers. 
 			* \param[in] host; Pointer to the class hostController used to directly invoke I2C transactions bypassing OPT3101::registers or OPT3101::device class
 			* \param[in] dev; Pointer to the class OPT3101::device used to read register(s) from device
-			* \param[in] readTIllulm; Flag which specifies if OPT3101::registers::tillum value needs to be read or not
 			* \returns Nothing;
 			*/
-			void capture(hostController *host, device *dev, bool readTIllulm = true);
+			void capture(hostController *host, device *dev);
 			/*!
 			* \brief reports members of the instance
 			*  Print the members of the class instance on screen
