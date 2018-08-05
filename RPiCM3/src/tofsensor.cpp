@@ -28,8 +28,7 @@ void TOFSensor::setup()
 {
     dev.calibrationSession_firstTimeBringUp(); ///* Calls the method to bring up the device first time and calibrate. Calls OPT3101::calibrationSession_firstTimeBringUp
     dev.calibration->report(); ///* Calls report function for all calibration coefficients. Since not all coefficients are done in this example most of them are expected to be zero.
-    printf("Waiting for user input to quit program...\n"); ///* Waits for user input before closing the console 
-    dev.initialize();
+    printf("Waiting for user input to quit program...\n"); ///* Waits for user input before closing the console
 }
 
 void TOFSensor::ConfigureMonoshot(){

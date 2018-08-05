@@ -42,7 +42,7 @@ serial::Serial OPT3101commandPort("COM32", 9600, serial::Timeout::simpleTimeout(
 #endif 
 
 #ifdef OPT3101_USE_STDIOLIB
-const char filePath[] = { "C:/temp/" };
+const char filePath[] = { "/home/pi/" };
 #endif
 
 //hostController host;
