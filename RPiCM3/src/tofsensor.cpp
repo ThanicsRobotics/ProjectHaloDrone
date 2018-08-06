@@ -30,16 +30,18 @@ void TOFSensor::setup()
 }
 
 void TOFSensor::ConfigureMonoshot(){
-    uint32_t configData = 0x400040;
-    andrew.writeI2C(i2cFd, configData);
+    // uint32_t configData = 0x400040;
+    // andrew.writeI2C(i2cFd, configData);
 
-    }
+    // }
 
 
 void TOFSensor::ReadPhaseOut(){
-
-letsgetit.capture(andrew, dev);
-letsgetit.report();
+    OPT3101::frameData& frameData = dev.calibration->phaseOffset.data;
+    frameData.capture(dev.host, dev);
+    frameData.report();
+// letsgetit.capture(andrew, dev);
+// letsgetit.report();
 
 }
 

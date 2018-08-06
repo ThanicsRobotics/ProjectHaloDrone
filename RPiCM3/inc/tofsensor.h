@@ -15,13 +15,7 @@ private:
     short phaseOut;
     int distance; //meters
     
-
-    
     OPT3101::device dev;
-
-    hostController andrew;
-
-    OPT3101::frameData letsgetit;
 
     void setup();
     void ConfigureMonoshot();
