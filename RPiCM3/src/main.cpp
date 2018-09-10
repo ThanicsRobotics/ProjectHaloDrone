@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
         // Creating flight controller and starting flight
         HaloController hc(shuttingDownPtr, clo);
         signal(SIGINT, signal_callback_handler);
-        hc.startVideoPipelines();
+        // hc.startVideoPipelines();
         std::cout << "Starting main loop\n";
         hc.startFlightController();
     }

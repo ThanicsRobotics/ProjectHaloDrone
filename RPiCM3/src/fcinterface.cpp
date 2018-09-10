@@ -103,12 +103,14 @@ void FCInterface::startInterface()
 
     // Manual arming process through SSH
     std::cout << "Type 'ARM' to arm the quadcopter: ";
-    std::string input = "";
+    std::string input;
     std::getline(std::cin, input);
     if (input == "ARM")
     {
         requestService(FCInterface::Service::ARM);
     }
+    else if (input == "PRE-ARM")
+    {}
 }
 
 void FCInterface::stopInterface()

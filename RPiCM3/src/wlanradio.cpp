@@ -5,9 +5,9 @@
 #include <iostream>
 
 WLANRadio::WLANRadio(WLAN::DeviceType deviceType, std::string ipAddress, int port)
-    : wlan(deviceType, ipAddress, port), connected(true)
+    : wlan(deviceType, ipAddress, port)
 {
-    
+    wlan.read();
 }
 
 WLANRadio::~WLANRadio()
@@ -15,13 +15,10 @@ WLANRadio::~WLANRadio()
     std::cout << "WLANR: Closing" << std::endl;
 }
 
-void WLANRadio::connect(WLAN::DeviceType deviceType, std::string ipAddress, int port)
+void WLANRadio::reconnect()
 {
-    if (!connected) 
-    {
-        wlan.start(deviceType, ipAddress, port);
-        wlan.read();
-    }
+    wlan.reconnect();
+    // wlan.read();
 }
 
 void WLANRadio::send(messagePacket& msg)
@@ -34,7 +31,7 @@ void WLANRadio::send(messagePacket& msg)
 void WLANRadio::setUpdater(std::function<void(std::size_t size)> callback)
 { 
     wlan.setCallback(callback);
-    wlan.read();
+    // wlan.read();
 }
 
 void WLANRadio::checkBuffer()
@@ -46,11 +43,6 @@ void WLANRadio::update(channels& pwmInputs, Maneuver& maneuver, std::size_t size
 {
     std::array<uint8_t, PACKET_SIZE> msg;
     wlan.getCachedMessage(msg);
-    // for (int i = 0; i < size; i++)
-    // {
-    //     std::cout << msg[i];
-    // }
-    // std::cout << std::endl;
     decode(msg, pwmInputs, maneuver);
     wlan.read();
 }

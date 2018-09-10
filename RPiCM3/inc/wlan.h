@@ -35,7 +35,8 @@ public:
 
     /// @brief Gives access to whether the socket is active.
     /// @return True if socket is active, false if not.
-    bool isActive() const { return active; }
+    bool isConnected() const { return socket.is_open(); }
+    void reconnect();
 
     void getCachedMessage(std::array<uint8_t, PACKET_SIZE>& msg) const { msg = cachedMessage; }
 

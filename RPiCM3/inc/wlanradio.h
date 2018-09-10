@@ -12,16 +12,16 @@ class WLANRadio
 public:
     WLANRadio(WLAN::DeviceType deviceType, std::string ipAddress, int port);
     ~WLANRadio();
-    void connect(WLAN::DeviceType deviceType, std::string ipAddress, int port);
+    void reconnect();
     void send(messagePacket& msg);
     void setUpdater(std::function<void(std::size_t size)> callback);
     void update(channels& pwmInputs, Maneuver& maneuver, std::size_t size);
     void checkBuffer();
+    bool isConnected() { return wlan.isConnected(); }
 
 private:
     WLAN wlan;
     messagePacket currentPacket;
-    bool connected = false;
     unsigned int seq = 0;
     uint16_t crc = 0;
     

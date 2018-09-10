@@ -301,8 +301,8 @@ void calculate_pid()
   pid_error_temp = gyro_roll_input - pid_roll_setpoint;
 
   // I-Controller calculation: Adding current error to previous error
-  // (integrating)
   pid_i_mem_roll += pid_i_gain_roll * pid_error_temp;
+  // Clamping
   if (pid_i_mem_roll > pid_max_roll)
     pid_i_mem_roll = pid_max_roll;
   else if (pid_i_mem_roll < pid_max_roll * -1)

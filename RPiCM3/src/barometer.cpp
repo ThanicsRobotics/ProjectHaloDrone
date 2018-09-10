@@ -17,8 +17,8 @@
 Barometer::Barometer(std::shared_ptr<bool> shutdown)
     : shutdownIndicator(shutdown)
 {
-    alreadySetup = true;
     setup();
+    alreadySetup = true;
 }
 
 Barometer::~Barometer() {
@@ -31,7 +31,7 @@ void Barometer::setup() {
     if (alreadySetup) return;
     // Open I2C address
     if ((baroI2cFd = i2cOpen(1, BARO_ADDR, 0)) < 0) {
-        printf("%s", strerror(errno));
+        std::cout << strerror(errno) << std::endl;
     }
     i2cConfigured = true;
 
@@ -47,13 +47,10 @@ void Barometer::setup() {
 
 /// @brief Closes I2C port and waits for calibraton thread to join.
 void Barometer::close() {
-    printf("BARO: Closing\n");
+    std::cout << "BARO: Closing\n";
 
     // Wait for baroThread to join to main thread
     closeCalibrationThread();
-
-    // Waiting for barometer's I2C to stop reading
-    // while (readingI2C);
 
     // Close I2C port
     if(i2cConfigured) i2cClose(baroI2cFd);
@@ -62,13 +59,17 @@ void Barometer::close() {
 
 /// @brief Joins baroThread to main thread.
 void Barometer::closeCalibrationThread() {
-    while (calState != CalibrationState::DONE);
-    // if (calState == CalibrationState::DONE)
-    // {
-        baroThread.join();
-        printf("BARO: Thread joined\n");
-        calState = CalibrationState::THREAD_CLOSED;
-    // }
+    std::cout << "BARO: Waiting for calibration to finish";
+    while (calState != CalibrationState::DONE)
+    {
+        std::cout << ".";
+        delay(200);
+    }
+    std::cout << std::endl;
+
+    baroThread.join();
+    printf("BARO: Thread joined\n");
+    calState = CalibrationState::THREAD_CLOSED;
 }
 
 /// @brief Executed by baroThread to calibrate/acclimate the barometer.
@@ -103,7 +104,7 @@ void Barometer::calibrate() {
         float range = *(minmax.second) - *(minmax.first);
         std::cout << "BARO: Range: " << range << std::endl;
         if (range < BARO_TOLERANCE && range != 0) {
-            printf("BARO: successful range\n");
+            std::cout << "BARO: successful range\n";
             count++;
         }
         else count = 0;
@@ -114,7 +115,7 @@ void Barometer::calibrate() {
             while(!(*shutdownIndicator));
         }
     }
-    printf("BARO: Baro acclimated in %d seconds, now calibrating...\n", (millis() - timer)/1000);
+    std::cout << "BARO: Baro acclimated in " << (millis() - timer)/1000 << " seconds, now calibrating...\n";
     float calibrationSum = 0;
 
     // After barometer has acclimated, we take 30 samples from barometer and find average
@@ -134,8 +135,7 @@ void Barometer::calibrate() {
     }
     readingI2C = false;
     surfaceAltitude = calibrationSum/30;
-    printf("BARO: Surface Altitude: %dm\n", (int)surfaceAltitude);
-    fflush(stdout);
+    std::cout << "BARO: Surface Altitude: " << (int)surfaceAltitude << "m\n";
     calibrated = true;
     calState = CalibrationState::DONE;
 }
@@ -180,4 +180,5 @@ float Barometer::getPressureAltitude() {
             }
         }
     }
+    return 0.0;
 }

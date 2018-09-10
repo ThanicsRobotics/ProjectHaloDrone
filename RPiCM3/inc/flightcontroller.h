@@ -66,6 +66,8 @@ class FlightController
 	channels pwmInputs;
 
 	void flightLoop();
+	void preFlightCheck();
+	void checkFail(const std::string& error);
 };
 
 #endif

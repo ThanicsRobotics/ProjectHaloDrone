@@ -25,6 +25,7 @@ bool ManeuverController::executeManeuver(const Maneuver& requestedManeuver)
     {
         activeManeuver = requestedManeuver;
         newManeuver();
+        return true;
     }
 }
 
@@ -47,6 +48,7 @@ bool ManeuverController::newManeuver()
     }
 }
 
+// Starts a new thread to manage maneuver, quits loop 
 bool ManeuverController::maneuverLoop(std::function<void()> maneuverFunction, std::function<void()> callback)
 {
     maneuverThread = std::thread([this, maneuverFunction, callback](){
